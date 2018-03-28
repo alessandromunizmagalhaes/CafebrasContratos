@@ -93,7 +93,7 @@ namespace CafebrasContratos
                 Database.CriarTabela(UnidadeComercial);
                 Database.CriarTabela(TipoOperacao);
                 Database.CriarTabela(MetodoFinanceiro);
-                /*
+
                 var valores_validos_status_contrato = new List<ValorValido>() { };
                 foreach (var status in Contrato._status)
                 {
@@ -107,27 +107,28 @@ namespace CafebrasContratos
                         , SAPbobsCOM.BoUTBTableType.bott_MasterData
                         , new List<Coluna>()
                         {
-                        new ColunaInt("DocNumCC","Numero do Contrato",true),
-                        new ColunaDate("DataIni","Data Inicial",true),
-                        new ColunaDate("DataFim","Data Final",true),
-                        new ColunaVarchar("StatusQua","Situação",1,true,"A", valores_validos_status_contrato),
-                        new ColunaVarchar("Descricao","Descrição",254,true),
-                        new ColunaVarchar("CardCode","Código do PN",15,true),
-                        new ColunaVarchar("CardName","Descrição do PN",100,true),
-                        new ColunaVarchar("CtName", "Contato do PN",50,true),
-                        new ColunaVarchar("Tel1", "Telefone do Contato",15,true),
-                        new ColunaVarchar("EMail", "E-mail do Contato",50,true),
-                        new ColunaDate("DtPrEnt", "Previsão de Entrega",true),
-                        new ColunaDate("DtPrPgt", "Previsão de Pagamento",true),
-                        new ColunaVarchar("ModCtto", "Modalidade", 30, true, null, null, Modalidade.NomeSemArroba),
-                        new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true, null, null, UnidadeComercial.NomeSemArroba),
-                        new ColunaVarchar("TipoOper", "Tipo Operação", 30, true, null, null, TipoOperacao.NomeSemArroba),
-                        new ColunaVarchar("MtdFin", "Método Financeiro", 30, true, null, null, MetodoFinanceiro.NomeSemArroba),
+                            new ColunaInt("DocNumCC","Numero do Contrato",true),
+                            new ColunaDate("DataIni","Data Inicial",true),
+                            new ColunaDate("DataFim","Data Final",true),
+                            new ColunaVarchar("StatusQua","Situação",1,true,"A", valores_validos_status_contrato),
+                            new ColunaVarchar("Descricao","Descrição",254,true),
+                            new ColunaVarchar("CardCode","Código do PN",15,true),
+                            new ColunaVarchar("CardName","Descrição do PN",100,true),
+                            new ColunaVarchar("CtName", "Contato do PN",50,true),
+                            new ColunaVarchar("Tel1", "Telefone do Contato",15,true),
+                            new ColunaVarchar("EMail", "E-mail do Contato",50,true),
+                            new ColunaDate("DtPrEnt", "Previsão de Entrega",true),
+                            new ColunaDate("DtPrPgt", "Previsão de Pagamento",true),
+                            new ColunaVarchar("ModCtto", "Modalidade", 30, true, null, null, Modalidade.NomeSemArroba),
+                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true, null, null, UnidadeComercial.NomeSemArroba),
+                            new ColunaVarchar("TipoOper", "Tipo Operação", 30, true, null, null, TipoOperacao.NomeSemArroba),
+                            new ColunaVarchar("MtdFin", "Método Financeiro", 30, true, null, null, MetodoFinanceiro.NomeSemArroba),
                         }
-                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO, CanCancel = SAPbobsCOM.BoYesNoEnum.tNO }
                     )
                 );
 
+                /*
                 Database.ExcluirTabela("UPD_OCCC");
 
                 Database.ExcluirTabela("UPD_OMOD");
@@ -135,8 +136,6 @@ namespace CafebrasContratos
                 Database.ExcluirTabela("UPD_OTOP");
                 Database.ExcluirTabela("UPD_OMFN");
                 */
-
-
 
                 _company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
             }
