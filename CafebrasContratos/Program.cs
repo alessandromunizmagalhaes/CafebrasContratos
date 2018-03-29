@@ -56,6 +56,15 @@ namespace CafebrasContratos
             {
                 _company.StartTransaction();
 
+                /*
+                Database.ExcluirTabela("UPD_OCCC");
+
+                Database.ExcluirTabela("UPD_OMOD");
+                Database.ExcluirTabela("UPD_OUCM");
+                Database.ExcluirTabela("UPD_OTOP");
+                Database.ExcluirTabela("UPD_OMFN");
+                */
+
                 var Modalidade = new TabelaUDO(
                             "UPD_OMOD"
                             , "Modalidade do Contrato"
@@ -119,23 +128,32 @@ namespace CafebrasContratos
                             new ColunaVarchar("EMail", "E-mail do Contato",50,true),
                             new ColunaDate("DtPrEnt", "Previsão de Entrega",true),
                             new ColunaDate("DtPrPgt", "Previsão de Pagamento",true),
-                            new ColunaVarchar("ModCtto", "Modalidade", 30, true, null, null, Modalidade.NomeSemArroba),
-                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true, null, null, UnidadeComercial.NomeSemArroba),
-                            new ColunaVarchar("TipoOper", "Tipo Operação", 30, true, null, null, TipoOperacao.NomeSemArroba),
-                            new ColunaVarchar("MtdFin", "Método Financeiro", 30, true, null, null, MetodoFinanceiro.NomeSemArroba),
+                            new ColunaVarchar("ModCtto", "Modalidade", 30, true),
+                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30),
+                            new ColunaVarchar("TipoOper", "Tipo Operação", 30),
+                            new ColunaVarchar("MtdFin", "Método Financeiro", 30),
+                            new ColunaPrice("VFat", "Valor Faturado por saca"),
+                            new ColunaPrice("VICMS", "Valor ICMS por saca"),
+                            new ColunaPrice("VSenar", "Valor Senar por saca"),
+                            new ColunaPrice("VLivre", "Valor Livre por saca"),
+                            new ColunaPrice("VBruto", "Valor Bruto por saca"),
+                            new ColunaQuantity("QtdPeso", "Qtd de Peso"),
+                            new ColunaQuantity("QtdSaca", "Qtd de Sacas"),
+                            new ColunaPrice("TFat", "Total Faturado por saca"),
+                            new ColunaPrice("TICMS", "Total ICMS por saca"),
+                            new ColunaPrice("TSenar", "Total Senar por saca"),
+                            new ColunaPrice("TLivre", "Total Livre por saca"),
+                            new ColunaPrice("TBruto", " Total Bruto por saca"),
+                            new ColunaQuantity("SPesoRec", "Saldo de Peso recebido"),
+                            new ColunaQuantity("SPesoNCT", "Saldo de Peso sem contrato"),
+                            new ColunaPrice("SScRec", "Saldo de sacas recebido"),
+                            new ColunaPrice("SScNCT", "Saldo de sacas sem contrato"),
+                            new ColunaPrice("SFin", "Saldo financeiro"),
+                            new ColunaPrice("VlrFrete", "Valor do frete"),
                         }
                         , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO, CanCancel = SAPbobsCOM.BoYesNoEnum.tNO }
                     )
                 );
-
-                /*
-                Database.ExcluirTabela("UPD_OCCC");
-
-                Database.ExcluirTabela("UPD_OMOD");
-                Database.ExcluirTabela("UPD_OUCM");
-                Database.ExcluirTabela("UPD_OTOP");
-                Database.ExcluirTabela("UPD_OMFN");
-                */
 
                 _company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
             }
@@ -173,27 +191,29 @@ namespace CafebrasContratos
 
         private static void DeclararEventos()
         {
-            /*
-            var formOfertaDeCompra = new FormOfertaDeCompra();
-            var formPedidoDeVenda = new FormPedidoDeVenda();
-            var formNotaFiscalDeSaida = new FormNotaFiscalDeSaida();
+            var formPreContrato = new FormPreContrato();
+            var eventFilters = new EventFilters();
+            eventFilters.Add(BoEventTypes.et_MENU_CLICK);
 
             try
             {
-                FormEvents.DeclararEventos(new List<MapEventsToForms>() {
-                    new MapEventsToForms(BoEventTypes.et_FORM_LOAD, new List<SAPHelper.Form>() {
-                        formOfertaDeCompra,
-                        formPedidoDeVenda,
-                        formNotaFiscalDeSaida,
-                    }),
-                    new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, formOfertaDeCompra)
+                FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
+                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formPreContrato)
                 });
             }
             catch (Exception e)
             {
-                Dialogs.PopupError(e.Message);
+                Dialogs.PopupError("Erro ao declarar eventos de formulário.\nErro: " + e.Message);
             }
-            */
+
+            try
+            {
+                Global.SBOApplication.SetFilter(eventFilters);
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro ao setar eventos declarados da aplicação.\nErro: " + e.Message);
+            }
 
             _sBOApplication.AppEvent += AppEvent;
             _sBOApplication.ItemEvent += FormEvents.ItemEvent;
