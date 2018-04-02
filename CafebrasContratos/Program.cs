@@ -129,9 +129,9 @@ namespace CafebrasContratos
                             new ColunaDate("DtPrEnt", "Previsão de Entrega",true),
                             new ColunaDate("DtPrPgt", "Previsão de Pagamento",true),
                             new ColunaVarchar("ModCtto", "Modalidade", 30, true),
-                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30),
-                            new ColunaVarchar("TipoOper", "Tipo Operação", 30),
-                            new ColunaVarchar("MtdFin", "Método Financeiro", 30),
+                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true),
+                            new ColunaVarchar("TipoOper", "Tipo Operação", 30, true),
+                            new ColunaVarchar("MtdFin", "Método Financeiro", 30, true),
                             new ColunaPrice("VFat", "Valor Faturado por saca"),
                             new ColunaPrice("VICMS", "Valor ICMS por saca"),
                             new ColunaPrice("VSenar", "Valor Senar por saca"),
@@ -150,6 +150,8 @@ namespace CafebrasContratos
                             new ColunaPrice("SScNCT", "Saldo de sacas sem contrato"),
                             new ColunaPrice("SFin", "Saldo financeiro"),
                             new ColunaPrice("VlrFrete", "Valor do frete"),
+                            new ColunaText("ObsIni", "Observações Iniciais"),
+                            new ColunaText("ObsFim", "Observações Finais"),
                         }
                         , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO, CanCancel = SAPbobsCOM.BoYesNoEnum.tNO }
                     )
@@ -201,10 +203,13 @@ namespace CafebrasContratos
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
-                    new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, formPreContrato)
+                    new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                 });
 
                 FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formPreContrato);
+                FormEvents.DeclararEventosInternos(EventosInternos.Pesquisar, formPreContrato);
             }
             catch (Exception e)
             {
@@ -222,6 +227,7 @@ namespace CafebrasContratos
 
             _sBOApplication.AppEvent += AppEvent;
             _sBOApplication.ItemEvent += FormEvents.ItemEvent;
+            _sBOApplication.FormDataEvent += FormEvents.FormDataEvent;
             _sBOApplication.MenuEvent += Menu.MenuEvent;
         }
 

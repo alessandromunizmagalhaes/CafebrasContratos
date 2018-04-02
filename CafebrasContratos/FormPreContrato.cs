@@ -11,22 +11,89 @@ namespace CafebrasContratos
 
         #region :: Campos
 
-        public ItemForm NumeroDoContrato { get; set; } = new ItemForm() { ItemUID = "DocNumCC", Datasource = "U_DocNumCC" };
-        public ItemForm DataInicio { get; set; } = new ItemForm() { ItemUID = "DataIni", Datasource = "U_DataIni" };
-        public ItemForm DataFim { get; set; } = new ItemForm() { ItemUID = "DataFim", Datasource = "U_DataFim" };
-        public ItemForm Status { get; set; } = new ItemForm() { ItemUID = "StatusQua", Datasource = "U_StatusQua" };
-        public ItemForm Descricao { get; set; } = new ItemForm() { ItemUID = "Descricao", Datasource = "U_Descricao" };
+        public ItemForm _numeroDoContrato = new ItemForm()
+        {
+            ItemUID = "DocNumCC",
+            Datasource = "U_DocNumCC"
+        };
+        public ItemFormObrigatorio _dataInicio = new ItemFormObrigatorio()
+        {
+            ItemUID = "DataIni",
+            Datasource = "U_DataIni",
+            Mensagem = "A Data de Início é obrigatória."
+        };
+        public ItemFormObrigatorio _dataFim = new ItemFormObrigatorio()
+        {
+            ItemUID = "DataFim",
+            Datasource = "U_DataFim",
+            Mensagem = "A Data Final é obrigatória."
+        };
+        public ItemForm _status = new ItemForm()
+        {
+            ItemUID = "StatusQua",
+            Datasource = "U_StatusQua"
+        };
+        public ItemFormObrigatorio _descricao = new ItemFormObrigatorio()
+        {
+            ItemUID = "Descricao",
+            Datasource = "U_Descricao",
+            Mensagem = "A Descrição Geral é obrigatória."
+        };
 
-        public ItemForm CodigoPN { get; set; } = new ItemForm() { ItemUID = "CardCode", Datasource = "U_CardCode" };
-        public ItemForm NomePN { get; set; } = new ItemForm() { ItemUID = "CardName", Datasource = "U_CardName" };
-        public ItemForm Telefone { get; set; } = new ItemForm() { ItemUID = "Tel1", Datasource = "U_Tel1" };
-        public ItemForm Email { get; set; } = new ItemForm() { ItemUID = "EMail", Datasource = "U_EMail" };
-        public ItemForm PessoasDeContato { get; set; } = new ItemForm() { ItemUID = "CtName", Datasource = "U_CtName" };
+        public ItemFormObrigatorio _codigoPN = new ItemFormObrigatorio()
+        {
+            ItemUID = "CardCode",
+            Datasource = "U_CardCode",
+            Mensagem = "O Parceiro de Negócios é obrigatório."
+        };
+        public ItemForm _nomePN = new ItemForm()
+        {
+            ItemUID = "CardName",
+            Datasource = "U_CardName",
+        };
+        public ItemFormObrigatorio _telefone = new ItemFormObrigatorio()
+        {
+            ItemUID = "Tel1",
+            Datasource = "U_Tel1",
+            Mensagem = "O telefone do contato é obrigatório."
+        };
+        public ItemFormObrigatorio _email = new ItemFormObrigatorio()
+        {
+            ItemUID = "EMail",
+            Datasource = "U_EMail",
+            Mensagem = "O E-mail do contato é obrigatório."
+        };
+        public ItemFormObrigatorio _pessoasDeContato = new ItemFormObrigatorio()
+        {
+            ItemUID = "CtName",
+            Datasource = "U_CtName",
+            Mensagem = "A pessoa de contato é obrigatória."
+        };
 
-        public ItemForm Modalidade { get; set; } = new ItemForm() { ItemUID = "ModCtto", Datasource = "U_ModCtto" };
-        public ItemForm UnidadeComercial { get; set; } = new ItemForm() { ItemUID = "UnidCom", Datasource = "U_UnidCom" };
-        public ItemForm TipoDeOperacao { get; set; } = new ItemForm() { ItemUID = "TipoOper", Datasource = "U_TipoOper" };
-        public ItemForm MetodoFinanceiro { get; set; } = new ItemForm() { ItemUID = "MtdFin", Datasource = "U_MtdFin" };
+        public ItemFormObrigatorio _modalidade = new ItemFormObrigatorio()
+        {
+            ItemUID = "ModCtto",
+            Datasource = "U_ModCtto",
+            Mensagem = "A modalidade do contrato é obrigatória"
+        };
+        public ItemFormObrigatorio _unidadeComercial = new ItemFormObrigatorio()
+        {
+            ItemUID = "UnidCom",
+            Datasource = "U_UnidCom",
+            Mensagem = "A unidade de comercial é obrigatória."
+        };
+        public ItemFormObrigatorio _tipoDeOperacao = new ItemFormObrigatorio()
+        {
+            ItemUID = "TipoOper",
+            Datasource = "U_TipoOper",
+            Mensagem = "O tipo de operação é obrigatório."
+        };
+        public ItemFormObrigatorio _metodoFinanceiro = new ItemFormObrigatorio()
+        {
+            ItemUID = "MtdFin",
+            Datasource = "U_MtdFin",
+            Mensagem = "O método financeiro é obrigatório."
+        };
 
 
         #endregion
@@ -40,10 +107,10 @@ namespace CafebrasContratos
 
             var form = GetForm(pVal);
 
-            PopularComboBox(form, Modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD]");
-            PopularComboBox(form, UnidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM]");
-            PopularComboBox(form, TipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP]");
-            PopularComboBox(form, MetodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN]");
+            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD]");
+            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM]");
+            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP]");
+            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN]");
 
             ConditionsParaFornecedores(form);
         }
@@ -52,56 +119,106 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var dataTable = chooseEvent.SelectedObjects;
+            if (!choose.IsSystem)
+            {
+                var dataTable = chooseEvent.SelectedObjects;
 
-            string cardcode = dataTable.GetValue("CardCode", 0);
-            string cardname = dataTable.GetValue("CardName", 0);
-            string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
+                string cardcode = dataTable.GetValue("CardCode", 0);
+                string cardname = dataTable.GetValue("CardName", 0);
+                string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
 
-            var dbdts = GetDBDatasource(pVal, mainDbDataSource);
+                var dbdts = GetDBDatasource(pVal, mainDbDataSource);
 
-            dbdts.SetValue(CodigoPN.Datasource, 0, cardcode);
-            dbdts.SetValue(NomePN.Datasource, 0, cardname);
+                dbdts.SetValue(_codigoPN.Datasource, 0, cardcode);
+                dbdts.SetValue(_nomePN.Datasource, 0, cardname);
 
-            PopularPessoasDeContato(form, cardcode, pessoaDeContato);
+                PopularPessoasDeContato(form, cardcode, pessoaDeContato);
+            }
         }
 
         public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
 
-            if (pVal.ItemUID == PessoasDeContato.ItemUID)
+            if (pVal.ItemUID == _pessoasDeContato.ItemUID)
             {
                 var dbdts = GetDBDatasource(pVal, mainDbDataSource);
-                string pessoaDeContato = dbdts.GetValue(PessoasDeContato.Datasource, 0);
-                string cardcode = dbdts.GetValue(CodigoPN.Datasource, 0);
+                string pessoaDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
+                string cardcode = dbdts.GetValue(_codigoPN.Datasource, 0);
                 AtualizarDadosPessoaDeContato(cardcode, pessoaDeContato, dbdts);
             }
         }
 
+        public override void OnBeforeFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            var form = GetForm(BusinessObjectInfo);
+            var dbdts = GetDBDatasource(BusinessObjectInfo, mainDbDataSource);
+
+            string next_code = GetNextCode(mainDbDataSource);
+
+            dbdts.SetValue("Code", 0, next_code);
+            dbdts.SetValue("Name", 0, next_code);
+            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextCode(mainDbDataSource));
+
+            Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
+            try
+            {
+                ValidarCamposObrigatorios(dbdts);
+            }
+            catch (FormValidationException e)
+            {
+                Dialogs.MessageBox(e.Message);
+                form.Items.Item(e.Campo).Click();
+                BubbleEvent = false;
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao tentar adicionar valores do formulário.\nErro: " + e.Message);
+            }
+        }
+
+        public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            var form = GetForm(BusinessObjectInfo);
+            form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+            form.Items.Item(_status.ItemUID).Enabled = true;
+        }
+
         public override void _OnAdicionarNovo(SAPbouiCOM.Form form)
         {
+            form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+            form.Items.Item(_status.ItemUID).Enabled = false;
+
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
             const int mesesPraFrente = 6;
             DateTime dataFinal = new DateTime(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month, DateTime.DaysInMonth(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month));
 
-            dbdts.SetValue(DataInicio.Datasource, 0, Helpers.DateToString(DateTime.Now));
-            dbdts.SetValue(DataFim.Datasource, 0, Helpers.DateToString(dataFinal));
-            dbdts.SetValue(Status.Datasource, 0, "A");
-            dbdts.SetValue(NumeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, NumeroDoContrato.Datasource));
+            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.DateToString(DateTime.Now));
+            dbdts.SetValue(_dataFim.Datasource, 0, Helpers.DateToString(dataFinal));
+            dbdts.SetValue(_status.Datasource, 0, "A");
+            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
 
-            form.Items.Item(Descricao.ItemUID).Click();
+            form.Items.Item(_descricao.ItemUID).Click();
+        }
+
+        public override void _OnPesquisar(SAPbouiCOM.Form form)
+        {
+            form.Items.Item(_numeroDoContrato.ItemUID).Enabled = true;
+            form.Items.Item(_status.ItemUID).Enabled = true;
         }
 
         #endregion
 
-        #region :: Regras de negócio
 
+        #region :: Regras de negócio
 
         private void PopularPessoasDeContato(SAPbouiCOM.Form form, string cardcode, string pessoaDeContatoSelecionada)
         {
-            ComboBox combo = form.Items.Item(PessoasDeContato.ItemUID).Specific;
+            ComboBox combo = form.Items.Item(_pessoasDeContato.ItemUID).Specific;
             string sql =
                 $@"SELECT 
 	                    Name, Name
@@ -109,13 +226,9 @@ namespace CafebrasContratos
                     WHERE CardCode = '{cardcode}'";
             PopularComboBox(combo, sql);
 
-            if (!String.IsNullOrEmpty(pessoaDeContatoSelecionada))
-            {
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-                dbdts.SetValue(PessoasDeContato.Datasource, 0, pessoaDeContatoSelecionada);
-
-                AtualizarDadosPessoaDeContato(cardcode, pessoaDeContatoSelecionada, dbdts);
-            }
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            dbdts.SetValue(_pessoasDeContato.Datasource, 0, pessoaDeContatoSelecionada);
+            AtualizarDadosPessoaDeContato(cardcode, pessoaDeContatoSelecionada, dbdts);
         }
 
         private void AtualizarDadosPessoaDeContato(string cardcode, string pessoaDeContato, DBDataSource dbdts)
@@ -137,8 +250,8 @@ namespace CafebrasContratos
                 email = rs.Fields.Item("E_MailL").Value;
             }
 
-            dbdts.SetValue(Telefone.Datasource, 0, telefone);
-            dbdts.SetValue(Email.Datasource, 0, email);
+            dbdts.SetValue(_telefone.Datasource, 0, telefone);
+            dbdts.SetValue(_email.Datasource, 0, email);
         }
 
         private static void ConditionsParaFornecedores(SAPbouiCOM.Form form)
