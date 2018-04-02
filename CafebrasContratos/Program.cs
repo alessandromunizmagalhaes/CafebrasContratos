@@ -199,7 +199,9 @@ namespace CafebrasContratos
                 var formPreContrato = new FormPreContrato();
 
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
-                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formPreContrato)
+                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, formPreContrato)
                 });
 
                 FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formPreContrato);
