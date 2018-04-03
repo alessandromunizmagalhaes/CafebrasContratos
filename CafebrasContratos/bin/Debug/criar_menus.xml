@@ -1,0 +1,75 @@
+﻿<Application>
+	<Menus>
+		<action type="add">
+			<Menu Checked="0"
+				  Enabled="1"
+				  FatherUID="43525"
+				  String="Contratos"
+				  Type="2"
+				  UniqueID="mnuCadastro">
+				<Menus>
+					<action type="add">
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Modalidades"
+							  Type="1"
+							  UniqueID="FrmModalidade">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Unidade Comercial"
+							  Type="1"
+							  UniqueID="FrmUnidadeComercial">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Tipo de Operação"
+							  Type="1"
+							  UniqueID="FrmTipoOperacao">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Método Financeiro"
+							  Type="1"
+							  UniqueID="FrmMetodoFinanceiro">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Safra"
+							  Type="1"
+							  UniqueID="FrmSafra">
+            </Menu>
+					</action>
+				</Menus>
+			</Menu>
+		</action>
+	</Menus>
+	<Menus>
+		<action type="add">
+			<Menu Checked="0"
+				  Enabled="1"
+				  FatherUID="43520"
+				  String="Contratos"
+				  Type="2"
+          Image="Logo.png" 
+				  UniqueID="mnuContrato">
+				<Menus>
+					<action type="add">
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuContrato"
+							  String="Contrato de Compra Geral"
+							  Type="1"
+							  UniqueID="FrmPreContrato">
+            </Menu>
+					</action>
+				</Menus>
+			</Menu>
+		</action>
+	</Menus>
+</Application>
