@@ -95,6 +95,41 @@ namespace CafebrasContratos
             Mensagem = "O método financeiro é obrigatório."
         };
 
+        public ItemFormObrigatorio _utilizacao = new ItemFormObrigatorio()
+        {
+            ItemUID = "Usage",
+            Datasource = "U_Usage",
+            Mensagem = "A utilização é obrigatória."
+        };
+        public ItemFormObrigatorio _embalagem = new ItemFormObrigatorio()
+        {
+            ItemUID = "Packg",
+            Datasource = "U_Packg",
+            Mensagem = "A embalagem é obrigatória."
+        };
+        public ItemFormObrigatorio _safra = new ItemFormObrigatorio()
+        {
+            ItemUID = "Safra",
+            Datasource = "U_Safra",
+            Mensagem = "A safra é obrigatória."
+        };
+        public ItemFormObrigatorio _codigoItem = new ItemFormObrigatorio()
+        {
+            ItemUID = "ItemCode",
+            Datasource = "U_ItemCode",
+            Mensagem = "O Item é obrigatório."
+        };
+        public ItemForm _nomeItem = new ItemForm()
+        {
+            ItemUID = "ItemName",
+            Datasource = "U_ItemName"
+        };
+        public ItemFormObrigatorio _deposito = new ItemFormObrigatorio()
+        {
+            ItemUID = "WhsCode",
+            Datasource = "U_WhsCode",
+            Mensagem = "O depósito é obrigatório."
+        };
 
         #endregion
 
@@ -107,10 +142,16 @@ namespace CafebrasContratos
 
             var form = GetForm(pVal);
 
-            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD]");
-            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM]");
-            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP]");
-            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN]");
+            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD] ORDER BY Name");
+            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM] ORDER BY Name");
+            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP] ORDER BY Name");
+            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN] ORDER BY Name");
+            PopularComboBox(form, _utilizacao.ItemUID, "SELECT ID, Usage FROM OUSG ORDER BY Usage");
+            PopularComboBox(form, _embalagem.ItemUID, "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType");
+            PopularComboBox(form, _safra.ItemUID, "SELECT Code, Name FROM [@UPD_OSAF] ORDER BY Name");
+
+            // clicando pra aba já vir selecionada
+            form.Items.Item("AbaGeral").Click();
 
             ConditionsParaFornecedores(form);
         }
@@ -121,20 +162,25 @@ namespace CafebrasContratos
 
             if (!choose.IsSystem)
             {
+                var dbdts = GetDBDatasource(pVal, mainDbDataSource);
                 var dataTable = chooseEvent.SelectedObjects;
 
-                string cardcode = dataTable.GetValue("CardCode", 0);
-                string cardname = dataTable.GetValue("CardName", 0);
-                string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
-
-                var dbdts = GetDBDatasource(pVal, mainDbDataSource);
-
-                dbdts.SetValue(_codigoPN.Datasource, 0, cardcode);
-                dbdts.SetValue(_nomePN.Datasource, 0, cardname);
-
-                PopularPessoasDeContato(form, cardcode, pessoaDeContato);
+                if (chooseEvent.ItemUID == _codigoPN.ItemUID)
+                {
+                    OnCardCodeChoose(form, dbdts, dataTable);
+                }
+                else if (chooseEvent.ItemUID == _codigoItem.ItemUID)
+                {
+                    OnItemCodeChoose(dbdts, dataTable);
+                }
+                else if (chooseEvent.ItemUID == _deposito.ItemUID)
+                {
+                    OnWhsCodeChoose(dbdts, dataTable);
+                }
             }
         }
+
+
 
         public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
@@ -209,6 +255,38 @@ namespace CafebrasContratos
         {
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = true;
             form.Items.Item(_status.ItemUID).Enabled = true;
+        }
+
+        #endregion
+
+        #region :: Choose From Lists
+
+        private void OnItemCodeChoose(DBDataSource dbdts, DataTable dataTable)
+        {
+            string itemcode = dataTable.GetValue("ItemCode", 0);
+            string itemname = dataTable.GetValue("ItemName", 0);
+
+            dbdts.SetValue(_codigoItem.Datasource, 0, itemcode);
+            dbdts.SetValue(_nomeItem.Datasource, 0, itemname);
+        }
+
+        private void OnWhsCodeChoose(DBDataSource dbdts, DataTable dataTable)
+        {
+            string whscode = dataTable.GetValue("WhsCode", 0);
+
+            dbdts.SetValue(_deposito.Datasource, 0, whscode);
+        }
+
+        private void OnCardCodeChoose(SAPbouiCOM.Form form, DBDataSource dbdts, DataTable dataTable)
+        {
+            string cardcode = dataTable.GetValue("CardCode", 0);
+            string cardname = dataTable.GetValue("CardName", 0);
+            string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
+
+            dbdts.SetValue(_codigoPN.Datasource, 0, cardcode);
+            dbdts.SetValue(_nomePN.Datasource, 0, cardname);
+
+            PopularPessoasDeContato(form, cardcode, pessoaDeContato);
         }
 
         #endregion

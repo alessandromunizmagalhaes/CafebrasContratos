@@ -6,8 +6,12 @@ namespace CafebrasContratos
     {
         public static readonly Dictionary<string, string> _status = new Dictionary<string, string>()
         {
-            { "A","Aberto" },
-            { "F","Fechado" },
+            // chave em ingles
+            // O -> Open
+            // A -> Authorized
+            // C -> Canceled
+            { "O","Aberto" },
+            { "A","Autorizado" },
             { "C","Cancelado" }
         };
     }

@@ -1,4 +1,5 @@
-﻿using SAPbouiCOM;
+﻿using SAPbobsCOM;
+using SAPbouiCOM;
 using SAPHelper;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace CafebrasContratos
     static class Program
     {
         private static string _addonName = "Cafébras Contratos";
-        public static SAPbouiCOM.Application _sBOApplication;
+        public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
 
         [STAThread]
@@ -56,36 +57,30 @@ namespace CafebrasContratos
             {
                 _company.StartTransaction();
 
-                /*
-                Database.ExcluirTabela("UPD_OCCC");
 
-                Database.ExcluirTabela("UPD_OMOD");
-                Database.ExcluirTabela("UPD_OUCM");
-                Database.ExcluirTabela("UPD_OTOP");
-                Database.ExcluirTabela("UPD_OMFN");
-                */
+                // Database.ExcluirTabela("UPD_OCCC");
 
                 var Modalidade = new TabelaUDO(
                             "UPD_OMOD"
                             , "Modalidade do Contrato"
-                            , SAPbobsCOM.BoUTBTableType.bott_MasterData
+                            , BoUTBTableType.bott_MasterData
                             , new List<Coluna>() { }
-                            , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
+                            , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                         );
 
                 var UnidadeComercial = new TabelaUDO(
                         "UPD_OUCM"
                         , "Unidade Comercial do Contrato"
-                        , SAPbobsCOM.BoUTBTableType.bott_MasterData
+                        , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
-                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
 
                 var TipoOperacao = new TabelaUDO(
                         "UPD_OTOP"
                         , "Tipo de Operação do Contrato"
-                        , SAPbobsCOM.BoUTBTableType.bott_MasterData
+                        , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
                         , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
                     );
@@ -93,15 +88,24 @@ namespace CafebrasContratos
                 var MetodoFinanceiro = new TabelaUDO(
                         "UPD_OMFN"
                         , "Método Financeiro do Contrato"
-                        , SAPbobsCOM.BoUTBTableType.bott_MasterData
+                        , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
-                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
+                    );
+
+                var Safra = new TabelaUDO(
+                        "UPD_OSAF"
+                        , "Safra do Item"
+                        , BoUTBTableType.bott_MasterData
+                        , new List<Coluna>() { }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
                 Database.CriarTabela(Modalidade);
                 Database.CriarTabela(UnidadeComercial);
                 Database.CriarTabela(TipoOperacao);
                 Database.CriarTabela(MetodoFinanceiro);
+                Database.CriarTabela(Safra);
 
                 var valores_validos_status_contrato = new List<ValorValido>() { };
                 foreach (var status in Contrato._status)
@@ -113,7 +117,7 @@ namespace CafebrasContratos
                     new TabelaUDO(
                         "UPD_OCCC"
                         , "Contrato de Compra Geral"
-                        , SAPbobsCOM.BoUTBTableType.bott_MasterData
+                        , BoUTBTableType.bott_MasterData
                         , new List<Coluna>()
                         {
                             new ColunaInt("DocNumCC","Numero do Contrato",true),
@@ -121,6 +125,7 @@ namespace CafebrasContratos
                             new ColunaDate("DataFim","Data Final",true),
                             new ColunaVarchar("StatusQua","Situação",1,true,"A", valores_validos_status_contrato),
                             new ColunaVarchar("Descricao","Descrição",254,true),
+
                             new ColunaVarchar("CardCode","Código do PN",15,true),
                             new ColunaVarchar("CardName","Descrição do PN",100,true),
                             new ColunaVarchar("CtName", "Contato do PN",50,true),
@@ -132,6 +137,18 @@ namespace CafebrasContratos
                             new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true),
                             new ColunaVarchar("TipoOper", "Tipo Operação", 30, true),
                             new ColunaVarchar("MtdFin", "Método Financeiro", 30, true),
+
+                            new ColunaVarchar("ItemCode", "Código do Item", 60,true),
+                            new ColunaVarchar("ItemName", "Nome do Item", 100,true),
+                            new ColunaVarchar("WhsCode", "Depósito do Item", 8,true),
+                            new ColunaVarchar("Safra", "Safra", 30, true),
+                            new ColunaVarchar("Usage", "Utilização", 10, true),
+                            new ColunaQuantity("Difere", "Diferencial do Item", true),
+                            new ColunaVarchar("Packg", "Embalagem", 30, true),
+                            new ColunaPrice("RateNY", "Câmbio moeda em NY", true),
+                            new ColunaPrice("RateUSD", "Câmbio moeda Dolar USA", true),
+                            new ColunaVarchar("Bebida", "Descrição Bebida", 20, true),
+
                             new ColunaPrice("VFat", "Valor Faturado por saca"),
                             new ColunaPrice("VICMS", "Valor ICMS por saca"),
                             new ColunaPrice("VSenar", "Valor Senar por saca"),
@@ -153,11 +170,11 @@ namespace CafebrasContratos
                             new ColunaText("ObsIni", "Observações Iniciais"),
                             new ColunaText("ObsFim", "Observações Finais"),
                         }
-                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO, CanCancel = SAPbobsCOM.BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO, CanCancel = BoYesNoEnum.tNO }
                     )
                 );
 
-                _company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+                _company.EndTransaction(BoWfTransOpt.wf_Commit);
             }
             catch (DatabaseException e)
             {
@@ -166,7 +183,7 @@ namespace CafebrasContratos
             catch (Exception e)
             {
                 Dialogs.PopupError("Erro interno. Erro ao criar estrutura de dados.\nErro: " + e.Message);
-                _company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                _company.EndTransaction(BoWfTransOpt.wf_RollBack);
             }
         }
 
@@ -178,7 +195,7 @@ namespace CafebrasContratos
             {
                 RemoverMenu();
 
-                Menu.CriarMenus(System.Windows.Forms.Application.StartupPath + @"/criar_menus.xml");
+                Menu.CriarMenus(AppDomain.CurrentDomain.BaseDirectory + @"/criar_menus.xml");
             }
             catch (Exception e)
             {
@@ -188,7 +205,7 @@ namespace CafebrasContratos
 
         private static void RemoverMenu()
         {
-            Menu.RemoverMenus(System.Windows.Forms.Application.StartupPath + @"/remover_menus.xml");
+            Menu.RemoverMenus(AppDomain.CurrentDomain.BaseDirectory + @"/remover_menus.xml");
         }
 
         private static void DeclararEventos()
