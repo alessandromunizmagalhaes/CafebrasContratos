@@ -14,35 +14,35 @@
 							  FatherUID="mnuCadastro"
 							  String="Cadastro de Modalidades"
 							  Type="1"
-							  UniqueID="FrmModalidade">
+							  UniqueID="FormModalidade">
             </Menu>
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuCadastro"
 							  String="Cadastro de Unidade Comercial"
 							  Type="1"
-							  UniqueID="FrmUnidadeComercial">
+							  UniqueID="FormUnidadeComercial">
             </Menu>
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuCadastro"
 							  String="Cadastro de Tipo de Operação"
 							  Type="1"
-							  UniqueID="FrmTipoOperacao">
+							  UniqueID="FormTipoOperacao">
             </Menu>
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuCadastro"
 							  String="Cadastro de Método Financeiro"
 							  Type="1"
-							  UniqueID="FrmMetodoFinanceiro">
+							  UniqueID="FormMetodoFinanceiro">
             </Menu>
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuCadastro"
 							  String="Cadastro de Safra"
 							  Type="1"
-							  UniqueID="FrmSafra">
+							  UniqueID="FormSafra">
             </Menu>
 					</action>
 				</Menus>
@@ -65,7 +65,7 @@
 							  FatherUID="mnuContrato"
 							  String="Contrato de Compra Geral"
 							  Type="1"
-							  UniqueID="FrmPreContrato">
+							  UniqueID="FormPreContrato">
             </Menu>
 					</action>
 				</Menus>

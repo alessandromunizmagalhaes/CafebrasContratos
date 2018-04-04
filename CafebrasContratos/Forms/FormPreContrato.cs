@@ -6,8 +6,9 @@ namespace CafebrasContratos
 {
     public class FormPreContrato : SAPHelper.Form
     {
-        public override string FormType { get { return "FrmPreContrato"; } }
+        public override string FormType { get { return "FormPreContrato"; } }
         private const string mainDbDataSource = "@UPD_OCCC";
+        private const string nomeFormDetalheDoItem = "FormDetalheItem.srf";
 
         #region :: Campos
 
@@ -130,77 +131,22 @@ namespace CafebrasContratos
             Datasource = "U_WhsCode",
             Mensagem = "O depósito é obrigatório."
         };
+        public ItemForm _botaoDetalheDoItem = new ItemForm()
+        {
+            ItemUID = "btnItem",
+        };
 
         #endregion
 
 
-        #region :: Eventos
-
-        public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            BubbleEvent = true;
-
-            var form = GetForm(pVal);
-
-            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD] ORDER BY Name");
-            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM] ORDER BY Name");
-            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP] ORDER BY Name");
-            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN] ORDER BY Name");
-            PopularComboBox(form, _utilizacao.ItemUID, "SELECT ID, Usage FROM OUSG ORDER BY Usage");
-            PopularComboBox(form, _embalagem.ItemUID, "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType");
-            PopularComboBox(form, _safra.ItemUID, "SELECT Code, Name FROM [@UPD_OSAF] ORDER BY Name");
-
-            // clicando pra aba já vir selecionada
-            form.Items.Item("AbaGeral").Click();
-
-            ConditionsParaFornecedores(form);
-        }
-
-        public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            BubbleEvent = true;
-
-            if (!choose.IsSystem)
-            {
-                var dbdts = GetDBDatasource(pVal, mainDbDataSource);
-                var dataTable = chooseEvent.SelectedObjects;
-
-                if (chooseEvent.ItemUID == _codigoPN.ItemUID)
-                {
-                    OnCardCodeChoose(form, dbdts, dataTable);
-                }
-                else if (chooseEvent.ItemUID == _codigoItem.ItemUID)
-                {
-                    OnItemCodeChoose(dbdts, dataTable);
-                }
-                else if (chooseEvent.ItemUID == _deposito.ItemUID)
-                {
-                    OnWhsCodeChoose(dbdts, dataTable);
-                }
-            }
-        }
-
-
-
-        public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            BubbleEvent = true;
-
-            if (pVal.ItemUID == _pessoasDeContato.ItemUID)
-            {
-                var dbdts = GetDBDatasource(pVal, mainDbDataSource);
-                string pessoaDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
-                string cardcode = dbdts.GetValue(_codigoPN.Datasource, 0);
-                AtualizarDadosPessoaDeContato(cardcode, pessoaDeContato, dbdts);
-            }
-        }
+        #region :: Eventos de Formulário
 
         public override void OnBeforeFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             BubbleEvent = true;
 
-            var form = GetForm(BusinessObjectInfo);
-            var dbdts = GetDBDatasource(BusinessObjectInfo, mainDbDataSource);
+            var form = GetForm(BusinessObjectInfo.FormUID);
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
 
             string next_code = GetNextCode(mainDbDataSource);
 
@@ -228,10 +174,87 @@ namespace CafebrasContratos
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            var form = GetForm(BusinessObjectInfo);
+            var form = GetForm(BusinessObjectInfo.FormUID);
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
             form.Items.Item(_status.ItemUID).Enabled = true;
         }
+
+        #endregion
+
+
+        #region :: Eventos de Item
+
+        public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            var form = GetForm(FormUID);
+
+            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD] ORDER BY Name");
+            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM] ORDER BY Name");
+            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP] ORDER BY Name");
+            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN] ORDER BY Name");
+            PopularComboBox(form, _utilizacao.ItemUID, "SELECT ID, Usage FROM OUSG ORDER BY Usage");
+            PopularComboBox(form, _embalagem.ItemUID, "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType");
+            PopularComboBox(form, _safra.ItemUID, "SELECT Code, Name FROM [@UPD_OSAF] ORDER BY Name");
+
+            // clicando para a primeira aba já vir selecionada
+            form.Items.Item("AbaGeral").Click();
+
+            ConditionsParaFornecedores(form);
+        }
+
+        public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == _pessoasDeContato.ItemUID)
+            {
+                var dbdts = GetDBDatasource(FormUID, mainDbDataSource);
+                string pessoaDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
+                string cardcode = dbdts.GetValue(_codigoPN.Datasource, 0);
+                AtualizarDadosPessoaDeContato(cardcode, pessoaDeContato, dbdts);
+            }
+        }
+
+        public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == _botaoDetalheDoItem.ItemUID)
+            {
+                CriarFormFilho(AppDomain.CurrentDomain.BaseDirectory + "/" + nomeFormDetalheDoItem, FormUID, new FormDetalheItem());
+            }
+        }
+
+        public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (!choose.IsSystem)
+            {
+                var dbdts = GetDBDatasource(pVal.FormUID, mainDbDataSource);
+                var dataTable = chooseEvent.SelectedObjects;
+
+                if (chooseEvent.ItemUID == _codigoPN.ItemUID)
+                {
+                    OnCardCodeChoose(form, dbdts, dataTable);
+                }
+                else if (chooseEvent.ItemUID == _codigoItem.ItemUID)
+                {
+                    OnItemCodeChoose(dbdts, dataTable);
+                }
+                else if (chooseEvent.ItemUID == _deposito.ItemUID)
+                {
+                    OnWhsCodeChoose(dbdts, dataTable);
+                }
+            }
+        }
+
+        #endregion
+
+
+        #region :: Eventos Internos
 
         public override void _OnAdicionarNovo(SAPbouiCOM.Form form)
         {
@@ -258,6 +281,7 @@ namespace CafebrasContratos
         }
 
         #endregion
+
 
         #region :: Choose From Lists
 
@@ -287,6 +311,25 @@ namespace CafebrasContratos
             dbdts.SetValue(_nomePN.Datasource, 0, cardname);
 
             PopularPessoasDeContato(form, cardcode, pessoaDeContato);
+        }
+
+        #endregion
+
+
+        #region :: Conditions
+
+        private static void ConditionsParaFornecedores(SAPbouiCOM.Form form)
+        {
+            ChooseFromList oCFL = form.ChooseFromLists.Item("PN");
+            Conditions oConds = oCFL.GetConditions();
+
+            Condition oCond = oConds.Add();
+
+            oCond.Alias = "CardType";
+            oCond.Operation = BoConditionOperation.co_EQUAL;
+            oCond.CondVal = "S";
+
+            oCFL.SetConditions(oConds);
         }
 
         #endregion
@@ -330,20 +373,6 @@ namespace CafebrasContratos
 
             dbdts.SetValue(_telefone.Datasource, 0, telefone);
             dbdts.SetValue(_email.Datasource, 0, email);
-        }
-
-        private static void ConditionsParaFornecedores(SAPbouiCOM.Form form)
-        {
-            ChooseFromList oCFL = form.ChooseFromLists.Item("PN");
-            Conditions oConds = oCFL.GetConditions();
-
-            Condition oCond = oConds.Add();
-
-            oCond.Alias = "CardType";
-            oCond.Operation = BoConditionOperation.co_EQUAL;
-            oCond.CondVal = "S";
-
-            oCFL.SetConditions(oConds);
         }
 
         #endregion

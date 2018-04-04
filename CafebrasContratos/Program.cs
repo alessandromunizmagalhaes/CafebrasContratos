@@ -51,14 +51,14 @@ namespace CafebrasContratos
 
         private static void CriarEstruturaDeDados()
         {
-            Dialogs.Info(":: " + _addonName + " :: Criando tabelas e estruturas de dados ...");
+            Dialogs.Info(":: " + _addonName + " :: Criando tabelas e estruturas de dados ...", BoMessageTime.bmt_Long);
 
             try
             {
                 _company.StartTransaction();
 
 
-                // Database.ExcluirTabela("UPD_OCCC");
+                //Database.ExcluirTabela("UPD_OCCC");
 
                 var Modalidade = new TabelaUDO(
                             "UPD_OMOD"
@@ -82,7 +82,7 @@ namespace CafebrasContratos
                         , "Tipo de Operação do Contrato"
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
-                        , new UDOParams() { CanDelete = SAPbobsCOM.BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
                 var MetodoFinanceiro = new TabelaUDO(
@@ -171,6 +171,14 @@ namespace CafebrasContratos
                             new ColunaText("ObsFim", "Observações Finais"),
                         }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO, CanCancel = BoYesNoEnum.tNO }
+                        , new List<Tabela>() {
+                            new Tabela("UPD_CCC1", "Detalhes do Item", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
+                                new ColunaVarchar("ItemCode","Código do Item",60),
+                                new ColunaVarchar("ItemName","Nome do Item",100),
+                                new ColunaPercent("PercItem","Percentual"),
+                                new ColunaQuantity("Difere","Diferencial"),
+                            })
+                        }
                     )
                 );
 
@@ -216,13 +224,22 @@ namespace CafebrasContratos
             try
             {
                 var formPreContrato = new FormPreContrato();
+                var formDetalheItem = new FormDetalheItem();
 
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
-                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formDetalheItem
+                    }),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, formDetalheItem),
+                    new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formDetalheItem
+                    }),
                 });
 
                 FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formPreContrato);
