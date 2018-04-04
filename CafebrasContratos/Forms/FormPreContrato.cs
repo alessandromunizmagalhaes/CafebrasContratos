@@ -12,10 +12,12 @@ namespace CafebrasContratos
 
         #region :: Campos
 
+
+
         public ItemForm _numeroDoContrato = new ItemForm()
         {
             ItemUID = "DocNumCC",
-            Datasource = "U_DocNumCC"
+            Datasource = "U_DocNumCC",
         };
         public ItemFormObrigatorio _dataInicio = new ItemFormObrigatorio()
         {
@@ -64,55 +66,62 @@ namespace CafebrasContratos
             Datasource = "U_EMail",
             Mensagem = "O E-mail do contato é obrigatório."
         };
-        public ItemFormObrigatorio _pessoasDeContato = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _pessoasDeContato = new ComboFormObrigatorio()
         {
             ItemUID = "CtName",
             Datasource = "U_CtName",
             Mensagem = "A pessoa de contato é obrigatória."
         };
 
-        public ItemFormObrigatorio _modalidade = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _modalidade = new ComboFormObrigatorio()
         {
             ItemUID = "ModCtto",
             Datasource = "U_ModCtto",
-            Mensagem = "A modalidade do contrato é obrigatória"
+            Mensagem = "A modalidade do contrato é obrigatória",
+            SQL = "SELECT Code, Name FROM [@UPD_OMOD] ORDER BY Name"
         };
-        public ItemFormObrigatorio _unidadeComercial = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _unidadeComercial = new ComboFormObrigatorio()
         {
             ItemUID = "UnidCom",
             Datasource = "U_UnidCom",
-            Mensagem = "A unidade de comercial é obrigatória."
+            Mensagem = "A unidade de comercial é obrigatória.",
+            SQL = "SELECT Code, Name FROM [@UPD_OUCM] ORDER BY Name"
         };
-        public ItemFormObrigatorio _tipoDeOperacao = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _tipoDeOperacao = new ComboFormObrigatorio()
         {
             ItemUID = "TipoOper",
             Datasource = "U_TipoOper",
-            Mensagem = "O tipo de operação é obrigatório."
+            Mensagem = "O tipo de operação é obrigatório.",
+            SQL = "SELECT Code, Name FROM [@UPD_OTOP] ORDER BY Name"
         };
-        public ItemFormObrigatorio _metodoFinanceiro = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _metodoFinanceiro = new ComboFormObrigatorio()
         {
             ItemUID = "MtdFin",
             Datasource = "U_MtdFin",
-            Mensagem = "O método financeiro é obrigatório."
+            Mensagem = "O método financeiro é obrigatório.",
+            SQL = "SELECT Code, Name FROM [@UPD_OMFN] ORDER BY Name"
         };
 
-        public ItemFormObrigatorio _utilizacao = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _utilizacao = new ComboFormObrigatorio()
         {
             ItemUID = "Usage",
             Datasource = "U_Usage",
-            Mensagem = "A utilização é obrigatória."
+            Mensagem = "A utilização é obrigatória.",
+            SQL = "SELECT ID, Usage FROM OUSG ORDER BY Usage"
         };
-        public ItemFormObrigatorio _embalagem = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _embalagem = new ComboFormObrigatorio()
         {
             ItemUID = "Packg",
             Datasource = "U_Packg",
-            Mensagem = "A embalagem é obrigatória."
+            Mensagem = "A embalagem é obrigatória.",
+            SQL = "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType",
         };
-        public ItemFormObrigatorio _safra = new ItemFormObrigatorio()
+        public ComboFormObrigatorio _safra = new ComboFormObrigatorio()
         {
             ItemUID = "Safra",
             Datasource = "U_Safra",
-            Mensagem = "A safra é obrigatória."
+            Mensagem = "A safra é obrigatória.",
+            SQL = "SELECT Code, Name FROM [@UPD_OSAF] ORDER BY Name"
         };
         public ItemFormObrigatorio _codigoItem = new ItemFormObrigatorio()
         {
@@ -175,8 +184,15 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
             var form = GetForm(BusinessObjectInfo.FormUID);
+
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
             form.Items.Item(_status.ItemUID).Enabled = true;
+
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+            string codigoPN = dbdts.GetValue(_codigoPN.Datasource, 0);
+            string pessoasDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
+            PopularPessoasDeContato(form, codigoPN, pessoasDeContato);
         }
 
         #endregion
@@ -190,13 +206,13 @@ namespace CafebrasContratos
 
             var form = GetForm(FormUID);
 
-            PopularComboBox(form, _modalidade.ItemUID, "SELECT Code, Name FROM [@UPD_OMOD] ORDER BY Name");
-            PopularComboBox(form, _unidadeComercial.ItemUID, "SELECT Code, Name FROM [@UPD_OUCM] ORDER BY Name");
-            PopularComboBox(form, _tipoDeOperacao.ItemUID, "SELECT Code, Name FROM [@UPD_OTOP] ORDER BY Name");
-            PopularComboBox(form, _metodoFinanceiro.ItemUID, "SELECT Code, Name FROM [@UPD_OMFN] ORDER BY Name");
-            PopularComboBox(form, _utilizacao.ItemUID, "SELECT ID, Usage FROM OUSG ORDER BY Usage");
-            PopularComboBox(form, _embalagem.ItemUID, "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType");
-            PopularComboBox(form, _safra.ItemUID, "SELECT Code, Name FROM [@UPD_OSAF] ORDER BY Name");
+            _modalidade.PopularComboBox(form);
+            _unidadeComercial.PopularComboBox(form);
+            _tipoDeOperacao.PopularComboBox(form);
+            _metodoFinanceiro.PopularComboBox(form);
+            _utilizacao.PopularComboBox(form);
+            _embalagem.PopularComboBox(form);
+            _safra.PopularComboBox(form);
 
             // clicando para a primeira aba já vir selecionada
             form.Items.Item("AbaGeral").Click();
@@ -263,13 +279,9 @@ namespace CafebrasContratos
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            const int mesesPraFrente = 6;
-            DateTime dataFinal = new DateTime(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month, DateTime.DaysInMonth(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month));
+            SugerirDataDoContrato(dbdts);
 
-            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.DateToString(DateTime.Now));
-            dbdts.SetValue(_dataFim.Datasource, 0, Helpers.DateToString(dataFinal));
-            dbdts.SetValue(_status.Datasource, 0, "A");
-            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
+            PopularPessoasDeContato(form, "", "");
 
             form.Items.Item(_descricao.ItemUID).Click();
         }
@@ -339,13 +351,12 @@ namespace CafebrasContratos
 
         private void PopularPessoasDeContato(SAPbouiCOM.Form form, string cardcode, string pessoaDeContatoSelecionada)
         {
-            ComboBox combo = form.Items.Item(_pessoasDeContato.ItemUID).Specific;
-            string sql =
-                $@"SELECT 
+            _pessoasDeContato.SQL =
+                    $@"SELECT 
 	                    Name, Name
                     FROM OCPR 
                     WHERE CardCode = '{cardcode}'";
-            PopularComboBox(combo, sql);
+            _pessoasDeContato.PopularComboBox(form);
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
             dbdts.SetValue(_pessoasDeContato.Datasource, 0, pessoaDeContatoSelecionada);
@@ -373,6 +384,17 @@ namespace CafebrasContratos
 
             dbdts.SetValue(_telefone.Datasource, 0, telefone);
             dbdts.SetValue(_email.Datasource, 0, email);
+        }
+
+        private void SugerirDataDoContrato(DBDataSource dbdts)
+        {
+            const int mesesPraFrente = 6;
+            DateTime dataFinal = new DateTime(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month, DateTime.DaysInMonth(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month));
+
+            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.DateToString(DateTime.Now));
+            dbdts.SetValue(_dataFim.Datasource, 0, Helpers.DateToString(dataFinal));
+            dbdts.SetValue(_status.Datasource, 0, "A");
+            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
         }
 
         #endregion

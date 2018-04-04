@@ -232,7 +232,10 @@ namespace CafebrasContratos
                         formDetalheItem
                     }),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
-                    new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formDetalheItem
+                    }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, formDetalheItem),
