@@ -36,18 +36,54 @@ namespace CafebrasContratos
             BubbleEvent = true;
 
             var form = GetForm(FormUID);
-            _matriz.CriarColunaSumAuto(form, _matriz._percentual.ItemUID);
-            CarregarDadosMatriz(form, _fatherFormUID);
+            try
+            {
+                form.Freeze(true);
+                _matriz.CriarColunaSumAuto(form, _matriz._percentual.ItemUID);
+                _matriz.CriarColunaSumAuto(form, _matriz._diferencial.ItemUID);
+                CarregarDadosMatriz(form, _fatherFormUID);
+
+                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+
+                for (int i = 1; i <= mtx.RowCount; i++)
+                {
+                    mtx.Columns.Item(_matriz._percentual.ItemUID).Cells.Item(i).Click();
+                }
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
         }
 
         public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
 
-            var fatherForm = GetForm(_fatherFormUID);
+            var fatherForm = GetFormIfExists(_fatherFormUID);
             if (fatherForm != null)
             {
                 ChangeFormMode(fatherForm);
+            }
+        }
+
+        public override void OnBeforeItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == "1")
+            {
+                var form = GetForm(FormUID);
+                var matriz = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+
+                if (!SomaDosPercentuaisEstaCorreta(matriz))
+                {
+                    BubbleEvent = false;
+                }
             }
         }
 
@@ -57,16 +93,57 @@ namespace CafebrasContratos
 
             if (pVal.ItemUID == _botaoAdicionar.ItemUID)
             {
-                OnBotaoAdicionar(pVal);
+                OnBotaoAdicionarClick(pVal);
             }
             else if (pVal.ItemUID == _botaoRemover.ItemUID)
             {
-                OnBotaoRemover(pVal);
+                OnBotaoRemoverClick(pVal);
             }
             else if (pVal.ItemUID == "1")
             {
                 CarregarDataSourceFormPai(FormUID, _fatherFormUID);
             }
+        }
+
+        private bool SomaDosPercentuaisEstaCorreta(Matrix mtx)
+        {
+            var percentual = 0.0;
+            try
+            {
+                percentual = SomaDosPercentuais(mtx);
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError(e.Message);
+                return false;
+            }
+
+            if (percentual == 100)
+            {
+                return true;
+            }
+            else
+            {
+                Dialogs.PopupError("A coluna percentual deve conter o total de 100%");
+            }
+            return false;
+        }
+
+        private double SomaDosPercentuais(Matrix mtx)
+        {
+            var soma_percentual = 0.0;
+            for (int i = 1; i <= mtx.RowCount; i++)
+            {
+                var percentual = Helpers.ToDouble(mtx.GetCellSpecific(_matriz._percentual.ItemUID, i).Value);
+                if (percentual == 0)
+                {
+                    throw new ArgumentException("O valor percentual não pode ser 0");
+                }
+
+                soma_percentual += percentual;
+            }
+
+            return soma_percentual;
         }
 
         public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
@@ -77,56 +154,25 @@ namespace CafebrasContratos
             string itemcode = dataTable.GetValue("ItemCode", 0);
             string itemname = dataTable.GetValue("ItemName", 0);
 
-            var matrix = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-            matrix.SetCellWithoutValidation(pVal.Row, _matriz._codigoItem.ItemUID, itemcode);
-            matrix.SetCellWithoutValidation(pVal.Row, _matriz._nomeItem.ItemUID, itemname);
+            var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+            mtx.SetCellWithoutValidation(pVal.Row, _matriz._codigoItem.ItemUID, itemcode);
+            mtx.SetCellWithoutValidation(pVal.Row, _matriz._nomeItem.ItemUID, itemname);
+
+            ChangeFormMode(form);
         }
 
-        private void OnBotaoAdicionar(ItemEvent pVal)
+        private void OnBotaoAdicionarClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-
-            try
-            {
-                form.Freeze(true);
-                mtx.AddRow();
-
-                dynamic lineIDColumn = mtx.GetCellSpecific("LineId", mtx.VisualRowCount);
-                if (lineIDColumn != null)
-                {
-                    lineIDColumn.Value = "";
-                    mtx.ClearRowData(mtx.VisualRowCount);
-                    mtx.SelectRow(mtx.VisualRowCount - 1, false, false);
-                }
-            }
-            catch (Exception e)
-            {
-                Dialogs.Error("Erro ao tentar adicionar uma nova linha a matriz.\nErro: " + e.Message);
-            }
-            finally
-            {
-                form.Freeze(false);
-            }
+            AddLine(form, _matriz.ItemUID, mainDbDataSource);
         }
 
-        private void OnBotaoRemover(ItemEvent pVal)
+
+
+        private void OnBotaoRemoverClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
-            var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-
-            int row = mtx.GetNextSelectedRow();
-            if (row > 0)
-            {
-                mtx.DeleteRow(row);
-
-                ChangeFormMode(form);
-            }
-            else
-            {
-                Dialogs.PopupError("Selecione uma linha.");
-            }
+            RemoveSelectedLine(form, _matriz.ItemUID, mainDbDataSource);
         }
 
         #endregion
@@ -148,14 +194,17 @@ namespace CafebrasContratos
 
         private void CarregarDataSourceFormPai(string localFormUID, string fatherFormUID)
         {
-            var fatherForm = GetForm(fatherFormUID);
-            var fatherDbdts = GetDBDatasource(fatherForm, mainDbDataSource);
+            var fatherForm = GetFormIfExists(fatherFormUID);
+            if (fatherForm != null)
+            {
+                var fatherDbdts = GetDBDatasource(fatherForm, mainDbDataSource);
 
-            var localForm = GetForm(localFormUID);
-            ((Matrix)localForm.Items.Item(_matriz.ItemUID).Specific).FlushToDataSource();
-            var localDbdts = GetDBDatasource(localForm, mainDbDataSource);
+                var localForm = GetForm(localFormUID);
+                ((Matrix)localForm.Items.Item(_matriz.ItemUID).Specific).FlushToDataSource();
+                var localDbdts = GetDBDatasource(localForm, mainDbDataSource);
 
-            Copy(localDbdts, ref fatherDbdts);
+                Copy(localDbdts, ref fatherDbdts);
+            }
         }
 
         #endregion

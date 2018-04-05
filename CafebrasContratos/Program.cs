@@ -191,7 +191,10 @@ namespace CafebrasContratos
             catch (Exception e)
             {
                 Dialogs.PopupError("Erro interno. Erro ao criar estrutura de dados.\nErro: " + e.Message);
-                _company.EndTransaction(BoWfTransOpt.wf_RollBack);
+                if (_company.InTransaction)
+                {
+                    _company.EndTransaction(BoWfTransOpt.wf_RollBack);
+                }
             }
         }
 
@@ -237,6 +240,7 @@ namespace CafebrasContratos
                         formDetalheItem
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_UPDATE, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, formDetalheItem),
                     new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){

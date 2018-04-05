@@ -164,6 +164,25 @@ namespace CafebrasContratos
             dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextCode(mainDbDataSource));
 
             Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
+
+            BubbleEvent = ValidarCamposObrigatorios(form, dbdts);
+        }
+
+        public override void OnBeforeFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            var form = GetForm(BusinessObjectInfo.FormUID);
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+            Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
+
+            BubbleEvent = ValidarCamposObrigatorios(form, dbdts);
+        }
+
+        private bool ValidarCamposObrigatorios(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            bool res = true;
             try
             {
                 ValidarCamposObrigatorios(dbdts);
@@ -172,12 +191,13 @@ namespace CafebrasContratos
             {
                 Dialogs.MessageBox(e.Message);
                 form.Items.Item(e.Campo).Click();
-                BubbleEvent = false;
+                res = false;
             }
             catch (Exception e)
             {
                 Dialogs.PopupError("Erro interno. Erro ao tentar adicionar valores do formulário.\nErro: " + e.Message);
             }
+            return res;
         }
 
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -264,6 +284,8 @@ namespace CafebrasContratos
                 {
                     OnWhsCodeChoose(dbdts, dataTable);
                 }
+
+                ChangeFormMode(form);
             }
         }
 
@@ -391,8 +413,8 @@ namespace CafebrasContratos
             const int mesesPraFrente = 6;
             DateTime dataFinal = new DateTime(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month, DateTime.DaysInMonth(DateTime.Now.AddMonths(mesesPraFrente).Year, DateTime.Now.AddMonths(mesesPraFrente).Month));
 
-            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.DateToString(DateTime.Now));
-            dbdts.SetValue(_dataFim.Datasource, 0, Helpers.DateToString(dataFinal));
+            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.ToString(DateTime.Now));
+            dbdts.SetValue(_dataFim.Datasource, 0, Helpers.ToString(dataFinal));
             dbdts.SetValue(_status.Datasource, 0, "A");
             dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
         }
