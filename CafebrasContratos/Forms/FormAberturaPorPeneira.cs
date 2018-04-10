@@ -4,9 +4,9 @@ using System;
 
 namespace CafebrasContratos
 {
-    public class FormDetalheItem : SAPHelper.Form
+    public class FormAberturaPorPeneira : SAPHelper.Form
     {
-        public override string FormType { get { return "FormDetalheItem"; } }
+        public override string FormType { get { return "FormAberturaPorPeneira"; } }
         private const string mainDbDataSource = "@UPD_CCC1";
         public static string _fatherFormUID = "";
 
@@ -39,16 +39,14 @@ namespace CafebrasContratos
             try
             {
                 form.Freeze(true);
+
                 _matriz.CriarColunaSumAuto(form, _matriz._percentual.ItemUID);
                 _matriz.CriarColunaSumAuto(form, _matriz._diferencial.ItemUID);
-                CarregarDadosMatriz(form, _fatherFormUID);
+
+                CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
                 var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-
-                for (int i = 1; i <= mtx.RowCount; i++)
-                {
-                    mtx.Columns.Item(_matriz._percentual.ItemUID).Cells.Item(i).Click();
-                }
+                ClicarParaCalcularOsTotalizadores(mtx);
             }
             catch (Exception e)
             {
@@ -101,9 +99,48 @@ namespace CafebrasContratos
             }
             else if (pVal.ItemUID == "1")
             {
-                CarregarDataSourceFormPai(FormUID, _fatherFormUID);
+                CarregarDataSourceFormPai(FormUID, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
             }
         }
+
+        public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            var dataTable = chooseEvent.SelectedObjects;
+            var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+
+            var itemcode = dataTable.GetValue("ItemCode", 0);
+            var itemname = dataTable.GetValue("ItemName", 0);
+            if (ItemJaFoiUsado(itemcode, mtx))
+            {
+                Dialogs.PopupError($"O Item '{itemcode}' - '{itemname}' já foi usado.");
+            }
+            else
+            {
+                mtx.SetCellWithoutValidation(pVal.Row, _matriz._codigoItem.ItemUID, itemcode);
+                mtx.SetCellWithoutValidation(pVal.Row, _matriz._nomeItem.ItemUID, itemname);
+
+                ChangeFormMode(form);
+            }
+        }
+
+        private void OnBotaoAdicionarClick(ItemEvent pVal)
+        {
+            var form = GetForm(pVal.FormUID);
+            AddLine(form, _matriz.ItemUID, mainDbDataSource);
+        }
+
+        private void OnBotaoRemoverClick(ItemEvent pVal)
+        {
+            var form = GetForm(pVal.FormUID);
+            RemoveSelectedLine(form, _matriz.ItemUID, mainDbDataSource);
+        }
+
+        #endregion
+
+
+        #region :: Regras de Negócio
 
         private bool SomaDosPercentuaisEstaCorreta(Matrix mtx)
         {
@@ -146,92 +183,56 @@ namespace CafebrasContratos
             return soma_percentual;
         }
 
-        public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
+        private void ClicarParaCalcularOsTotalizadores(Matrix mtx)
         {
-            BubbleEvent = true;
-
-            var dataTable = chooseEvent.SelectedObjects;
-            string itemcode = dataTable.GetValue("ItemCode", 0);
-            string itemname = dataTable.GetValue("ItemName", 0);
-
-            var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-            mtx.SetCellWithoutValidation(pVal.Row, _matriz._codigoItem.ItemUID, itemcode);
-            mtx.SetCellWithoutValidation(pVal.Row, _matriz._nomeItem.ItemUID, itemname);
-
-            ChangeFormMode(form);
-        }
-
-        private void OnBotaoAdicionarClick(ItemEvent pVal)
-        {
-            var form = GetForm(pVal.FormUID);
-            AddLine(form, _matriz.ItemUID, mainDbDataSource);
-        }
-
-
-
-        private void OnBotaoRemoverClick(ItemEvent pVal)
-        {
-            var form = GetForm(pVal.FormUID);
-            RemoveSelectedLine(form, _matriz.ItemUID, mainDbDataSource);
-        }
-
-        #endregion
-
-        #region :: Regras de Negócio
-
-        private void CarregarDadosMatriz(SAPbouiCOM.Form localForm, string fatherFormUID)
-        {
-            var localDbdts = GetDBDatasource(localForm, mainDbDataSource);
-
-            var fatherForm = GetForm(fatherFormUID);
-            var fatherDbdts = GetDBDatasource(fatherForm, mainDbDataSource);
-
-            Copy(fatherDbdts, ref localDbdts);
-
-            var mtx = ((Matrix)localForm.Items.Item(_matriz.ItemUID).Specific);
-            mtx.LoadFromDataSourceEx(true);
-        }
-
-        private void CarregarDataSourceFormPai(string localFormUID, string fatherFormUID)
-        {
-            var fatherForm = GetFormIfExists(fatherFormUID);
-            if (fatherForm != null)
+            for (int i = 1; i <= mtx.RowCount; i++)
             {
-                var fatherDbdts = GetDBDatasource(fatherForm, mainDbDataSource);
-
-                var localForm = GetForm(localFormUID);
-                ((Matrix)localForm.Items.Item(_matriz.ItemUID).Specific).FlushToDataSource();
-                var localDbdts = GetDBDatasource(localForm, mainDbDataSource);
-
-                Copy(localDbdts, ref fatherDbdts);
+                mtx.Columns.Item(_matriz._percentual.ItemUID).Cells.Item(i).Click();
             }
         }
 
+        private bool ItemJaFoiUsado(string itemcode, Matrix mtx)
+        {
+            for (int i = 1; i <= mtx.RowCount; i++)
+            {
+                if (mtx.GetCellSpecific(_matriz._codigoItem.ItemUID, i).Value == itemcode)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         #endregion
 
-    }
 
-    public class MatrizItens : MatrizForm
-    {
-        public ItemForm _codigoItem = new ItemForm()
+        #region :: Configuração da Matriz
+
+        public class MatrizItens : MatrizForm
         {
-            ItemUID = "ItemCode",
-            Datasource = "U_ItemCode"
-        };
-        public ItemForm _nomeItem = new ItemForm()
-        {
-            ItemUID = "ItemName",
-            Datasource = "U_ItemName"
-        };
-        public ItemForm _percentual = new ItemForm()
-        {
-            ItemUID = "PercItem",
-            Datasource = "U_PercItem"
-        };
-        public ItemForm _diferencial = new ItemForm()
-        {
-            ItemUID = "Difere",
-            Datasource = "U_Difere"
-        };
+            public ItemForm _codigoItem = new ItemForm()
+            {
+                ItemUID = "ItemCode",
+                Datasource = "U_ItemCode"
+            };
+            public ItemForm _nomeItem = new ItemForm()
+            {
+                ItemUID = "ItemName",
+                Datasource = "U_ItemName"
+            };
+            public ItemForm _percentual = new ItemForm()
+            {
+                ItemUID = "PercItem",
+                Datasource = "U_PercItem"
+            };
+            public ItemForm _diferencial = new ItemForm()
+            {
+                ItemUID = "Difere",
+                Datasource = "U_Difere"
+            };
+        }
+
+        #endregion
     }
 }

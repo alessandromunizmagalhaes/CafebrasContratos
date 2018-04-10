@@ -60,52 +60,61 @@ namespace CafebrasContratos
 
                 //Database.ExcluirTabela("UPD_OCCC");
 
-                var Modalidade = new TabelaUDO(
+                var modalidade = new TabelaUDO(
                             "UPD_OMOD"
-                            , "Modalidade do Contrato"
+                            , "Cadastro de Modalidade"
                             , BoUTBTableType.bott_MasterData
                             , new List<Coluna>() { }
                             , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                         );
 
-                var UnidadeComercial = new TabelaUDO(
+                var unidadeComercial = new TabelaUDO(
                         "UPD_OUCM"
-                        , "Unidade Comercial do Contrato"
+                        , "Cadastro de Unidade Comercial"
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
 
-                var TipoOperacao = new TabelaUDO(
+                var tipoOperacao = new TabelaUDO(
                         "UPD_OTOP"
-                        , "Tipo de Operação do Contrato"
+                        , "Cadastro de Tipo de Operação"
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
-                var MetodoFinanceiro = new TabelaUDO(
+                var metodoFinanceiro = new TabelaUDO(
                         "UPD_OMFN"
-                        , "Método Financeiro do Contrato"
+                        , "Cadastro de Método Financeiro"
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
-                var Safra = new TabelaUDO(
+                var safra = new TabelaUDO(
                         "UPD_OSAF"
-                        , "Safra do Item"
+                        , "Cadastro de Safra do Item"
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>() { }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
-                Database.CriarTabela(Modalidade);
-                Database.CriarTabela(UnidadeComercial);
-                Database.CriarTabela(TipoOperacao);
-                Database.CriarTabela(MetodoFinanceiro);
-                Database.CriarTabela(Safra);
+                var certificado = new TabelaUDO(
+                        "UPD_CRTC"
+                        , "Cadastro do Certificado"
+                        , BoUTBTableType.bott_MasterData
+                        , new List<Coluna>() { }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
+                    );
+
+                Database.CriarTabela(modalidade);
+                Database.CriarTabela(unidadeComercial);
+                Database.CriarTabela(tipoOperacao);
+                Database.CriarTabela(metodoFinanceiro);
+                Database.CriarTabela(safra);
+                Database.CriarTabela(certificado);
 
                 var valores_validos_status_contrato = new List<ValorValido>() { };
                 foreach (var status in Contrato._status)
@@ -120,34 +129,34 @@ namespace CafebrasContratos
                         , BoUTBTableType.bott_MasterData
                         , new List<Coluna>()
                         {
-                            new ColunaInt("DocNumCC","Numero do Contrato",true),
-                            new ColunaDate("DataIni","Data Inicial",true),
-                            new ColunaDate("DataFim","Data Final",true),
-                            new ColunaVarchar("StatusQua","Situação",1,true,"A", valores_validos_status_contrato),
-                            new ColunaVarchar("Descricao","Descrição",254,true),
+                            new ColunaInt("DocNumCC","Numero do Contrato"),
+                            new ColunaDate("DataIni","Data Inicial"),
+                            new ColunaDate("DataFim","Data Final"),
+                            new ColunaVarchar("StatusQua","Situação",1, false,"A", valores_validos_status_contrato),
+                            new ColunaVarchar("Descricao","Descrição",254),
 
-                            new ColunaVarchar("CardCode","Código do PN",15,true),
-                            new ColunaVarchar("CardName","Descrição do PN",100,true),
-                            new ColunaVarchar("CtName", "Contato do PN",50,true),
-                            new ColunaVarchar("Tel1", "Telefone do Contato",15,true),
-                            new ColunaVarchar("EMail", "E-mail do Contato",50,true),
-                            new ColunaDate("DtPrEnt", "Previsão de Entrega",true),
-                            new ColunaDate("DtPrPgt", "Previsão de Pagamento",true),
-                            new ColunaVarchar("ModCtto", "Modalidade", 30, true),
-                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30, true),
-                            new ColunaVarchar("TipoOper", "Tipo Operação", 30, true),
-                            new ColunaVarchar("MtdFin", "Método Financeiro", 30, true),
+                            new ColunaVarchar("CardCode","Código do PN",15),
+                            new ColunaVarchar("CardName","Descrição do PN",100),
+                            new ColunaVarchar("CtName", "Contato do PN",50),
+                            new ColunaVarchar("Tel1", "Telefone do Contato",15),
+                            new ColunaVarchar("EMail", "E-mail do Contato",50),
+                            new ColunaDate("DtPrEnt", "Previsão de Entrega"),
+                            new ColunaDate("DtPrPgt", "Previsão de Pagamento"),
+                            new ColunaVarchar("ModCtto", "Modalidade", 30),
+                            new ColunaVarchar("UnidCom", "Unidade Comercial", 30),
+                            new ColunaVarchar("TipoOper", "Tipo Operação", 30),
+                            new ColunaVarchar("MtdFin", "Método Financeiro", 30),
 
-                            new ColunaVarchar("ItemCode", "Código do Item", 60,true),
-                            new ColunaVarchar("ItemName", "Nome do Item", 100,true),
-                            new ColunaVarchar("WhsCode", "Depósito do Item", 8,true),
-                            new ColunaVarchar("Safra", "Safra", 30, true),
-                            new ColunaVarchar("Usage", "Utilização", 10, true),
-                            new ColunaQuantity("Difere", "Diferencial do Item", true),
-                            new ColunaVarchar("Packg", "Embalagem", 30, true),
-                            new ColunaPrice("RateNY", "Câmbio moeda em NY", true),
-                            new ColunaPrice("RateUSD", "Câmbio moeda Dolar USA", true),
-                            new ColunaVarchar("Bebida", "Descrição Bebida", 20, true),
+                            new ColunaVarchar("ItemCode", "Código do Item", 60),
+                            new ColunaVarchar("ItemName", "Nome do Item", 100),
+                            new ColunaVarchar("WhsCode", "Depósito do Item", 8),
+                            new ColunaVarchar("Safra", "Safra", 30),
+                            new ColunaVarchar("Usage", "Utilização", 10),
+                            new ColunaQuantity("Difere", "Diferencial do Item"),
+                            new ColunaVarchar("Packg", "Embalagem", 30),
+                            new ColunaPrice("RateNY", "Câmbio moeda em NY"),
+                            new ColunaPrice("RateUSD", "Câmbio moeda Dolar USA"),
+                            new ColunaVarchar("Bebida", "Descrição Bebida", 20),
 
                             new ColunaPrice("VFat", "Valor Faturado por saca"),
                             new ColunaPrice("VICMS", "Valor ICMS por saca"),
@@ -172,11 +181,26 @@ namespace CafebrasContratos
                         }
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO, CanCancel = BoYesNoEnum.tNO }
                         , new List<Tabela>() {
-                            new Tabela("UPD_CCC1", "Detalhes do Item", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
+                            new Tabela("UPD_CCC1", "Itens do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
                                 new ColunaVarchar("ItemCode","Código do Item",60),
                                 new ColunaVarchar("ItemName","Nome do Item",100),
                                 new ColunaPercent("PercItem","Percentual"),
                                 new ColunaQuantity("Difere","Diferencial"),
+                            }),
+                            new Tabela("UPD_CCC2", "Corretores do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
+                                new ColunaVarchar("PartCode","Código do Corretor",30),
+                                new ColunaVarchar("PartName","Nome do Corretor",254),
+                                new ColunaPercent("PercCom","Percentual"),
+                                new ColunaAtivo()
+                            }),
+                            new Tabela("UPD_CCC3", "Responsáveis do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
+                                new ColunaVarchar("PartCode","Código do Responsável",30),
+                                new ColunaVarchar("PartName","Nome do Responsável",254),
+                                new ColunaPercent("PercCom","Percentual"),
+                                new ColunaAtivo()
+                            }),
+                            new Tabela("UPD_CCC4", "Certificados do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
+                                new ColunaVarchar("Certif","Certificado",30)
                             })
                         }
                     )
@@ -227,25 +251,32 @@ namespace CafebrasContratos
             try
             {
                 var formPreContrato = new FormPreContrato();
-                var formDetalheItem = new FormDetalheItem();
+                var formAberturaPorPeneira = new FormAberturaPorPeneira();
+                var formDetalheCertificado = new FormDetalheCertificado();
 
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, new List<SAPHelper.Form>(){
                         formPreContrato,
-                        formDetalheItem
+                        formAberturaPorPeneira,
+                        formDetalheCertificado
                     }),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_VALIDATE, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, new List<SAPHelper.Form>(){
                         formPreContrato,
-                        formDetalheItem
+                        formAberturaPorPeneira
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_UPDATE, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
-                    new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, formDetalheItem),
+                    new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
+                        formAberturaPorPeneira,
+                        formDetalheCertificado
+                    }),
                     new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato,
-                        formDetalheItem
+                        formAberturaPorPeneira,
+                        formDetalheCertificado
                     }),
                 });
 

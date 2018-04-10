@@ -45,7 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\FormDetalheItem.cs" />
+    <Compile Include="Forms\FormAberturaPorPeneira.cs" />
+    <Compile Include="Forms\FormDetalheCertificado.cs" />
     <Compile Include="Forms\FormPreContrato.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
