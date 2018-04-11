@@ -12,7 +12,7 @@ namespace CafebrasContratos
 
         #region :: Campos
 
-        public MatrizItens _matriz = new MatrizItens()
+        public Matriz _matriz = new Matriz()
         {
             ItemUID = "mtxItem",
             Datasource = mainDbDataSource
@@ -128,13 +128,17 @@ namespace CafebrasContratos
         private void OnBotaoAdicionarClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            AddLine(form, _matriz.ItemUID, mainDbDataSource);
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+            _matriz.AdicionarLinha(form, dbdts);
         }
 
         private void OnBotaoRemoverClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            RemoveSelectedLine(form, _matriz.ItemUID, mainDbDataSource);
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+            _matriz.RemoverLinha(form, dbdts);
         }
 
         #endregion
@@ -209,7 +213,7 @@ namespace CafebrasContratos
 
         #region :: Configuração da Matriz
 
-        public class MatrizItens : MatrizForm
+        public class Matriz : MatrizChildForm
         {
             public ItemForm _codigoItem = new ItemForm()
             {

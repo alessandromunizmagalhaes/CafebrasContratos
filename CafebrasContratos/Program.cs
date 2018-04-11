@@ -122,6 +122,16 @@ namespace CafebrasContratos
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
+                var grupoDeCafe = new Tabela(
+                        "UPD_OCTC"
+                        , "Grupos de Café"
+                        , BoUTBTableType.bott_NoObject
+                        , new List<Coluna>() {
+                            new ColunaAtivo()
+                            , new ColunaVarchar("ItmsGrpCod","Código Grupo de Item", 30)
+                        }
+                    );
+
                 Database.CriarTabela(modalidade);
                 Database.CriarTabela(unidadeComercial);
                 Database.CriarTabela(tipoOperacao);
@@ -129,6 +139,7 @@ namespace CafebrasContratos
                 Database.CriarTabela(safra);
                 Database.CriarTabela(certificado);
                 Database.CriarTabela(participante);
+                Database.CriarTabela(grupoDeCafe);
 
                 var valores_validos_status_contrato = new List<ValorValido>() { };
                 foreach (var status in Contrato._status)
@@ -262,6 +273,7 @@ namespace CafebrasContratos
 
             try
             {
+                var formGrupoDeItens = new FormGrupoDeItens();
                 var formCertificado = new FormCertificado();
                 var formMetodoFinanceiro = new FormMetodoFinanceiro();
                 var formModalidade = new FormModalidade();
@@ -318,7 +330,8 @@ namespace CafebrasContratos
                         formPreContrato,
                         formAberturaPorPeneira,
                         formDetalheCertificado,
-                        formComissoes
+                        formComissoes,
+                        formGrupoDeItens
                     }),
                 });
 

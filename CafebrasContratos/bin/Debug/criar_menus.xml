@@ -12,6 +12,13 @@
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuCadastro"
+							  String="Cadastro de Grupos de Item"
+							  Type="1"
+							  UniqueID="FormGrupoDeItens">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
 							  String="Cadastro de Modalidades"
 							  Type="1"
 							  UniqueID="FormModalidade">

@@ -126,25 +126,33 @@ namespace CafebrasContratos
         private void OnAdicionarCorretorClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            AddLine(form, _corretores.ItemUID, corretorDbDataSource);
+            var dbdts = GetDBDatasource(form, corretorDbDataSource);
+
+            _corretores.AdicionarLinha(form, dbdts);
         }
 
         private void OnRemoverCorretorClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            RemoveSelectedLine(form, _corretores.ItemUID, corretorDbDataSource);
+            var dbdts = GetDBDatasource(form, corretorDbDataSource);
+
+            _corretores.RemoverLinha(form, dbdts);
         }
 
         private void OnAdicionarResponsavelClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            AddLine(form, _responsaveis.ItemUID, responsavelDbDataSource);
+            var dbdts = GetDBDatasource(form, responsavelDbDataSource);
+
+            _responsaveis.AdicionarLinha(form, dbdts);
         }
 
         private void OnRemoverResponsavelClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
-            RemoveSelectedLine(form, _responsaveis.ItemUID, responsavelDbDataSource);
+            var dbdts = GetDBDatasource(form, responsavelDbDataSource);
+
+            _responsaveis.RemoverLinha(form, dbdts);
         }
 
         #endregion
@@ -165,7 +173,7 @@ namespace CafebrasContratos
 
         #region :: Configuração das Matrizes
 
-        public class Matriz : MatrizForm
+        public class Matriz : MatrizChildForm
         {
             public virtual ComboForm _participante
             {

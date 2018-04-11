@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\Cadastros\Form.cs" />
+    <Compile Include="Forms\Cadastros\FormGrupoDeItens.cs" />
     <Compile Include="Forms\Cadastros\FormParticipante.cs" />
     <Compile Include="Forms\Cadastros\FormCertificado.cs" />
     <Compile Include="Forms\Cadastros\FormMetodoFinanceiro.cs" />
