@@ -109,12 +109,26 @@ namespace CafebrasContratos
                         , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
                     );
 
+                var participante = new TabelaUDO(
+                        "UPD_PART"
+                        , "Cadastro de Participantes"
+                        , BoUTBTableType.bott_MasterData
+                        , new List<Coluna>() {
+                            new ColunaVarchar("Tipo","Tipo",1,false,"C", new List<ValorValido>(){
+                                new ValorValido("C","Corretor"),
+                                new ValorValido("R","Responsável"),
+                            }),
+                        }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
+                    );
+
                 Database.CriarTabela(modalidade);
                 Database.CriarTabela(unidadeComercial);
                 Database.CriarTabela(tipoOperacao);
                 Database.CriarTabela(metodoFinanceiro);
                 Database.CriarTabela(safra);
                 Database.CriarTabela(certificado);
+                Database.CriarTabela(participante);
 
                 var valores_validos_status_contrato = new List<ValorValido>() { };
                 foreach (var status in Contrato._status)
@@ -250,6 +264,14 @@ namespace CafebrasContratos
 
             try
             {
+                var formCertificado = new FormCertificado();
+                var formMetodoFinanceiro = new FormMetodoFinanceiro();
+                var formModalidade = new FormModalidade();
+                var formSafra = new FormSafra();
+                var formTipoOperacao = new FormTipoOperacao();
+                var formUnidadeComercial = new FormUnidadeComercial();
+                var formParticipante = new FormParticipante();
+
                 var formPreContrato = new FormPreContrato();
                 var formAberturaPorPeneira = new FormAberturaPorPeneira();
                 var formDetalheCertificado = new FormDetalheCertificado();
@@ -266,8 +288,26 @@ namespace CafebrasContratos
                         formPreContrato,
                         formAberturaPorPeneira
                     }),
-                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, formPreContrato),
-                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_UPDATE, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formCertificado,
+                        formMetodoFinanceiro,
+                        formModalidade,
+                        formSafra,
+                        formTipoOperacao,
+                        formUnidadeComercial,
+                        formParticipante
+                    }),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_UPDATE, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formCertificado,
+                        formMetodoFinanceiro,
+                        formModalidade,
+                        formSafra,
+                        formTipoOperacao,
+                        formUnidadeComercial,
+                        formParticipante
+                    }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
                         formAberturaPorPeneira,

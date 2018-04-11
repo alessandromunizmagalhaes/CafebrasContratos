@@ -39,8 +39,7 @@ namespace CafebrasContratos
             {
                 form.Freeze(true);
 
-                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-                _matriz._certificado.PopularComboBox(mtx, _matriz._certificado.ItemUID);
+                _matriz._certificado.PopularComboBox(form, _matriz.ItemUID, _matriz._certificado.ItemUID);
 
                 CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
             }

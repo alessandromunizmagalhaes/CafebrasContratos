@@ -1,25 +1,6 @@
 ﻿<Application>
 	<Menus>
 		<action type="add">
-      <Menu Checked="0"
-				  Enabled="1"
-				  FatherUID="43520"
-				  String="Contratos"
-				  Type="2"
-          Image="_LOGO_PATH_" 
-				  UniqueID="mnuContrato">
-				<Menus>
-					<action type="add">
-            <Menu Checked="0"
-							  Enabled="1"
-							  FatherUID="mnuContrato"
-							  String="Contrato de Compra Geral"
-							  Type="1"
-							  UniqueID="FormPreContrato">
-            </Menu>
-					</action>
-				</Menus>
-			</Menu>
 			<Menu Checked="0"
 				  Enabled="1"
 				  FatherUID="43525"
@@ -69,6 +50,32 @@
 							  String="Cadastro de Certificado"
 							  Type="1"
 							  UniqueID="FormCertificado">
+            </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Cadastro de Participantes"
+							  Type="1"
+							  UniqueID="FormParticipante">
+            </Menu>
+					</action>
+				</Menus>
+			</Menu>
+      <Menu Checked="0"
+				  Enabled="1"
+				  FatherUID="43520"
+				  String="Contratos"
+				  Type="2"
+          Image="_LOGO_PATH_" 
+				  UniqueID="mnuContrato">
+				<Menus>
+					<action type="add">
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuContrato"
+							  String="Contrato de Compra Geral"
+							  Type="1"
+							  UniqueID="FormPreContrato">
             </Menu>
 					</action>
 				</Menus>

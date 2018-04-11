@@ -277,30 +277,6 @@ namespace CafebrasContratos
             BubbleEvent = ValidarCamposObrigatorios(form, dbdts);
         }
 
-        private bool ValidarCamposObrigatorios(SAPbouiCOM.Form form, DBDataSource dbdts)
-        {
-            bool res = true;
-            try
-            {
-                ValidarCamposObrigatorios(dbdts);
-            }
-            catch (FormValidationException e)
-            {
-                Dialogs.MessageBox(e.Message);
-                if (!String.IsNullOrEmpty(e.AbaUID))
-                {
-                    form.Items.Item(e.AbaUID).Click();
-                }
-                form.Items.Item(e.Campo).Click();
-                res = false;
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao tentar adicionar valores do formulário.\nErro: " + e.Message);
-            }
-            return res;
-        }
-
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             BubbleEvent = true;
