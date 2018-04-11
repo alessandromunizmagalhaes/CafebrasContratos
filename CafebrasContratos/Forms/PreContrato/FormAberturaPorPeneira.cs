@@ -17,11 +17,11 @@ namespace CafebrasContratos
             ItemUID = "mtxItem",
             Datasource = mainDbDataSource
         };
-        public ItemForm _botaoAdicionar = new ItemForm()
+        public ButtonForm _adicionar = new ButtonForm()
         {
             ItemUID = "btnAdd"
         };
-        public ItemForm _botaoRemover = new ItemForm()
+        public ButtonForm _remover = new ButtonForm()
         {
             ItemUID = "btnRmv"
         };
@@ -89,11 +89,11 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            if (pVal.ItemUID == _botaoAdicionar.ItemUID)
+            if (pVal.ItemUID == _adicionar.ItemUID)
             {
                 OnBotaoAdicionarClick(pVal);
             }
-            else if (pVal.ItemUID == _botaoRemover.ItemUID)
+            else if (pVal.ItemUID == _remover.ItemUID)
             {
                 OnBotaoRemoverClick(pVal);
             }

@@ -52,6 +52,7 @@
     <Compile Include="Forms\Cadastros\FormUnidadeComercial.cs" />
     <Compile Include="Forms\Cadastros\FormTipoOperacao.cs" />
     <Compile Include="Forms\Cadastros\FormSafra.cs" />
+    <Compile Include="Forms\PreContrato\FormComissoes.cs" />
     <Compile Include="Forms\PreContrato\FormAberturaPorPeneira.cs" />
     <Compile Include="Forms\PreContrato\FormDetalheCertificado.cs" />
     <Compile Include="Forms\Cadastros\FormModalidade.cs" />

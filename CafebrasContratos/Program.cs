@@ -203,13 +203,11 @@ namespace CafebrasContratos
                             }),
                             new Tabela("UPD_CCC2", "Corretores do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
                                 new ColunaVarchar("PartCode","Código do Corretor",30),
-                                new ColunaVarchar("PartName","Nome do Corretor",254),
                                 new ColunaPercent("PercCom","Percentual"),
                                 new ColunaAtivo()
                             }),
                             new Tabela("UPD_CCC3", "Responsáveis do Contrato", BoUTBTableType.bott_MasterDataLines, new List<Coluna>(){
                                 new ColunaVarchar("PartCode","Código do Responsável",30),
-                                new ColunaVarchar("PartName","Nome do Responsável",254),
                                 new ColunaPercent("PercCom","Percentual"),
                                 new ColunaAtivo()
                             }),
@@ -275,12 +273,14 @@ namespace CafebrasContratos
                 var formPreContrato = new FormPreContrato();
                 var formAberturaPorPeneira = new FormAberturaPorPeneira();
                 var formDetalheCertificado = new FormDetalheCertificado();
+                var formComissoes = new FormComissoes();
 
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, new List<SAPHelper.Form>(){
                         formPreContrato,
                         formAberturaPorPeneira,
-                        formDetalheCertificado
+                        formDetalheCertificado,
+                        formComissoes
                     }),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_VALIDATE, formPreContrato),
@@ -311,12 +311,14 @@ namespace CafebrasContratos
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
                         formAberturaPorPeneira,
-                        formDetalheCertificado
+                        formDetalheCertificado,
+                        formComissoes
                     }),
                     new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato,
                         formAberturaPorPeneira,
-                        formDetalheCertificado
+                        formDetalheCertificado,
+                        formComissoes
                     }),
                 });
 

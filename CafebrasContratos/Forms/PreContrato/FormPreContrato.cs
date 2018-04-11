@@ -10,6 +10,7 @@ namespace CafebrasContratos
         private const string mainDbDataSource = "@UPD_OCCC";
         private const string nomeFormAberturaPorPeneira = "FormAberturaPorPeneira.srf";
         private const string nomeFormDetalheCertificado = "FormDetalheCertificado.srf";
+        private const string nomeFormComissoes = "FormComissoes.srf";
         private const string abaGeralUID = "AbaGeral";
         private const string abaItemUID = "AbaItem";
 
@@ -151,15 +152,6 @@ namespace CafebrasContratos
             AbaUID = abaItemUID,
         };
 
-
-        public ItemForm _botaoAberturaPorPeneira = new ItemForm()
-        {
-            ItemUID = "btnAbertur",
-        };
-        public ItemForm _botaoCertificado = new ItemForm()
-        {
-            ItemUID = "btnCertif",
-        };
         public ItemForm _quantidadeDePeso = new ItemForm()
         {
             ItemUID = "QtdPeso",
@@ -245,6 +237,24 @@ namespace CafebrasContratos
         #endregion
 
 
+        #region :: Botões
+
+        public ButtonForm _aberturaPorPeneira = new ButtonForm()
+        {
+            ItemUID = "btnAbertur",
+        };
+        public ButtonForm _certificado = new ButtonForm()
+        {
+            ItemUID = "btnCertif",
+        };
+        public ButtonForm _comissoes = new ButtonForm()
+        {
+            ItemUID = "btnComiss",
+        };
+
+        #endregion
+
+
         #region :: Eventos de Formulário
 
         public override void OnBeforeFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -303,13 +313,13 @@ namespace CafebrasContratos
 
             var form = GetForm(FormUID);
 
-            _modalidade.PopularComboBox(form);
-            _unidadeComercial.PopularComboBox(form);
-            _tipoDeOperacao.PopularComboBox(form);
-            _metodoFinanceiro.PopularComboBox(form);
-            _utilizacao.PopularComboBox(form);
-            _embalagem.PopularComboBox(form);
-            _safra.PopularComboBox(form);
+            _modalidade.Popular(form);
+            _unidadeComercial.Popular(form);
+            _tipoDeOperacao.Popular(form);
+            _metodoFinanceiro.Popular(form);
+            _utilizacao.Popular(form);
+            _embalagem.Popular(form);
+            _safra.Popular(form);
 
             // clicando para a primeira aba já vir selecionada
             form.Items.Item("AbaGeral").Click();
@@ -333,14 +343,18 @@ namespace CafebrasContratos
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
-
-            if (pVal.ItemUID == _botaoAberturaPorPeneira.ItemUID)
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            if (pVal.ItemUID == _aberturaPorPeneira.ItemUID)
             {
-                CriarFormFilho(AppDomain.CurrentDomain.BaseDirectory + "/" + nomeFormAberturaPorPeneira, FormUID, new FormAberturaPorPeneira());
+                CriarFormFilho(baseDirectory + "/" + nomeFormAberturaPorPeneira, FormUID, new FormAberturaPorPeneira());
             }
-            else if (pVal.ItemUID == _botaoCertificado.ItemUID)
+            else if (pVal.ItemUID == _certificado.ItemUID)
             {
-                CriarFormFilho(AppDomain.CurrentDomain.BaseDirectory + "/" + nomeFormDetalheCertificado, FormUID, new FormDetalheCertificado());
+                CriarFormFilho(baseDirectory + "/" + nomeFormDetalheCertificado, FormUID, new FormDetalheCertificado());
+            }
+            else if (pVal.ItemUID == _comissoes.ItemUID)
+            {
+                CriarFormFilho(baseDirectory + "/" + nomeFormComissoes, FormUID, new FormComissoes());
             }
         }
 
@@ -474,7 +488,7 @@ namespace CafebrasContratos
 	                    Name, Name
                     FROM OCPR 
                     WHERE CardCode = '{cardcode}'";
-            _pessoasDeContato.PopularComboBox(form);
+            _pessoasDeContato.Popular(form);
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
             dbdts.SetValue(_pessoasDeContato.Datasource, 0, pessoaDeContatoSelecionada);
