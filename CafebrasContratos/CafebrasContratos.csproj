@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Estrutura de Dados\DbPreContrato.cs" />
     <Compile Include="Forms\Cadastros\FormGrupoDeItens.cs" />
     <Compile Include="Forms\Cadastros\FormParticipante.cs" />
     <Compile Include="Forms\Cadastros\FormCertificado.cs" />
