@@ -6,6 +6,8 @@ namespace CafebrasContratos
 {
     public class FormPreContrato : SAPHelper.Form
     {
+        #region :: Propriedades
+
         public override string FormType { get { return "FormPreContrato"; } }
         private const string mainDbDataSource = "@UPD_OCCC";
 
@@ -23,6 +25,10 @@ namespace CafebrasContratos
         private const string chooseItemUID = "Item";
 
         private const string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
+
+
+        #endregion
+
 
         #region :: Campos
 
@@ -334,7 +340,7 @@ namespace CafebrasContratos
             var form = GetForm(BusinessObjectInfo.FormUID);
 
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
-            form.Items.Item(_status.ItemUID).Enabled = GrupoAprovadorPermitido();
+            form.Items.Item(_status.ItemUID).Enabled = PreContrato.GrupoAprovadorPermitido();
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
@@ -373,7 +379,7 @@ namespace CafebrasContratos
                     _embalagem.Popular(form);
                     _safra.Popular(form);
 
-                    if (!GrupoAprovadorPermitido())
+                    if (!PreContrato.GrupoAprovadorPermitido())
                     {
                         FormEmModoVisualizacao(form);
                     }
@@ -594,23 +600,10 @@ namespace CafebrasContratos
 
         #region :: Regras de negócio
 
-        private bool GrupoAprovadorPermitido()
-        {
-            switch (Program._grupoAprovador)
-            {
-                case GrupoAprovador.Planejador:
-                case GrupoAprovador.Gestor:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
         private void FormEmModoVisualizacao(SAPbouiCOM.Form form)
         {
             form.Items.Item(_dataInicio.ItemUID).Enabled = false;
             form.Items.Item(_dataFim.ItemUID).Enabled = false;
-            form.Items.Item(_status.ItemUID).Enabled = false;
             form.Items.Item(_descricao.ItemUID).Enabled = false;
             form.Items.Item(_codigoPN.ItemUID).Enabled = false;
             form.Items.Item(_pessoasDeContato.ItemUID).Enabled = false;

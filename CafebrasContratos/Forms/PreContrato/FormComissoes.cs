@@ -74,6 +74,8 @@ namespace CafebrasContratos
 
                 _corretores._participante.Popular(mtxCorretores);
                 _responsaveis._participante.Popular(mtxResponsaveis);
+
+                form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
             }
             catch (Exception e)
             {
@@ -82,17 +84,6 @@ namespace CafebrasContratos
             finally
             {
                 form.Freeze(false);
-            }
-        }
-
-        public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            BubbleEvent = true;
-
-            var fatherForm = GetFormIfExists(_fatherFormUID);
-            if (fatherForm != null)
-            {
-                ChangeFormMode(fatherForm);
             }
         }
 
@@ -143,6 +134,12 @@ namespace CafebrasContratos
             {
                 CarregarDataSourceFormPai(FormUID, _fatherFormUID, _corretores.ItemUID, corretorDbDataSource);
                 CarregarDataSourceFormPai(FormUID, _fatherFormUID, _responsaveis.ItemUID, responsavelDbDataSource);
+
+                var fatherForm = GetFormIfExists(_fatherFormUID);
+                if (fatherForm != null)
+                {
+                    ChangeFormMode(fatherForm);
+                }
             }
         }
 

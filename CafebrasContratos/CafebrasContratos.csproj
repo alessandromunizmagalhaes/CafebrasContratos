@@ -59,6 +59,7 @@
     <Compile Include="Forms\Cadastros\FormModalidade.cs" />
     <Compile Include="Forms\PreContrato\FormPreContrato.cs" />
     <Compile Include="Enums\GrupoAprovador.cs" />
+    <Compile Include="Forms\PreContrato\PreContrato.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\StatusContrato.cs" />

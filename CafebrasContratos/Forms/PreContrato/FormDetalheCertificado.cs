@@ -43,6 +43,8 @@ namespace CafebrasContratos
                 _matriz._certificado.Popular(form, _matriz.ItemUID);
 
                 CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
+
+                form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
             }
             catch (Exception e)
             {
@@ -51,17 +53,6 @@ namespace CafebrasContratos
             finally
             {
                 form.Freeze(false);
-            }
-        }
-
-        public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            BubbleEvent = true;
-
-            var fatherForm = GetFormIfExists(_fatherFormUID);
-            if (fatherForm != null)
-            {
-                ChangeFormMode(fatherForm);
             }
         }
 
@@ -98,6 +89,12 @@ namespace CafebrasContratos
             else if (pVal.ItemUID == "1")
             {
                 CarregarDataSourceFormPai(FormUID, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
+
+                var fatherForm = GetFormIfExists(_fatherFormUID);
+                if (fatherForm != null)
+                {
+                    ChangeFormMode(fatherForm);
+                }
             }
         }
 
