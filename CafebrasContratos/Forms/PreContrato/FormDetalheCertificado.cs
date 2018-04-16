@@ -65,6 +65,24 @@ namespace CafebrasContratos
             }
         }
 
+        public override void OnBeforeItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == "1")
+            {
+                var form = GetForm(FormUID);
+                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                mtx.FlushToDataSource();
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz))
+                {
+                    BubbleEvent = false;
+                }
+            }
+        }
+
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
@@ -106,11 +124,12 @@ namespace CafebrasContratos
 
         public class Matriz : MatrizChildForm
         {
-            public ComboForm _certificado = new ComboForm()
+            public ComboFormObrigatorio _certificado = new ComboFormObrigatorio()
             {
                 ItemUID = "Certif",
                 Datasource = "U_Certif",
-                SQL = "SELECT Code, Name FROM [@UPD_CRTC] WHERE Canceled = 'N' ORDER BY Name"
+                SQL = "SELECT Code, Name FROM [@UPD_CRTC] WHERE Canceled = 'N' ORDER BY Name",
+                Mensagem = "O certificado é obrigatório"
             };
         }
 

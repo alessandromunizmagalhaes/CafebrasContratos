@@ -12,6 +12,7 @@ namespace CafebrasContratos
         private static string _addonName = "Cafébras Contratos";
         public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
+        public static string _grupoAprovador;
 
         [STAThread]
         static void Main()
@@ -25,6 +26,8 @@ namespace CafebrasContratos
             DeclararEventos();
 
             Dialogs.Success(".:: " + _addonName + " ::. Iniciado", BoMessageTime.bmt_Medium);
+
+            SetGrupoAprovador();
 
             // deixa a aplicação ativa
             System.Windows.Forms.Application.Run();
@@ -119,7 +122,7 @@ namespace CafebrasContratos
                                 new ValorValido("R","Responsável"),
                             }),
                         }
-                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO }
+                        , new UDOParams() { CanDelete = BoYesNoEnum.tNO, EnableEnhancedForm = BoYesNoEnum.tNO }
                     );
 
                 var grupoDeCafe = new Tabela(
@@ -127,8 +130,7 @@ namespace CafebrasContratos
                         , "Grupos de Café"
                         , BoUTBTableType.bott_NoObject
                         , new List<Coluna>() {
-                            new ColunaAtivo()
-                            , new ColunaVarchar("ItmsGrpCod","Código Grupo de Item", 30)
+                            new ColunaVarchar("ItmsGrpCod","Código Grupo de Item", 30)
                         }
                     );
 
@@ -141,12 +143,6 @@ namespace CafebrasContratos
                 Database.CriarTabela(participante);
                 Database.CriarTabela(grupoDeCafe);
 
-                var valores_validos_status_contrato = new List<ValorValido>() { };
-                foreach (var status in Contrato._status)
-                {
-                    valores_validos_status_contrato.Add(new ValorValido(status.Key, status.Value));
-                }
-
                 Database.CriarTabela(
                     new TabelaUDO(
                         "UPD_OCCC"
@@ -157,7 +153,11 @@ namespace CafebrasContratos
                             new ColunaInt("DocNumCC","Numero do Contrato"),
                             new ColunaDate("DataIni","Data Inicial"),
                             new ColunaDate("DataFim","Data Final"),
-                            new ColunaVarchar("StatusQua","Situação",1, false,"A", valores_validos_status_contrato),
+                            new ColunaVarchar("StatusQua","Situação",1, false,"A", new List<ValorValido>(){
+                                new ValorValido(StatusContrato.Aberto, "Aberto"),
+                                new ValorValido(StatusContrato.Autorizado, "Autorizado"),
+                                new ValorValido(StatusContrato.Cancelado, "Cancelado"),
+                            }),
                             new ColunaVarchar("Descricao","Descrição",254),
 
                             new ColunaVarchar("CardCode","Código do PN",15),
@@ -229,6 +229,14 @@ namespace CafebrasContratos
                     )
                 );
 
+                Database.CriarCampo("OUSR", new ColunaVarchar("GrupoAprov", "Grupo Aprovador", 2, false, "V", new List<ValorValido>() {
+                    new ValorValido(GrupoAprovador.Planejador, "Planejador"),
+                    new ValorValido(GrupoAprovador.Executor, "Executor"),
+                    new ValorValido(GrupoAprovador.Autorizador, "Autorizador"),
+                    new ValorValido(GrupoAprovador.Gestor, "Gestor"),
+                    new ValorValido(GrupoAprovador.Visualizador, "Visualizador")
+                }));
+
                 _company.EndTransaction(BoWfTransOpt.wf_Commit);
             }
             catch (DatabaseException e)
@@ -287,13 +295,17 @@ namespace CafebrasContratos
                 var formDetalheCertificado = new FormDetalheCertificado();
                 var formComissoes = new FormComissoes();
 
+                var formUsuarios = new FormUsuarios();
+
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, new List<SAPHelper.Form>(){
                         formPreContrato,
                         formAberturaPorPeneira,
                         formDetalheCertificado,
-                        formComissoes
+                        formComissoes,
+                        formGrupoDeItens
                     }),
+                    new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formUsuarios),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_VALIDATE, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, new List<SAPHelper.Form>(){
@@ -366,6 +378,16 @@ namespace CafebrasContratos
             {
                 RemoverMenu();
             }
+        }
+
+        #endregion
+
+        #region :: Regras de Negócio
+
+        public static void SetGrupoAprovador()
+        {
+            var rs = Helpers.DoQuery($"SELECT U_GrupoAprov FROM OUSR WHERE USER_CODE = '{Global.Company.UserName}'");
+            _grupoAprovador = rs.Fields.Item("U_GrupoAprov").Value;
         }
 
         #endregion

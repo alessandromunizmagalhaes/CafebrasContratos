@@ -76,9 +76,11 @@ namespace CafebrasContratos
             if (pVal.ItemUID == "1")
             {
                 var form = GetForm(FormUID);
-                var matriz = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                mtx.FlushToDataSource();
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-                if (!SomaDosPercentuaisEstaCorreta(matriz))
+                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz) || !SomaDosPercentuaisEstaCorreta(mtx))
                 {
                     BubbleEvent = false;
                 }
@@ -148,17 +150,7 @@ namespace CafebrasContratos
 
         private bool SomaDosPercentuaisEstaCorreta(Matrix mtx)
         {
-            var percentual = 0.0;
-            try
-            {
-                percentual = SomaDosPercentuais(mtx);
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError(e.Message);
-                return false;
-            }
-
+            var percentual = SomaDosPercentuais(mtx);
             if (percentual == 100)
             {
                 return true;
@@ -176,11 +168,6 @@ namespace CafebrasContratos
             for (int i = 1; i <= mtx.RowCount; i++)
             {
                 var percentual = Helpers.ToDouble(mtx.GetCellSpecific(_matriz._percentual.ItemUID, i).Value);
-                if (percentual == 0)
-                {
-                    throw new ArgumentException("O valor percentual não pode ser 0");
-                }
-
                 soma_percentual += percentual;
             }
 
@@ -207,7 +194,6 @@ namespace CafebrasContratos
             return false;
         }
 
-
         #endregion
 
 
@@ -215,20 +201,22 @@ namespace CafebrasContratos
 
         public class Matriz : MatrizChildForm
         {
-            public ItemForm _codigoItem = new ItemForm()
+            public ItemFormObrigatorio _codigoItem = new ItemFormObrigatorio()
             {
                 ItemUID = "ItemCode",
-                Datasource = "U_ItemCode"
+                Datasource = "U_ItemCode",
+                Mensagem = "O Código do Item é obrigatório",
             };
             public ItemForm _nomeItem = new ItemForm()
             {
                 ItemUID = "ItemName",
                 Datasource = "U_ItemName"
             };
-            public ItemForm _percentual = new ItemForm()
+            public ItemFormObrigatorio _percentual = new ItemFormObrigatorio()
             {
                 ItemUID = "PercItem",
-                Datasource = "U_PercItem"
+                Datasource = "U_PercItem",
+                Mensagem = "O percentual é obrigatório",
             };
             public ItemForm _diferencial = new ItemForm()
             {

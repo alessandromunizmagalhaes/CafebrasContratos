@@ -8,11 +8,21 @@ namespace CafebrasContratos
     {
         public override string FormType { get { return "FormPreContrato"; } }
         private const string mainDbDataSource = "@UPD_OCCC";
+
         private const string nomeFormAberturaPorPeneira = "FormAberturaPorPeneira.srf";
         private const string nomeFormDetalheCertificado = "FormDetalheCertificado.srf";
         private const string nomeFormComissoes = "FormComissoes.srf";
+
         private const string abaGeralUID = "AbaGeral";
         private const string abaItemUID = "AbaItem";
+        private const string abaContratoFinalUID = "AbaCFinal";
+        private const string abaObsUID = "AbaObs";
+
+
+        private const string choosePNUID = "PN";
+        private const string chooseItemUID = "Item";
+
+        private const string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
 
         #region :: Campos
 
@@ -74,6 +84,17 @@ namespace CafebrasContratos
             Datasource = "U_CtName",
             Mensagem = "A pessoa de contato é obrigatória.",
             AbaUID = abaGeralUID,
+        };
+
+        public ItemForm _previsaoEntrega = new ItemForm()
+        {
+            ItemUID = "DtPrEnt",
+            Datasource = "U_DtPrEnt",
+        };
+        public ItemForm _previsaoPagamento = new ItemForm()
+        {
+            ItemUID = "DtPrPgt",
+            Datasource = "U_DtPrPgt",
         };
 
         public ComboFormObrigatorio _modalidade = new ComboFormObrigatorio()
@@ -150,6 +171,26 @@ namespace CafebrasContratos
             Mensagem = "A embalagem é obrigatória.",
             SQL = "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType",
             AbaUID = abaItemUID,
+        };
+        public ItemForm _bebida = new ItemForm()
+        {
+            ItemUID = "Bebida",
+            Datasource = "U_Bebida",
+        };
+        public ItemForm _diferencial = new ItemForm()
+        {
+            ItemUID = "Difere",
+            Datasource = "U_Difere",
+        };
+        public ItemForm _taxaNY = new ItemForm()
+        {
+            ItemUID = "RateNY",
+            Datasource = "U_RateNY",
+        };
+        public ItemForm _taxaDollar = new ItemForm()
+        {
+            ItemUID = "RateUSD",
+            Datasource = "U_RateUSD",
         };
 
         public ItemForm _quantidadeDePeso = new ItemForm()
@@ -272,7 +313,7 @@ namespace CafebrasContratos
 
             Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-            BubbleEvent = ValidarCamposObrigatorios(form, dbdts);
+            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
         }
 
         public override void OnBeforeFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -284,7 +325,7 @@ namespace CafebrasContratos
 
             Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-            BubbleEvent = ValidarCamposObrigatorios(form, dbdts);
+            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
         }
 
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -293,7 +334,7 @@ namespace CafebrasContratos
             var form = GetForm(BusinessObjectInfo.FormUID);
 
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
-            form.Items.Item(_status.ItemUID).Enabled = true;
+            form.Items.Item(_status.ItemUID).Enabled = GrupoAprovadorPermitido();
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
@@ -310,21 +351,48 @@ namespace CafebrasContratos
         public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
+            if (String.IsNullOrEmpty(Program._grupoAprovador))
+            {
+                Dialogs.PopupError("Nenhum Grupo Aprovador foi configurado para este usúario.\nNão será possível abrir a tela de contratos.");
+                var form = GetForm(FormUID);
+                form.Close();
+            }
+            else
+            {
+                var form = GetForm(FormUID);
 
-            var form = GetForm(FormUID);
+                try
+                {
+                    form.Freeze(true);
 
-            _modalidade.Popular(form);
-            _unidadeComercial.Popular(form);
-            _tipoDeOperacao.Popular(form);
-            _metodoFinanceiro.Popular(form);
-            _utilizacao.Popular(form);
-            _embalagem.Popular(form);
-            _safra.Popular(form);
+                    _modalidade.Popular(form);
+                    _unidadeComercial.Popular(form);
+                    _tipoDeOperacao.Popular(form);
+                    _metodoFinanceiro.Popular(form);
+                    _utilizacao.Popular(form);
+                    _embalagem.Popular(form);
+                    _safra.Popular(form);
 
-            // clicando para a primeira aba já vir selecionada
-            form.Items.Item("AbaGeral").Click();
+                    if (!GrupoAprovadorPermitido())
+                    {
+                        FormEmModoVisualizacao(form);
+                    }
 
-            ConditionsParaFornecedores(form);
+                    // clicando para a primeira aba já vir selecionada
+                    form.Items.Item("AbaGeral").Click();
+
+                    ConditionsParaFornecedores(form);
+                    ConditionsParaItens(form);
+                }
+                catch (Exception e)
+                {
+                    Dialogs.PopupError("Erro interno. Erro ao iniciar dados do formulário\nErro: " + e.Message);
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
+            }
         }
 
         public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -369,6 +437,18 @@ namespace CafebrasContratos
                 CalcularTotais(dbdts);
             }
             */
+        }
+
+        public override void OnBeforeChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            var sql = SQLGrupoDeItensPermitidos;
+            var rs = Helpers.DoQuery(sql);
+            if (rs.RecordCount == 0)
+            {
+                Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
+                BubbleEvent = false;
+            }
         }
 
         public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
@@ -464,7 +544,7 @@ namespace CafebrasContratos
 
         private static void ConditionsParaFornecedores(SAPbouiCOM.Form form)
         {
-            ChooseFromList oCFL = form.ChooseFromLists.Item("PN");
+            ChooseFromList oCFL = form.ChooseFromLists.Item(choosePNUID);
             Conditions oConds = oCFL.GetConditions();
 
             Condition oCond = oConds.Add();
@@ -476,10 +556,89 @@ namespace CafebrasContratos
             oCFL.SetConditions(oConds);
         }
 
+        private static void ConditionsParaItens(SAPbouiCOM.Form form)
+        {
+            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
+            Conditions oConds = oCFL.GetConditions();
+
+            var sql = SQLGrupoDeItensPermitidos;
+            var rs = Helpers.DoQuery(sql);
+            if (rs.RecordCount > 0)
+            {
+                int i = 0;
+                while (!rs.EoF)
+                {
+                    i++;
+                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
+
+                    Condition oCond = oConds.Add();
+
+                    oCond.Alias = "ItmsGrpCod";
+                    oCond.Operation = BoConditionOperation.co_EQUAL;
+                    oCond.CondVal = grupoDeItem;
+
+                    // põe OR em todos, menos no último.
+                    if (i < rs.RecordCount)
+                    {
+                        oCond.Relationship = BoConditionRelationship.cr_OR;
+                    }
+
+                    rs.MoveNext();
+                }
+                oCFL.SetConditions(oConds);
+            }
+        }
+
         #endregion
 
 
         #region :: Regras de negócio
+
+        private bool GrupoAprovadorPermitido()
+        {
+            switch (Program._grupoAprovador)
+            {
+                case GrupoAprovador.Planejador:
+                case GrupoAprovador.Gestor:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void FormEmModoVisualizacao(SAPbouiCOM.Form form)
+        {
+            form.Items.Item(_dataInicio.ItemUID).Enabled = false;
+            form.Items.Item(_dataFim.ItemUID).Enabled = false;
+            form.Items.Item(_status.ItemUID).Enabled = false;
+            form.Items.Item(_descricao.ItemUID).Enabled = false;
+            form.Items.Item(_codigoPN.ItemUID).Enabled = false;
+            form.Items.Item(_pessoasDeContato.ItemUID).Enabled = false;
+            form.Items.Item(_previsaoEntrega.ItemUID).Enabled = false;
+            form.Items.Item(_previsaoPagamento.ItemUID).Enabled = false;
+            form.Items.Item(_modalidade.ItemUID).Enabled = false;
+            form.Items.Item(_tipoDeOperacao.ItemUID).Enabled = false;
+            form.Items.Item(_unidadeComercial.ItemUID).Enabled = false;
+            form.Items.Item(_metodoFinanceiro.ItemUID).Enabled = false;
+            form.Items.Item(_quantidadeDePeso.ItemUID).Enabled = false;
+            form.Items.Item(_quantidadeDeSacas.ItemUID).Enabled = false;
+            form.Items.Item(_valorLivre.ItemUID).Enabled = false;
+            form.Items.Item(_valorICMS.ItemUID).Enabled = false;
+            form.Items.Item(_valorSENAR.ItemUID).Enabled = false;
+            form.Items.Item(_valorFaturado.ItemUID).Enabled = false;
+            form.Items.Item(_valorBruto.ItemUID).Enabled = false;
+            form.Items.Item(_valorFrete.ItemUID).Enabled = false;
+
+            form.Items.Item(_codigoItem.ItemUID).Enabled = false;
+            form.Items.Item(_deposito.ItemUID).Enabled = false;
+            form.Items.Item(_utilizacao.ItemUID).Enabled = false;
+            form.Items.Item(_safra.ItemUID).Enabled = false;
+            form.Items.Item(_embalagem.ItemUID).Enabled = false;
+            form.Items.Item(_bebida.ItemUID).Enabled = false;
+            form.Items.Item(_diferencial.ItemUID).Enabled = false;
+            form.Items.Item(_taxaNY.ItemUID).Enabled = false;
+            form.Items.Item(_taxaDollar.ItemUID).Enabled = false;
+        }
 
         private void PopularPessoasDeContato(SAPbouiCOM.Form form, string cardcode, string pessoaDeContatoSelecionada)
         {

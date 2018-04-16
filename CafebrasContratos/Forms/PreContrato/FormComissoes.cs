@@ -96,6 +96,29 @@ namespace CafebrasContratos
             }
         }
 
+        public override void OnBeforeItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == "1")
+            {
+                var form = GetForm(FormUID);
+                var mtxCorretor = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
+                var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
+
+                mtxCorretor.FlushToDataSource();
+                mtxResponsaveis.FlushToDataSource();
+
+                var dbdtsCorretor = GetDBDatasource(form, corretorDbDataSource);
+                var dbdtsResponsavel = GetDBDatasource(form, responsavelDbDataSource);
+
+                if (!CamposMatrizEstaoPreenchidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoPreenchidos(form, dbdtsResponsavel, _responsaveis))
+                {
+                    BubbleEvent = false;
+                }
+            }
+        }
+
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
@@ -175,21 +198,16 @@ namespace CafebrasContratos
 
         public class Matriz : MatrizChildForm
         {
-            public virtual ComboForm _participante
+            public ComboFormObrigatorio _participante = new ComboFormObrigatorio()
             {
-                get
-                {
-                    return new ComboForm()
-                    {
-                        ItemUID = "PartCode",
-                        Datasource = "U_PercCom"
-                    };
-                }
-            }
-            public ItemForm _comissao = new ItemForm()
+                ItemUID = "PartCode",
+                Datasource = "U_PartCode"
+            };
+
+            public ItemFormObrigatorio _comissao = new ItemFormObrigatorio()
             {
                 ItemUID = "PercCom",
-                Datasource = "U_PercCom"
+                Datasource = "U_PercCom",
             };
 
             protected string GetSQL(string tipoParticipante)
@@ -200,27 +218,23 @@ namespace CafebrasContratos
 
         public class MatrizCorretores : Matriz
         {
-            public override ComboForm _participante
+            public MatrizCorretores()
             {
-                get
-                {
-                    var participante = base._participante;
-                    participante.SQL = GetSQL("C");
-                    return participante;
-                }
+                _participante.Mensagem = "O corretor é obrigatório";
+                _participante.SQL = GetSQL("C");
+
+                _comissao.Mensagem = "A comissão do corretor é obrigatória";
             }
         }
 
         public class MatrizResponsaveis : Matriz
         {
-            public override ComboForm _participante
+            public MatrizResponsaveis()
             {
-                get
-                {
-                    var participante = base._participante;
-                    participante.SQL = GetSQL("R");
-                    return participante;
-                }
+                _participante.Mensagem = "O responsável é obrigatório";
+                _participante.SQL = GetSQL("C");
+
+                _comissao.Mensagem = "A comissão do responsável é obrigatória";
             }
         }
 
