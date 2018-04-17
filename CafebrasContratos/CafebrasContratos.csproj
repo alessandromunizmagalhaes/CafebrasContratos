@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Estrutura de Dados\DbConfig.cs" />
     <Compile Include="Estrutura de Dados\DbPreContrato.cs" />
     <Compile Include="Forms\Cadastros\FormGrupoDeItens.cs" />
     <Compile Include="Forms\Cadastros\FormParticipante.cs" />
@@ -53,14 +54,14 @@
     <Compile Include="Forms\Cadastros\FormUnidadeComercial.cs" />
     <Compile Include="Forms\Cadastros\FormTipoOperacao.cs" />
     <Compile Include="Forms\Cadastros\FormSafra.cs" />
-    <Compile Include="Forms\FormPadraoSAP\FormUsuarios.cs" />
+    <Compile Include="Forms\Padrão SAP\FormUsuarios.cs" />
     <Compile Include="Forms\PreContrato\FormComissoes.cs" />
     <Compile Include="Forms\PreContrato\FormAberturaPorPeneira.cs" />
     <Compile Include="Forms\PreContrato\FormDetalheCertificado.cs" />
     <Compile Include="Forms\Cadastros\FormModalidade.cs" />
     <Compile Include="Forms\PreContrato\FormPreContrato.cs" />
     <Compile Include="Enums\GrupoAprovador.cs" />
-    <Compile Include="Forms\PreContrato\PreContrato.cs" />
+    <Compile Include="Regras de Negócio\PreContrato.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\StatusContrato.cs" />

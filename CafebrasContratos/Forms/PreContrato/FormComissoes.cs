@@ -7,8 +7,8 @@ namespace CafebrasContratos
     public class FormComissoes : SAPHelper.Form
     {
         public override string FormType { get { return "FormComissoes"; } }
-        private const string corretorDbDataSource = "@UPD_CCC2";
-        private const string responsavelDbDataSource = "@UPD_CCC3";
+        private string corretorDbDataSource = DbPreContrato.corretoresDoContrato.NomeComArroba;
+        private string responsavelDbDataSource = DbPreContrato.responsaveisDoContrato.NomeComArroba;
         public static string _fatherFormUID = "";
 
         #region :: Campos de Corretores
@@ -16,7 +16,7 @@ namespace CafebrasContratos
         public MatrizCorretores _corretores = new MatrizCorretores()
         {
             ItemUID = "matrix1",
-            Datasource = corretorDbDataSource
+            Datasource = DbPreContrato.corretoresDoContrato.NomeComArroba
         };
         public ButtonForm _adicionarCorretores = new ButtonForm()
         {
@@ -35,7 +35,7 @@ namespace CafebrasContratos
         public MatrizResponsaveis _responsaveis = new MatrizResponsaveis()
         {
             ItemUID = "matrix2",
-            Datasource = responsavelDbDataSource
+            Datasource = DbPreContrato.responsaveisDoContrato.NomeComArroba
         };
         public ButtonForm _adicionarResponsavel = new ButtonForm()
         {
@@ -229,7 +229,7 @@ namespace CafebrasContratos
             public MatrizResponsaveis()
             {
                 _participante.Mensagem = "O responsável é obrigatório";
-                _participante.SQL = GetSQL("C");
+                _participante.SQL = GetSQL("R");
 
                 _comissao.Mensagem = "A comissão do responsável é obrigatória";
             }

@@ -7,14 +7,14 @@ namespace CafebrasContratos
     public class FormGrupoDeItens : SAPHelper.Form
     {
         public override string FormType { get { return "FormGrupoDeItens"; } }
-        public const string mainDbDataSource = "@UPD_OCTC";
+        public string mainDbDataSource = DbConfig.grupoDeCafe.NomeComArroba;
 
         #region :: Campos
 
         public Matriz _matriz = new Matriz()
         {
             ItemUID = "matrix",
-            Datasource = mainDbDataSource
+            Datasource = DbConfig.grupoDeCafe.NomeComArroba
         };
         public ButtonForm _adicionar = new ButtonForm()
         {
@@ -30,6 +30,7 @@ namespace CafebrasContratos
         };
 
         #endregion
+
 
         #region :: Eventos de Itens
 
@@ -60,6 +61,24 @@ namespace CafebrasContratos
             else
             {
                 _matriz.AdicionarLinha(form);
+            }
+        }
+
+        public override void OnBeforeItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+            if (pVal.ItemUID == _salvar.ItemUID)
+            {
+                var form = GetForm(FormUID);
+                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                mtx.FlushToDataSource();
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz))
+                {
+                    BubbleEvent = false;
+                }
             }
         }
 
@@ -146,7 +165,6 @@ namespace CafebrasContratos
         private void OnAdicionarLinha(string FormUID)
         {
             var form = GetForm(FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
 
             _matriz.AdicionarLinha(form);
         }
@@ -158,11 +176,12 @@ namespace CafebrasContratos
 
         public class Matriz : MatrizMasterDataForm
         {
-            public ComboForm _grupoDeItem = new ComboForm()
+            public ComboFormObrigatorio _grupoDeItem = new ComboFormObrigatorio()
             {
                 ItemUID = "ItmsGrpCod",
                 Datasource = "U_ItmsGrpCod",
-                SQL = "SELECT ItmsGrpCod, ItmsGrpNam FROM OITB ORDER BY ItmsGrpNam"
+                SQL = "SELECT ItmsGrpCod, ItmsGrpNam FROM OITB ORDER BY ItmsGrpNam",
+                Mensagem = "O Grupo de Item é obrigatório."
             };
         }
 

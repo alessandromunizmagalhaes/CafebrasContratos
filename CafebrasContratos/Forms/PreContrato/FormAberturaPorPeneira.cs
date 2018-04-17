@@ -7,15 +7,17 @@ namespace CafebrasContratos
     public class FormAberturaPorPeneira : SAPHelper.Form
     {
         public override string FormType { get { return "FormAberturaPorPeneira"; } }
-        private const string mainDbDataSource = "@UPD_CCC1";
+        private string mainDbDataSource = DbPreContrato.itensDoContrato.NomeComArroba;
         public static string _fatherFormUID = "";
+
+        private const string chooseItemUID = "Item";
 
         #region :: Campos
 
         public Matriz _matriz = new Matriz()
         {
             ItemUID = "mtxItem",
-            Datasource = mainDbDataSource
+            Datasource = DbPreContrato.itensDoContrato.NomeComArroba
         };
         public ButtonForm _adicionar = new ButtonForm()
         {
@@ -49,6 +51,8 @@ namespace CafebrasContratos
                 ClicarParaCalcularOsTotalizadores(mtx);
 
                 form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
+
+                PreContrato.ConditionsParaItens(form, chooseItemUID);
             }
             catch (Exception e)
             {
@@ -100,6 +104,11 @@ namespace CafebrasContratos
                     ChangeFormMode(fatherForm);
                 }
             }
+        }
+
+        public override void OnBeforeChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = PreContrato.TemGrupoDeItemConfiguradoParaChoose();
         }
 
         public override void OnAfterChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)

@@ -9,7 +9,7 @@ namespace CafebrasContratos
         #region :: Propriedades
 
         public override string FormType { get { return "FormPreContrato"; } }
-        private const string mainDbDataSource = "@UPD_OCCC";
+        private string mainDbDataSource = DbPreContrato.preContrato.NomeComArroba;
 
         private const string nomeFormAberturaPorPeneira = "FormAberturaPorPeneira.srf";
         private const string nomeFormDetalheCertificado = "FormDetalheCertificado.srf";
@@ -20,12 +20,8 @@ namespace CafebrasContratos
         private const string abaContratoFinalUID = "AbaCFinal";
         private const string abaObsUID = "AbaObs";
 
-
         private const string choosePNUID = "PN";
         private const string chooseItemUID = "Item";
-
-        private const string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
-
 
         #endregion
 
@@ -388,7 +384,7 @@ namespace CafebrasContratos
                     form.Items.Item("AbaGeral").Click();
 
                     ConditionsParaFornecedores(form);
-                    ConditionsParaItens(form);
+                    PreContrato.ConditionsParaItens(form, chooseItemUID);
                 }
                 catch (Exception e)
                 {
@@ -447,13 +443,13 @@ namespace CafebrasContratos
 
         public override void OnBeforeChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
         {
-            BubbleEvent = true;
-            var sql = SQLGrupoDeItensPermitidos;
-            var rs = Helpers.DoQuery(sql);
-            if (rs.RecordCount == 0)
+            if (pVal.ItemUID == _codigoItem.ItemUID)
             {
-                Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
-                BubbleEvent = false;
+                BubbleEvent = PreContrato.TemGrupoDeItemConfiguradoParaChoose();
+            }
+            else
+            {
+                BubbleEvent = true;
             }
         }
 
@@ -548,7 +544,7 @@ namespace CafebrasContratos
 
         #region :: Conditions
 
-        private static void ConditionsParaFornecedores(SAPbouiCOM.Form form)
+        private void ConditionsParaFornecedores(SAPbouiCOM.Form form)
         {
             ChooseFromList oCFL = form.ChooseFromLists.Item(choosePNUID);
             Conditions oConds = oCFL.GetConditions();
@@ -562,38 +558,7 @@ namespace CafebrasContratos
             oCFL.SetConditions(oConds);
         }
 
-        private static void ConditionsParaItens(SAPbouiCOM.Form form)
-        {
-            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
-            Conditions oConds = oCFL.GetConditions();
 
-            var sql = SQLGrupoDeItensPermitidos;
-            var rs = Helpers.DoQuery(sql);
-            if (rs.RecordCount > 0)
-            {
-                int i = 0;
-                while (!rs.EoF)
-                {
-                    i++;
-                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
-
-                    Condition oCond = oConds.Add();
-
-                    oCond.Alias = "ItmsGrpCod";
-                    oCond.Operation = BoConditionOperation.co_EQUAL;
-                    oCond.CondVal = grupoDeItem;
-
-                    // põe OR em todos, menos no último.
-                    if (i < rs.RecordCount)
-                    {
-                        oCond.Relationship = BoConditionRelationship.cr_OR;
-                    }
-
-                    rs.MoveNext();
-                }
-                oCFL.SetConditions(oConds);
-            }
-        }
 
         #endregion
 

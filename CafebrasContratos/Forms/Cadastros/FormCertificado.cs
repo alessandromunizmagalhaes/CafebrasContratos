@@ -5,6 +5,6 @@ namespace CafebrasContratos
     public class FormCertificado : FormCadastroBasico
     {
         public override string FormType { get { return "FormCertificado"; } }
-        public override string mainDbDataSource { get { return "@UPD_CRTC"; } }
+        public override string mainDbDataSource { get { return DbConfig.certificado.NomeComArroba; } }
     }
 }

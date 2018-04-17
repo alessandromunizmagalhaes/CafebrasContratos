@@ -7,7 +7,7 @@ namespace CafebrasContratos
     public class FormDetalheCertificado : SAPHelper.Form
     {
         public override string FormType { get { return "FormDetalheCertificado"; } }
-        private const string mainDbDataSource = "@UPD_CCC4";
+        private string mainDbDataSource = DbPreContrato.certificadosDoContrato.NomeComArroba;
         public static string _fatherFormUID = "";
 
         #region :: Campos
@@ -15,7 +15,7 @@ namespace CafebrasContratos
         public Matriz _matriz = new Matriz()
         {
             ItemUID = "matrix",
-            Datasource = mainDbDataSource
+            Datasource = DbPreContrato.certificadosDoContrato.NomeComArroba
         };
         public ButtonForm _adicionar = new ButtonForm()
         {
