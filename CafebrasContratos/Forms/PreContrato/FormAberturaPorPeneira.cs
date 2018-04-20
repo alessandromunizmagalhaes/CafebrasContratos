@@ -8,6 +8,8 @@ namespace CafebrasContratos
     {
         public override string FormType { get { return "FormAberturaPorPeneira"; } }
         private string mainDbDataSource = DbPreContrato.itensDoContrato.NomeComArroba;
+        private string fatherFormMainDbDataSource = DbPreContrato.preContrato.NomeComArroba;
+
         public static string _fatherFormUID = "";
 
         private const string chooseItemUID = "Item";
@@ -50,9 +52,12 @@ namespace CafebrasContratos
                 var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
                 ClicarParaCalcularOsTotalizadores(mtx);
 
-                form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
+                form.Items.Item("1").Enabled = PreContrato.UsuarioPermitido();
 
-                PreContrato.ConditionsParaItens(form, chooseItemUID);
+                var fatherForm = GetForm(_fatherFormUID);
+                var fatherDbdts = GetDBDatasource(fatherForm, fatherFormMainDbDataSource);
+                var itemcodeBase = fatherDbdts.GetValue("U_ItemCode", 0).Trim();
+                ConditionsParaItens(form, itemcodeBase);
             }
             catch (Exception e)
             {
@@ -198,6 +203,96 @@ namespace CafebrasContratos
                 }
             }
             return false;
+        }
+
+        #endregion
+
+
+        #region :: Conditions
+
+        public void ConditionsParaItens(SAPbouiCOM.Form form, string itemcodeBase)
+        {
+            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
+            Conditions oConds = oCFL.GetConditions();
+
+            var rsGrupo = Helpers.DoQuery(PreContrato.SQLGrupoDeItensPermitidos);
+            if (rsGrupo.RecordCount > 0)
+            {
+                int i = 0;
+                while (!rsGrupo.EoF)
+                {
+                    i++;
+                    string grupoDeItem = rsGrupo.Fields.Item("U_ItmsGrpCod").Value;
+
+                    Condition oCond = oConds.Add();
+
+                    if (i == 1)
+                    {
+                        oCond.BracketOpenNum = 1;
+                    }
+
+                    oCond.Alias = "ItmsGrpCod";
+                    oCond.Operation = BoConditionOperation.co_EQUAL;
+                    oCond.CondVal = grupoDeItem;
+
+                    if (i == rsGrupo.RecordCount)
+                    {
+                        oCond.BracketCloseNum = 1;
+                        oCond.Relationship = BoConditionRelationship.cr_AND;
+                    }
+                    else
+                    {
+                        oCond.Relationship = BoConditionRelationship.cr_OR;
+                    }
+
+                    rsGrupo.MoveNext();
+                }
+            }
+
+            // só trazer itens ativos
+            Condition oCondAtivo = oConds.Add();
+            oCondAtivo.BracketOpenNum = 2;
+            oCondAtivo.Alias = "frozenFor";
+            oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
+            oCondAtivo.CondVal = "N";
+            oCondAtivo.BracketCloseNum = 2;
+            oCondAtivo.Relationship = BoConditionRelationship.cr_AND;
+
+            // só trazer os itens de peneira do item base
+            var rsItens = Helpers.DoQuery($"SELECT ItemCode FROM OITM WHERE U_UPD_ITEMBASE = '{itemcodeBase}'");
+            if (rsItens.RecordCount > 0)
+            {
+                int i = 0;
+                while (!rsItens.EoF)
+                {
+                    i++;
+                    string itemcode = rsItens.Fields.Item("ItemCode").Value;
+
+                    Condition oCond = oConds.Add();
+
+                    if (i == 1)
+                    {
+                        oCond.BracketOpenNum = 3;
+                    }
+
+                    oCond.Alias = "ItemCode";
+                    oCond.Operation = BoConditionOperation.co_EQUAL;
+                    oCond.CondVal = itemcode;
+
+                    if (i == rsItens.RecordCount)
+                    {
+                        oCond.BracketCloseNum = 3;
+                    }
+                    else
+                    {
+                        oCond.Relationship = BoConditionRelationship.cr_OR;
+                    }
+
+                    rsItens.MoveNext();
+                }
+
+                oCFL.SetConditions(oConds);
+            }
         }
 
         #endregion

@@ -44,7 +44,7 @@ namespace CafebrasContratos
 
                 CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
-                form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
+                form.Items.Item("1").Enabled = PreContrato.UsuarioPermitido();
             }
             catch (Exception e)
             {

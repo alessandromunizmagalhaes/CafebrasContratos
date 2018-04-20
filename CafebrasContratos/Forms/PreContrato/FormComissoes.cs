@@ -75,7 +75,7 @@ namespace CafebrasContratos
                 _corretores._participante.Popular(mtxCorretores);
                 _responsaveis._participante.Popular(mtxResponsaveis);
 
-                form.Items.Item("1").Enabled = PreContrato.GrupoAprovadorPermitido();
+                form.Items.Item("1").Enabled = PreContrato.UsuarioPermitido();
             }
             catch (Exception e)
             {

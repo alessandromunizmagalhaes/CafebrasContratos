@@ -22,6 +22,7 @@ namespace CafebrasContratos
 
         private const string choosePNUID = "PN";
         private const string chooseItemUID = "Item";
+        private const string chooseDepositoUID = "Warehouse";
 
         #endregion
 
@@ -302,32 +303,44 @@ namespace CafebrasContratos
 
         public override void OnBeforeFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
-            BubbleEvent = true;
+            if (PreContrato.UsuarioPermitido())
+            {
+                var form = GetForm(BusinessObjectInfo.FormUID);
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+                string next_code = GetNextCode(mainDbDataSource);
 
-            string next_code = GetNextCode(mainDbDataSource);
+                dbdts.SetValue("Code", 0, next_code);
+                dbdts.SetValue("Name", 0, next_code);
+                dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextCode(mainDbDataSource));
 
-            dbdts.SetValue("Code", 0, next_code);
-            dbdts.SetValue("Name", 0, next_code);
-            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextCode(mainDbDataSource));
+                Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-            Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
-
-            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+            }
+            else
+            {
+                BubbleEvent = false;
+                Dialogs.PopupError("O usuário corrente não pode criar um novo contrato.");
+            }
         }
 
         public override void OnBeforeFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
-            BubbleEvent = true;
+            if (PreContrato.UsuarioPermitido())
+            {
+                var form = GetForm(BusinessObjectInfo.FormUID);
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+                Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-            Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
-
-            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+            }
+            else
+            {
+                BubbleEvent = false;
+                Dialogs.PopupError("O usuário corrente não pode atualizar os dados de um contrato.");
+            }
         }
 
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -336,13 +349,16 @@ namespace CafebrasContratos
             var form = GetForm(BusinessObjectInfo.FormUID);
 
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
-            form.Items.Item(_status.ItemUID).Enabled = PreContrato.GrupoAprovadorPermitido();
+            form.Items.Item(_status.ItemUID).Enabled = PreContrato.UsuarioPermitido();
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
             string codigoPN = dbdts.GetValue(_codigoPN.Datasource, 0);
             string pessoasDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
             PopularPessoasDeContato(form, codigoPN, pessoasDeContato);
+
+            string itemcode = dbdts.GetValue(_codigoItem.Datasource, 0);
+            HabilitarBotaoAberturaPorPeneira(form, itemcode);
         }
 
         #endregion
@@ -375,7 +391,7 @@ namespace CafebrasContratos
                     _embalagem.Popular(form);
                     _safra.Popular(form);
 
-                    if (!PreContrato.GrupoAprovadorPermitido())
+                    if (!PreContrato.UsuarioPermitido())
                     {
                         FormEmModoVisualizacao(form);
                     }
@@ -384,7 +400,8 @@ namespace CafebrasContratos
                     form.Items.Item("AbaGeral").Click();
 
                     ConditionsParaFornecedores(form);
-                    PreContrato.ConditionsParaItens(form, chooseItemUID);
+                    ConditionsParaDeposito(form);
+                    ConditionsParaItens(form);
                 }
                 catch (Exception e)
                 {
@@ -432,13 +449,13 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            /*
+
             if (EventoEmCampoDeValor(pVal.ItemUID))
             {
-                var dbdts = GetDBDatasource(FormUID, mainDbDataSource);
-                CalcularTotais(dbdts);
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
+                CalcularTotais(form,dbdts);
             }
-            */
         }
 
         public override void OnBeforeChooseFromList(SAPbouiCOM.Form form, ChooseFromListEvent chooseEvent, ChooseFromList choose, ref ItemEvent pVal, out bool BubbleEvent)
@@ -468,7 +485,7 @@ namespace CafebrasContratos
                 }
                 else if (chooseEvent.ItemUID == _codigoItem.ItemUID)
                 {
-                    OnItemCodeChoose(dbdts, dataTable);
+                    OnItemCodeChoose(form, dbdts, dataTable);
                 }
                 else if (chooseEvent.ItemUID == _deposito.ItemUID)
                 {
@@ -511,13 +528,15 @@ namespace CafebrasContratos
 
         #region :: Choose From Lists
 
-        private void OnItemCodeChoose(DBDataSource dbdts, DataTable dataTable)
+        private void OnItemCodeChoose(SAPbouiCOM.Form form, DBDataSource dbdts, DataTable dataTable)
         {
             string itemcode = dataTable.GetValue("ItemCode", 0);
             string itemname = dataTable.GetValue("ItemName", 0);
 
             dbdts.SetValue(_codigoItem.Datasource, 0, itemcode);
             dbdts.SetValue(_nomeItem.Datasource, 0, itemname);
+
+            HabilitarBotaoAberturaPorPeneira(form, itemcode);
         }
 
         private void OnWhsCodeChoose(DBDataSource dbdts, DataTable dataTable)
@@ -558,7 +577,69 @@ namespace CafebrasContratos
             oCFL.SetConditions(oConds);
         }
 
+        private void ConditionsParaDeposito(SAPbouiCOM.Form form)
+        {
+            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseDepositoUID);
+            Conditions oConds = oCFL.GetConditions();
 
+            Condition oCond = oConds.Add();
+
+            oCond.Alias = "Inactive";
+            oCond.Operation = BoConditionOperation.co_EQUAL;
+            oCond.CondVal = "N";
+
+            oCFL.SetConditions(oConds);
+        }
+
+        public void ConditionsParaItens(SAPbouiCOM.Form form)
+        {
+            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
+            Conditions oConds = oCFL.GetConditions();
+
+            var rs = Helpers.DoQuery(PreContrato.SQLGrupoDeItensPermitidos);
+            if (rs.RecordCount > 0)
+            {
+                int i = 0;
+                while (!rs.EoF)
+                {
+                    i++;
+                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
+
+                    Condition oCond = oConds.Add();
+
+                    if (i == 1)
+                    {
+                        oCond.BracketOpenNum = 1;
+                    }
+
+                    oCond.Alias = "ItmsGrpCod";
+                    oCond.Operation = BoConditionOperation.co_EQUAL;
+                    oCond.CondVal = grupoDeItem;
+
+                    if (i == rs.RecordCount)
+                    {
+                        oCond.BracketCloseNum = 1;
+                        oCond.Relationship = BoConditionRelationship.cr_AND;
+                    }
+                    else
+                    {
+                        oCond.Relationship = BoConditionRelationship.cr_OR;
+                    }
+
+                    rs.MoveNext();
+                }
+
+                // só trazer itens ativos
+                Condition oCondAtivo = oConds.Add();
+                oCondAtivo.BracketOpenNum = 2;
+                oCondAtivo.Alias = "frozenFor";
+                oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
+                oCondAtivo.CondVal = "N";
+                oCondAtivo.BracketCloseNum = 2;
+
+                oCFL.SetConditions(oConds);
+            }
+        }
 
         #endregion
 
@@ -648,15 +729,39 @@ namespace CafebrasContratos
             ;
         }
 
-        private void CalcularTotais(DBDataSource dbdts)
+        private void CalcularTotais(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            double qtdPeso = Helpers.ToDouble(dbdts.GetValue(_quantidadeDePeso.ItemUID, 0));
-            double qtdSacas = Helpers.ToDouble(dbdts.GetValue(_quantidadeDeSacas.ItemUID, 0));
-            double valorLivre = Helpers.ToDouble(dbdts.GetValue(_valorLivre.ItemUID, 0));
-            double valorICMS = Helpers.ToDouble(dbdts.GetValue(_valorICMS.ItemUID, 0));
-            double valorSENAR = Helpers.ToDouble(dbdts.GetValue(_valorSENAR.ItemUID, 0));
-            double valorFaturado = Helpers.ToDouble(dbdts.GetValue(_valorFaturado.ItemUID, 0));
-            double valorBruto = Helpers.ToDouble(dbdts.GetValue(_valorBruto.ItemUID, 0));
+            double qtdPeso = Helpers.ToDouble(dbdts.GetValue(_quantidadeDePeso.Datasource, 0));
+            double qtdSacas = Helpers.ToDouble(dbdts.GetValue(_quantidadeDeSacas.Datasource, 0));
+            double valorLivre = Helpers.ToDouble(dbdts.GetValue(_valorLivre.Datasource, 0));
+            double valorICMS = Helpers.ToDouble(dbdts.GetValue(_valorICMS.Datasource, 0));
+            double valorSENAR = Helpers.ToDouble(dbdts.GetValue(_valorSENAR.Datasource, 0));
+            double valorFaturado = Helpers.ToDouble(dbdts.GetValue(_valorFaturado.Datasource, 0));
+            double valorBruto = Helpers.ToDouble(dbdts.GetValue(_valorBruto.Datasource, 0));
+            try
+            {
+                form.Freeze(true);
+                dbdts.SetValue(_totalLivre.Datasource, 0, Helpers.ToSAPString(valorLivre * qtdSacas));
+                dbdts.SetValue(_totalICMS.Datasource, 0, Helpers.ToSAPString(valorICMS * qtdSacas));
+                dbdts.SetValue(_totalSENAR.Datasource, 0, Helpers.ToSAPString(valorSENAR * qtdSacas));
+                dbdts.SetValue(_totalFaturado.Datasource, 0, Helpers.ToSAPString(valorFaturado * qtdSacas));
+                dbdts.SetValue(_totalBruto.Datasource, 0, Helpers.ToSAPString(valorBruto * qtdSacas));
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
+        private void HabilitarBotaoAberturaPorPeneira(SAPbouiCOM.Form form, string itemcode)
+        {
+            var botao_habilitado = false;
+            var rs = Helpers.DoQuery($"SELECT U_UPD_TIPO_ITEM FROM OITM WHERE ItemCode = '{itemcode}'");
+            if (rs.Fields.Item("U_UPD_TIPO_ITEM").Value == "B")
+            {
+                botao_habilitado = true;
+            }
+            form.Items.Item(_aberturaPorPeneira.ItemUID).Enabled = botao_habilitado;
         }
 
         #endregion

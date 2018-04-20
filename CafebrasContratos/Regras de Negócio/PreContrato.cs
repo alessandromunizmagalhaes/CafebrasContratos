@@ -1,13 +1,12 @@
-﻿using SAPbouiCOM;
-using SAPHelper;
+﻿using SAPHelper;
 
 namespace CafebrasContratos
 {
     public static class PreContrato
     {
-        private static string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
+        public static string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
 
-        public static bool GrupoAprovadorPermitido()
+        public static bool UsuarioPermitido()
         {
             switch (Program._grupoAprovador)
             {
@@ -16,38 +15,6 @@ namespace CafebrasContratos
                     return true;
                 default:
                     return false;
-            }
-        }
-
-        public static void ConditionsParaItens(SAPbouiCOM.Form form, string chooseItemUID)
-        {
-            ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
-            Conditions oConds = oCFL.GetConditions();
-
-            var rs = Helpers.DoQuery(SQLGrupoDeItensPermitidos);
-            if (rs.RecordCount > 0)
-            {
-                int i = 0;
-                while (!rs.EoF)
-                {
-                    i++;
-                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
-
-                    Condition oCond = oConds.Add();
-
-                    oCond.Alias = "ItmsGrpCod";
-                    oCond.Operation = BoConditionOperation.co_EQUAL;
-                    oCond.CondVal = grupoDeItem;
-
-                    // põe OR em todos, menos no último.
-                    if (i < rs.RecordCount)
-                    {
-                        oCond.Relationship = BoConditionRelationship.cr_OR;
-                    }
-
-                    rs.MoveNext();
-                }
-                oCFL.SetConditions(oConds);
             }
         }
 
