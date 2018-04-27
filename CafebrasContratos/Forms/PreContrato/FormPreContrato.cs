@@ -124,13 +124,11 @@ namespace CafebrasContratos
             SQL = "SELECT Code, Name FROM [@UPD_OTOP] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
         };
-        public ComboFormObrigatorio _metodoFinanceiro = new ComboFormObrigatorio()
+        public ComboForm _metodoFinanceiro = new ComboForm()
         {
             ItemUID = "MtdFin",
             Datasource = "U_MtdFin",
-            Mensagem = "O método financeiro é obrigatório.",
             SQL = "SELECT Code, Name FROM [@UPD_OMFN] WHERE Canceled = 'N' ORDER BY Name",
-            AbaUID = abaGeralUID,
         };
         public ItemFormObrigatorio _codigoItem = new ItemFormObrigatorio()
         {
@@ -454,7 +452,7 @@ namespace CafebrasContratos
             {
                 var form = GetForm(FormUID);
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
-                CalcularTotais(form,dbdts);
+                CalcularTotais(form, dbdts);
             }
         }
 

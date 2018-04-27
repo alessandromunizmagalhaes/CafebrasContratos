@@ -31,6 +31,7 @@ namespace CafebrasContratos
 
         #endregion
 
+
         #region :: Eventos de Formulário
 
         public override void OnBeforeFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
@@ -39,6 +40,9 @@ namespace CafebrasContratos
 
             var form = GetForm(BusinessObjectInfo.FormUID);
             var dbdts = GetDBDatasource(form, mainDbDataSource);
+
+            string nextCode = GetNextCode(mainDbDataSource);
+            dbdts.SetValue(_codigo.ItemUID, 0, nextCode);
 
             BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
         }
@@ -51,6 +55,30 @@ namespace CafebrasContratos
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
             BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+        }
+
+        #endregion
+
+
+        #region :: Eventos de Item
+
+        public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            var form = GetForm(FormUID);
+            _OnAdicionarNovo(form);
+        }
+
+        #endregion
+
+
+        #region :: Eventos Internos
+
+        public override void _OnAdicionarNovo(SAPbouiCOM.Form form)
+        {
+            string nextCode = GetNextCode(mainDbDataSource);
+            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            dbdts.SetValue(_codigo.ItemUID, 0, nextCode);
         }
 
         #endregion

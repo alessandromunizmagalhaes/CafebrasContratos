@@ -124,6 +124,8 @@ namespace CafebrasContratos
 
             try
             {
+                #region :: Forms Cadastro Básico
+
                 var formGrupoDeItens = new FormGrupoDeItens();
                 var formCertificado = new FormCertificado();
                 var formMetodoFinanceiro = new FormMetodoFinanceiro();
@@ -133,21 +135,54 @@ namespace CafebrasContratos
                 var formUnidadeComercial = new FormUnidadeComercial();
                 var formParticipante = new FormParticipante();
 
+                var formsCadastroBasico = new List<SAPHelper.Form>() {
+                     formGrupoDeItens,
+                     formCertificado,
+                     formMetodoFinanceiro,
+                     formModalidade,
+                     formSafra,
+                     formTipoOperacao,
+                     formUnidadeComercial,
+                     formParticipante
+                };
+
+                #endregion
+
+
+                #region :: Forms Pré Contrato
+
                 var formPreContrato = new FormPreContrato();
                 var formAberturaPorPeneira = new FormAberturaPorPeneira();
                 var formDetalheCertificado = new FormDetalheCertificado();
                 var formComissoes = new FormComissoes();
 
+                var formsDetalhePreContrato = new List<SAPHelper.Form>() {
+                     formAberturaPorPeneira,
+                     formDetalheCertificado,
+                     formComissoes
+                };
+
+                #endregion
+
+
+                #region :: Form SAP
+
                 var formUsuarios = new FormUsuarios();
 
+                #endregion
+
+
+                #region :: Grupos de Forms
+
+                var formsVisible = new List<SAPHelper.Form>() { formPreContrato };
+                formsVisible.AddRange(formsCadastroBasico);
+                formsVisible.AddRange(formsDetalhePreContrato);
+
+                #endregion
+
+
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
-                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, new List<SAPHelper.Form>(){
-                        formPreContrato,
-                        formAberturaPorPeneira,
-                        formDetalheCertificado,
-                        formComissoes,
-                        formGrupoDeItens
-                    }),
+                    new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formsVisible),
                     new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formUsuarios),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_VALIDATE, formPreContrato),
@@ -190,7 +225,10 @@ namespace CafebrasContratos
                     }),
                 });
 
-                FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formPreContrato);
+                var formsAdicionarNovo = new List<SAPHelper.Form>() { formPreContrato };
+                formsAdicionarNovo.AddRange(formsCadastroBasico);
+
+                FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formsAdicionarNovo);
                 FormEvents.DeclararEventosInternos(EventosInternos.Pesquisar, formPreContrato);
             }
             catch (Exception e)
