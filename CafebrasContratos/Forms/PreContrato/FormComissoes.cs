@@ -103,7 +103,7 @@ namespace CafebrasContratos
                 var dbdtsCorretor = GetDBDatasource(form, corretorDbDataSource);
                 var dbdtsResponsavel = GetDBDatasource(form, responsavelDbDataSource);
 
-                if (!CamposMatrizEstaoPreenchidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoPreenchidos(form, dbdtsResponsavel, _responsaveis))
+                if (!CamposMatrizEstaoValidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoValidos(form, dbdtsResponsavel, _responsaveis))
                 {
                     BubbleEvent = false;
                 }

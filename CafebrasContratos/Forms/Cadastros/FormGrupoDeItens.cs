@@ -75,7 +75,7 @@ namespace CafebrasContratos
                 mtx.FlushToDataSource();
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz))
+                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
                 {
                     BubbleEvent = false;
                 }

@@ -80,7 +80,7 @@ namespace CafebrasContratos
                 mtx.FlushToDataSource();
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz) || !SomaDosPercentuaisEstaCorreta(mtx))
+                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz) || !SomaDosPercentuaisEstaCorreta(mtx))
                 {
                     BubbleEvent = false;
                 }
@@ -259,7 +259,7 @@ namespace CafebrasContratos
             oCondAtivo.Relationship = BoConditionRelationship.cr_AND;
 
             // só trazer os itens de peneira do item base
-            var rsItens = Helpers.DoQuery($"SELECT ItemCode FROM OITM WHERE U_UPD_ITEMBASE = '{itemcodeBase}'");
+            var rsItens = Helpers.DoQuery($"SELECT ItemCode FROM OITM WHERE U_UPD_ITEMBASE = '{itemcodeBase}' AND ItemCode <> '{itemcodeBase}'");
             if (rsItens.RecordCount > 0)
             {
                 int i = 0;

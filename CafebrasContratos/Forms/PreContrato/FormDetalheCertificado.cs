@@ -67,7 +67,7 @@ namespace CafebrasContratos
                 mtx.FlushToDataSource();
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-                if (!CamposMatrizEstaoPreenchidos(form, dbdts, _matriz))
+                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
                 {
                     BubbleEvent = false;
                 }
@@ -121,12 +121,13 @@ namespace CafebrasContratos
 
         public class Matriz : MatrizChildForm
         {
-            public ComboFormObrigatorio _certificado = new ComboFormObrigatorio()
+            public ComboFormObrigatorioUnico _certificado = new ComboFormObrigatorioUnico()
             {
                 ItemUID = "Certif",
                 Datasource = "U_Certif",
                 SQL = "SELECT Code, Name FROM [@UPD_CRTC] WHERE Canceled = 'N' ORDER BY Name",
-                Mensagem = "O certificado é obrigatório"
+                MensagemQuandoObrigatorio = "O certificado é obrigatório",
+                MensagemQuandoUnico = "Não pode existir um certificado duplicado."
             };
         }
 
