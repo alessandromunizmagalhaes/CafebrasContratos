@@ -20,6 +20,8 @@ namespace CafebrasContratos
         {
             ConectarComSAP();
 
+            testebranchcombug
+
             CriarEstruturaDeDados();
 
             CriarMenus();
