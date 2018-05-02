@@ -9,7 +9,7 @@ namespace CafebrasContratos
         #region :: Propriedades
 
         public override string FormType { get { return "FormPreContrato"; } }
-        private string mainDbDataSource = DbPreContrato.preContrato.NomeComArroba;
+        private string mainDbDataSource = new TabelaPreContrato().NomeComArroba;
 
         private const string nomeFormAberturaPorPeneira = "FormAberturaPorPeneira.srf";
         private const string nomeFormDetalheCertificado = "FormDetalheCertificado.srf";
@@ -739,11 +739,11 @@ namespace CafebrasContratos
             try
             {
                 form.Freeze(true);
-                dbdts.SetValue(_totalLivre.Datasource, 0, Helpers.ToSAPString(valorLivre * qtdSacas));
-                dbdts.SetValue(_totalICMS.Datasource, 0, Helpers.ToSAPString(valorICMS * qtdSacas));
-                dbdts.SetValue(_totalSENAR.Datasource, 0, Helpers.ToSAPString(valorSENAR * qtdSacas));
-                dbdts.SetValue(_totalFaturado.Datasource, 0, Helpers.ToSAPString(valorFaturado * qtdSacas));
-                dbdts.SetValue(_totalBruto.Datasource, 0, Helpers.ToSAPString(valorBruto * qtdSacas));
+                dbdts.SetValue(_totalLivre.Datasource, 0, Helpers.ToString(valorLivre * qtdSacas));
+                dbdts.SetValue(_totalICMS.Datasource, 0, Helpers.ToString(valorICMS * qtdSacas));
+                dbdts.SetValue(_totalSENAR.Datasource, 0, Helpers.ToString(valorSENAR * qtdSacas));
+                dbdts.SetValue(_totalFaturado.Datasource, 0, Helpers.ToString(valorFaturado * qtdSacas));
+                dbdts.SetValue(_totalBruto.Datasource, 0, Helpers.ToString(valorBruto * qtdSacas));
             }
             finally
             {

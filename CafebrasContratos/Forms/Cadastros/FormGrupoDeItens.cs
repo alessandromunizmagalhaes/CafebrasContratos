@@ -7,14 +7,14 @@ namespace CafebrasContratos
     public class FormGrupoDeItens : SAPHelper.Form
     {
         public override string FormType { get { return "FormGrupoDeItens"; } }
-        public string mainDbDataSource = DbConfig.grupoDeCafe.NomeComArroba;
+        public string mainDbDataSource = new TabelaGrupoCafe().NomeComArroba;
 
         #region :: Campos
 
         public Matriz _matriz = new Matriz()
         {
             ItemUID = "matrix",
-            Datasource = DbConfig.grupoDeCafe.NomeComArroba
+            Datasource = new TabelaGrupoCafe().NomeComArroba
         };
         public ButtonForm _adicionar = new ButtonForm()
         {

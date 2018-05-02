@@ -13,6 +13,7 @@ namespace CafebrasContratos
         public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
         public static string _grupoAprovador;
+        public static double _versaoAddon = 0.2;
 
         [STAThread]
         static void Main()
@@ -55,45 +56,36 @@ namespace CafebrasContratos
         private static void CriarEstruturaDeDados()
         {
             Dialogs.Info(":: " + _addonName + " :: Criando tabelas e estruturas de dados ...", BoMessageTime.bmt_Long);
-            if (!ConfigXML.JaCriouEstrutura)
+
+            try
             {
-                try
+                _company.StartTransaction();
+
+                using (Database db = new Database(_versaoAddon))
                 {
-                    _company.StartTransaction();
+                    var versoes = new List<Versionamento>() {
+                        new Versao_Zero_Um(),
+                        new Versao_Zero_Dois(),
+                    };
 
-                    using (Database db = new Database())
-                    {
-                        //db.ExcluirTabela("UPD_OCCC");
-
-                        db.CriarTabela(DbConfig.modalidade);
-                        db.CriarTabela(DbConfig.unidadeComercial);
-                        db.CriarTabela(DbConfig.tipoOperacao);
-                        db.CriarTabela(DbConfig.metodoFinanceiro);
-                        db.CriarTabela(DbConfig.safra);
-                        db.CriarTabela(DbConfig.certificado);
-                        db.CriarTabela(DbConfig.participante);
-                        db.CriarTabela(DbConfig.grupoDeCafe);
-
-                        db.CriarTabela(DbPreContrato.preContrato);
-
-                        db.CriarCampo("OUSR", DbConfig.grupoAprovador);
-                    }
-
-                    _company.EndTransaction(BoWfTransOpt.wf_Commit);
+                    Versoes.Aplicar(db, versoes);
                 }
-                catch (DatabaseException e)
+
+                _company.EndTransaction(BoWfTransOpt.wf_Commit);
+            }
+            catch (DatabaseException e)
+            {
+                Dialogs.PopupError(e.Message);
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao criar estrutura de dados.\nErro: " + e.Message);
+                if (_company.InTransaction)
                 {
-                    Dialogs.PopupError(e.Message);
-                }
-                catch (Exception e)
-                {
-                    Dialogs.PopupError("Erro interno. Erro ao criar estrutura de dados.\nErro: " + e.Message);
-                    if (_company.InTransaction)
-                    {
-                        _company.EndTransaction(BoWfTransOpt.wf_RollBack);
-                    }
+                    _company.EndTransaction(BoWfTransOpt.wf_RollBack);
                 }
             }
+
         }
 
         private static void CriarMenus()
@@ -251,6 +243,7 @@ namespace CafebrasContratos
             _sBOApplication.MenuEvent += Menu.MenuEvent;
         }
 
+
         #region :: Declaração Eventos
 
         private static void AppEvent(BoAppEventTypes EventType)
@@ -262,6 +255,7 @@ namespace CafebrasContratos
         }
 
         #endregion
+
 
         #region :: Regras de Negócio
 

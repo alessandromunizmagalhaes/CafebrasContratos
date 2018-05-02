@@ -6,7 +6,7 @@ namespace CafebrasContratos
     public class FormParticipante : SAPHelper.Form
     {
         public override string FormType { get { return "FormParticipante"; } }
-        private string mainDbDataSource = DbConfig.participante.NomeComArroba;
+        private string mainDbDataSource = new TabelaParticipante().NomeComArroba;
 
         #region :: Campos
 

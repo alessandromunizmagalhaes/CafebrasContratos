@@ -5,6 +5,6 @@ namespace CafebrasContratos
     public class FormUnidadeComercial : FormCadastroBasico
     {
         public override string FormType { get { return "FormUnidadeComercial"; } }
-        public override string mainDbDataSource { get { return DbConfig.unidadeComercial.NomeComArroba; } }
+        public override string mainDbDataSource { get { return new TabelaUnidadeComercial().NomeComArroba; } }
     }
 }

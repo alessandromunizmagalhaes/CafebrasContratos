@@ -7,8 +7,8 @@ namespace CafebrasContratos
     public class FormAberturaPorPeneira : SAPHelper.Form
     {
         public override string FormType { get { return "FormAberturaPorPeneira"; } }
-        private string mainDbDataSource = DbPreContrato.itensDoContrato.NomeComArroba;
-        private string fatherFormMainDbDataSource = DbPreContrato.preContrato.NomeComArroba;
+        private string mainDbDataSource = new TabelaItensDoPreContrato().NomeComArroba;
+        private string fatherFormMainDbDataSource = new TabelaPreContrato().NomeComArroba;
 
         public static string _fatherFormUID = "";
 
@@ -19,7 +19,7 @@ namespace CafebrasContratos
         public Matriz _matriz = new Matriz()
         {
             ItemUID = "mtxItem",
-            Datasource = DbPreContrato.itensDoContrato.NomeComArroba
+            Datasource = new TabelaItensDoPreContrato().NomeComArroba
         };
         public ButtonForm _adicionar = new ButtonForm()
         {
