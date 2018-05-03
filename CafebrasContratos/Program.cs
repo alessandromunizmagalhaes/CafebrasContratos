@@ -85,7 +85,6 @@ namespace CafebrasContratos
                     _company.EndTransaction(BoWfTransOpt.wf_RollBack);
                 }
             }
-
         }
 
         private static void CriarMenus()
@@ -251,6 +250,9 @@ namespace CafebrasContratos
             if (EventType == BoAppEventTypes.aet_ShutDown)
             {
                 RemoverMenu();
+
+                // remove a aplicação da memória
+                System.Windows.Forms.Application.Exit();
             }
         }
 
