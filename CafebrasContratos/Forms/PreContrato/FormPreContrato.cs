@@ -71,6 +71,11 @@ namespace CafebrasContratos
             ItemUID = "CardName",
             Datasource = "U_CardName",
         };
+        public ItemForm _nomeEstrangeiro = new ItemForm()
+        {
+            ItemUID = "FrgnName",
+            Datasource = "U_FrgnName",
+        };
         public ItemForm _telefone = new ItemForm()
         {
             ItemUID = "Tel1",
@@ -549,9 +554,11 @@ namespace CafebrasContratos
             string cardcode = dataTable.GetValue("CardCode", 0);
             string cardname = dataTable.GetValue("CardName", 0);
             string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
+            string nomeEstrangeiro = dataTable.GetValue("CardFName", 0);
 
             dbdts.SetValue(_codigoPN.Datasource, 0, cardcode);
             dbdts.SetValue(_nomePN.Datasource, 0, cardname);
+            dbdts.SetValue(_nomeEstrangeiro.Datasource, 0, nomeEstrangeiro);
 
             PopularPessoasDeContato(form, cardcode, pessoaDeContato);
         }

@@ -20,10 +20,8 @@ namespace CafebrasContratos
         {
             ConectarComSAP();
 
-            testebranchcombug
-
             CriarEstruturaDeDados();
-            //commit sem bug
+
             CriarMenus();
 
             DeclararEventos();
@@ -63,14 +61,14 @@ namespace CafebrasContratos
             {
                 _company.StartTransaction();
 
-                using (Database db = new Database(_versaoAddon))
+                using (Database db = new Database())
                 {
                     var versoes = new List<Versionamento>() {
                         new Versao_Zero_Um(),
                         new Versao_Zero_Dois(),
                     };
 
-                    Versoes.Aplicar(db, versoes);
+                    GerenciadorVersoes.Aplicar(db, versoes, _versaoAddon);
                 }
 
                 _company.EndTransaction(BoWfTransOpt.wf_Commit);

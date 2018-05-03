@@ -145,6 +145,9 @@ namespace CafebrasContratos
         #region :: Versão 0.2
 
         public Coluna Transportadora { get { return new ColunaVarchar("Transp", "Cardcode Transportadora", 100); } }
+        public Coluna ValorSeguro { get { return new ColunaPrice("VSeguro", "Valor Seguro"); } }
+        public Coluna LocalRetirada { get { return new ColunaVarchar("LocalRet", "Local de Retirada", 100); } }
+        public Coluna NomeEstrangeiro { get { return new ColunaVarchar("FrgnName", "Nome estrangeiro do PN", 100); } }
 
         #endregion
 

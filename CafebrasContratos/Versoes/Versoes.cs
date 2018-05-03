@@ -1,22 +1,9 @@
-﻿using SAPHelper;
+﻿using SAPbobsCOM;
+using SAPHelper;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CafebrasContratos
 {
-    public static class Versoes
-    {
-        public static void Aplicar(Database db, List<Versionamento> versoes)
-        {
-            var dbVersao = db.Versao();
-            var versoesAtrasadas = versoes.OrderBy(v => v.Versao).Where(v => v.Versao < dbVersao);
-            foreach (var versao in versoesAtrasadas)
-            {
-                versao.Aplicar(db);
-            }
-        }
-    }
-
     public class Versao_Zero_Um : Versionamento
     {
         public override double Versao { get => 0.1; }
@@ -45,14 +32,22 @@ namespace CafebrasContratos
         public override void Aplicar(Database db)
         {
             var tabelaPreContrato = new TabelaPreContrato();
+
             db.CriarCampo(tabelaPreContrato.NomeComArroba, tabelaPreContrato.Transportadora);
+            db.CriarCampo(tabelaPreContrato.NomeComArroba, tabelaPreContrato.ValorSeguro);
+            db.CriarCampo(tabelaPreContrato.NomeComArroba, tabelaPreContrato.LocalRetirada);
+            db.CriarCampo(tabelaPreContrato.NomeComArroba, tabelaPreContrato.NomeEstrangeiro);
+
+            UserObjectsMD uDO = Global.Company.GetBusinessObject(BoObjectTypes.oUserObjectsMD);
+            if (uDO.GetByKey(tabelaPreContrato.NomeSemArroba))
+            {
+                db.DefinirColunasComoUDO(uDO, new List<Coluna>() {
+                    tabelaPreContrato.Transportadora,
+                    tabelaPreContrato.ValorSeguro,
+                    tabelaPreContrato.LocalRetirada,
+                    tabelaPreContrato.NomeEstrangeiro
+                });
+            }
         }
-    }
-
-    public abstract class Versionamento
-    {
-        public abstract double Versao { get; }
-
-        public abstract void Aplicar(Database db);
     }
 }
