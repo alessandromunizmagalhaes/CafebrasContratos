@@ -152,6 +152,44 @@ namespace CafebrasContratos
         #endregion
 
 
+        #region :: Versão 0.3
+
+        public Coluna Peneira01 { get { return new ColunaPercent("P01", "Peneira 01"); } }
+        public Coluna Peneira02 { get { return new ColunaPercent("P02", "Peneira 02"); } }
+        public Coluna Peneira03 { get { return new ColunaPercent("P03", "Peneira 03"); } }
+        public Coluna Peneira04 { get { return new ColunaPercent("P04", "Peneira 04"); } }
+        public Coluna Peneira05 { get { return new ColunaPercent("P05", "Peneira 05"); } }
+        public Coluna Peneira06 { get { return new ColunaPercent("P06", "Peneira 06"); } }
+        public Coluna Peneira07 { get { return new ColunaPercent("P07", "Peneira 07"); } }
+        public Coluna Peneira08 { get { return new ColunaPercent("P08", "Peneira 08"); } }
+        public Coluna Peneira09 { get { return new ColunaPercent("P09", "Peneira 09"); } }
+        public Coluna Peneira10 { get { return new ColunaPercent("P10", "Peneira 10"); } }
+        public Coluna Peneira11 { get { return new ColunaPercent("P11", "Peneira 11"); } }
+        public Coluna Peneira12 { get { return new ColunaPercent("P12", "Peneira 12"); } }
+        public Coluna Peneira13 { get { return new ColunaPercent("P13", "Peneira 13"); } }
+        public Coluna Peneira14 { get { return new ColunaPercent("P14", "Peneira 14"); } }
+        public Coluna Peneira15 { get { return new ColunaPercent("P15", "Peneira 15"); } }
+
+
+        public Coluna Diferencial01 { get { return new ColunaQuantity("D01", "Diferencial 01"); } }
+        public Coluna Diferencial02 { get { return new ColunaQuantity("D02", "Diferencial 02"); } }
+        public Coluna Diferencial03 { get { return new ColunaQuantity("D03", "Diferencial 03"); } }
+        public Coluna Diferencial04 { get { return new ColunaQuantity("D04", "Diferencial 04"); } }
+        public Coluna Diferencial05 { get { return new ColunaQuantity("D05", "Diferencial 05"); } }
+        public Coluna Diferencial06 { get { return new ColunaQuantity("D06", "Diferencial 06"); } }
+        public Coluna Diferencial07 { get { return new ColunaQuantity("D07", "Diferencial 07"); } }
+        public Coluna Diferencial08 { get { return new ColunaQuantity("D08", "Diferencial 08"); } }
+        public Coluna Diferencial09 { get { return new ColunaQuantity("D09", "Diferencial 09"); } }
+        public Coluna Diferencial10 { get { return new ColunaQuantity("D10", "Diferencial 10"); } }
+        public Coluna Diferencial11 { get { return new ColunaQuantity("D11", "Diferencial 11"); } }
+        public Coluna Diferencial12 { get { return new ColunaQuantity("D12", "Diferencial 12"); } }
+        public Coluna Diferencial13 { get { return new ColunaQuantity("D13", "Diferencial 13"); } }
+        public Coluna Diferencial14 { get { return new ColunaQuantity("D14", "Diferencial 14"); } }
+        public Coluna Diferencial15 { get { return new ColunaQuantity("D15", "Diferencial 15"); } }
+
+        #endregion
+
+
         public TabelaPreContrato() : base(
             "UPD_OCCC"
             , "Contrato de Compra Geral"

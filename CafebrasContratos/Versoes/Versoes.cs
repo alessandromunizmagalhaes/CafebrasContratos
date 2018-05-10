@@ -50,4 +50,56 @@ namespace CafebrasContratos
             }
         }
     }
+
+    public class Versao_Zero_Tres : Versionamento
+    {
+        public override double Versao { get => 0.3; }
+
+        public override void Aplicar(Database db)
+        {
+            var tabelaPreContrato = new TabelaPreContrato();
+
+            var colunas = new List<Coluna>() {
+                tabelaPreContrato.Peneira01,
+                tabelaPreContrato.Peneira02,
+                tabelaPreContrato.Peneira03,
+                tabelaPreContrato.Peneira04,
+                tabelaPreContrato.Peneira05,
+                tabelaPreContrato.Peneira06,
+                tabelaPreContrato.Peneira07,
+                tabelaPreContrato.Peneira08,
+                tabelaPreContrato.Peneira09,
+                tabelaPreContrato.Peneira10,
+                tabelaPreContrato.Peneira11,
+                tabelaPreContrato.Peneira12,
+                tabelaPreContrato.Peneira13,
+                tabelaPreContrato.Peneira14,
+                tabelaPreContrato.Peneira15,
+
+                tabelaPreContrato.Diferencial01,
+                tabelaPreContrato.Diferencial02,
+                tabelaPreContrato.Diferencial03,
+                tabelaPreContrato.Diferencial04,
+                tabelaPreContrato.Diferencial05,
+                tabelaPreContrato.Diferencial06,
+                tabelaPreContrato.Diferencial07,
+                tabelaPreContrato.Diferencial08,
+                tabelaPreContrato.Diferencial09,
+                tabelaPreContrato.Diferencial10,
+                tabelaPreContrato.Diferencial11,
+                tabelaPreContrato.Diferencial12,
+                tabelaPreContrato.Diferencial13,
+                tabelaPreContrato.Diferencial14,
+                tabelaPreContrato.Diferencial15,
+            };
+
+            foreach (var coluna in colunas)
+            {
+                db.CriarCampo(tabelaPreContrato.NomeComArroba, coluna);
+            }
+
+            var tabelaConfigPeneira = new TabelaConfiguracaoPeneira();
+            db.CriarTabela(tabelaConfigPeneira);
+        }
+    }
 }

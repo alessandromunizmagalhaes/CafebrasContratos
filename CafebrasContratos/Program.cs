@@ -13,7 +13,7 @@ namespace CafebrasContratos
         public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
         public static string _grupoAprovador;
-        public static double _versaoAddon = 0.2;
+        public static double _versaoAddon = 0.3;
 
         [STAThread]
         static void Main()
@@ -66,6 +66,7 @@ namespace CafebrasContratos
                     var versoes = new List<Versionamento>() {
                         new Versao_Zero_Um(),
                         new Versao_Zero_Dois(),
+                        new Versao_Zero_Tres(),
                     };
 
                     GerenciadorVersoes.Aplicar(db, versoes, _versaoAddon);
@@ -203,7 +204,6 @@ namespace CafebrasContratos
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
-                        formAberturaPorPeneira,
                         formDetalheCertificado,
                         formComissoes
                     }),

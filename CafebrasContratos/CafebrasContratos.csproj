@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Estrutura de Dados\TabelaConfiguracaoPeneira.cs" />
     <Compile Include="Estrutura de Dados\TabelasCadastroBasico.cs" />
     <Compile Include="Estrutura de Dados\TabelasPreContrato.cs" />
     <Compile Include="Estrutura de Dados\CamposTabelaSAP.cs" />
