@@ -18,6 +18,12 @@ namespace CafebrasContratos
             }
         }
 
+        public static bool ItemTipoBica(string itemcode)
+        {
+            var rs = Helpers.DoQuery($"SELECT U_UPD_TIPO_ITEM FROM OITM WHERE ItemCode = '{itemcode}'");
+            return rs.Fields.Item("U_UPD_TIPO_ITEM").Value == "B";
+        }
+
         public static bool TemGrupoDeItemConfiguradoParaChoose()
         {
             var rs = Helpers.DoQuery(SQLGrupoDeItensPermitidos);

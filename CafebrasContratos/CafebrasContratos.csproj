@@ -58,6 +58,7 @@
     <Compile Include="Forms\Cadastros\FormUnidadeComercial.cs" />
     <Compile Include="Forms\Cadastros\FormTipoOperacao.cs" />
     <Compile Include="Forms\Cadastros\FormSafra.cs" />
+    <Compile Include="Forms\Configuração\FormConfiguracaoPeneira.cs" />
     <Compile Include="Forms\Padrão SAP\FormUsuarios.cs" />
     <Compile Include="Forms\PreContrato\FormComissoes.cs" />
     <Compile Include="Forms\PreContrato\FormAberturaPorPeneira.cs" />

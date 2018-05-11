@@ -65,6 +65,13 @@
 							  Type="1"
 							  UniqueID="FormParticipante">
             </Menu>
+            <Menu Checked="0"
+							  Enabled="1"
+							  FatherUID="mnuCadastro"
+							  String="Configuração de Peneiras"
+							  Type="1"
+							  UniqueID="FormConfiguracaoPeneira">
+            </Menu>
 					</action>
 				</Menus>
 			</Menu>

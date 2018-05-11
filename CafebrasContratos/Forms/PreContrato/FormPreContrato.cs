@@ -1,6 +1,7 @@
 ﻿using SAPbouiCOM;
 using SAPHelper;
 using System;
+using System.Collections.Generic;
 
 namespace CafebrasContratos
 {
@@ -284,6 +285,32 @@ namespace CafebrasContratos
         #endregion
 
 
+        #region :: Campos Peneira
+
+        public readonly List<ItemForm> _peneiras = new List<ItemForm>() {
+            new ItemForm(){ ItemUID = "P01", Datasource = "U_P01" },
+            new ItemForm(){ ItemUID = "P02", Datasource = "U_P02" },
+            new ItemForm(){ ItemUID = "P03", Datasource = "U_P03" },
+            new ItemForm(){ ItemUID = "P04", Datasource = "U_P04" },
+            new ItemForm(){ ItemUID = "P05", Datasource = "U_P05" },
+            new ItemForm(){ ItemUID = "P06", Datasource = "U_P06" },
+            new ItemForm(){ ItemUID = "P07", Datasource = "U_P07" },
+            new ItemForm(){ ItemUID = "P08", Datasource = "U_P08" },
+            new ItemForm(){ ItemUID = "P09", Datasource = "U_P09" },
+            new ItemForm(){ ItemUID = "P10", Datasource = "U_P10" },
+            new ItemForm(){ ItemUID = "P11", Datasource = "U_P11" },
+            new ItemForm(){ ItemUID = "P12", Datasource = "U_P12" },
+            new ItemForm(){ ItemUID = "P13", Datasource = "U_P13" },
+            new ItemForm(){ ItemUID = "P14", Datasource = "U_P14" },
+            new ItemForm(){ ItemUID = "P15", Datasource = "U_P15" },
+        };
+
+        public ItemForm _totalPeneira = new ItemForm() { ItemUID = "totalP", Datasource = "totalP" };
+        public ItemForm _totalDiferencial = new ItemForm() { ItemUID = "totalD", Datasource = "totalD" };
+
+        #endregion
+
+
         #region :: Botões
 
         public ButtonForm _aberturaPorPeneira = new ButtonForm()
@@ -315,11 +342,12 @@ namespace CafebrasContratos
 
                 dbdts.SetValue("Code", 0, next_code);
                 dbdts.SetValue("Name", 0, next_code);
-                dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextCode(mainDbDataSource));
+
+                _numeroDoContrato.SetaValorDBDatasource(dbdts, GetNextCode(mainDbDataSource));
 
                 Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-                BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                BubbleEvent = FormEstaValido(form, dbdts);
             }
             else
             {
@@ -337,7 +365,7 @@ namespace CafebrasContratos
 
                 Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-                BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                BubbleEvent = FormEstaValido(form, dbdts);
             }
             else
             {
@@ -362,6 +390,7 @@ namespace CafebrasContratos
 
             string itemcode = dbdts.GetValue(_codigoItem.Datasource, 0);
             HabilitarBotaoAberturaPorPeneira(form, itemcode);
+            HabilitarCamposDePeneira(form, dbdts, itemcode);
         }
 
         #endregion
@@ -400,11 +429,13 @@ namespace CafebrasContratos
                     }
 
                     // clicando para a primeira aba já vir selecionada
-                    form.Items.Item("AbaGeral").Click();
+                    form.Items.Item(abaGeralUID).Click();
 
                     ConditionsParaFornecedores(form);
                     ConditionsParaDeposito(form);
                     ConditionsParaItens(form);
+
+                    GerirCamposPeneira(form);
                 }
                 catch (Exception e)
                 {
@@ -452,12 +483,23 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-
             if (EventoEmCampoDeValor(pVal.ItemUID))
             {
                 var form = GetForm(FormUID);
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
                 CalcularTotais(form, dbdts);
+            }
+            else if (EventoEmCampoDePeneira(pVal.ItemUID))
+            {
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
+                AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
+            }
+            else if (EventoEmCampoDeDiferencial(pVal.ItemUID))
+            {
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, mainDbDataSource);
+                AtualizarSomaDosDiferenciais(form, dbdts);
             }
         }
 
@@ -511,9 +553,12 @@ namespace CafebrasContratos
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            dbdts.SetValue(_dataInicio.Datasource, 0, Helpers.ToString(DateTime.Now));
-            dbdts.SetValue(_status.Datasource, 0, "O");
-            dbdts.SetValue(_numeroDoContrato.Datasource, 0, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
+            _dataInicio.SetaValorDBDatasource(dbdts, DateTime.Now);
+            _status.SetaValorDBDatasource(dbdts, "O");
+            _numeroDoContrato.SetaValorDBDatasource(dbdts, GetNextPrimaryKey(mainDbDataSource, _numeroDoContrato.Datasource));
+
+            AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
+            AtualizarSomaDosDiferenciais(form, dbdts);
 
             PopularPessoasDeContato(form, "", "");
 
@@ -536,17 +581,17 @@ namespace CafebrasContratos
             string itemcode = dataTable.GetValue("ItemCode", 0);
             string itemname = dataTable.GetValue("ItemName", 0);
 
-            dbdts.SetValue(_codigoItem.Datasource, 0, itemcode);
-            dbdts.SetValue(_nomeItem.Datasource, 0, itemname);
+            _codigoItem.SetaValorDBDatasource(dbdts, itemcode);
+            _nomeItem.SetaValorDBDatasource(dbdts, itemname);
 
             HabilitarBotaoAberturaPorPeneira(form, itemcode);
+            HabilitarCamposDePeneira(form, dbdts, itemcode);
         }
 
         private void OnWhsCodeChoose(DBDataSource dbdts, DataTable dataTable)
         {
             string whscode = dataTable.GetValue("WhsCode", 0);
-
-            dbdts.SetValue(_deposito.Datasource, 0, whscode);
+            _deposito.SetaValorDBDatasource(dbdts, whscode);
         }
 
         private void OnCardCodeChoose(SAPbouiCOM.Form form, DBDataSource dbdts, DataTable dataTable)
@@ -556,9 +601,9 @@ namespace CafebrasContratos
             string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
             string nomeEstrangeiro = dataTable.GetValue("CardFName", 0);
 
-            dbdts.SetValue(_codigoPN.Datasource, 0, cardcode);
-            dbdts.SetValue(_nomePN.Datasource, 0, cardname);
-            dbdts.SetValue(_nomeEstrangeiro.Datasource, 0, nomeEstrangeiro);
+            _codigoPN.SetaValorDBDatasource(dbdts, cardcode);
+            _nomePN.SetaValorDBDatasource(dbdts, cardname);
+            _nomeEstrangeiro.SetaValorDBDatasource(dbdts, nomeEstrangeiro);
 
             PopularPessoasDeContato(form, cardcode, pessoaDeContato);
         }
@@ -694,7 +739,7 @@ namespace CafebrasContratos
             _pessoasDeContato.Popular(form);
 
             var dbdts = GetDBDatasource(form, mainDbDataSource);
-            dbdts.SetValue(_pessoasDeContato.Datasource, 0, pessoaDeContatoSelecionada);
+            _pessoasDeContato.SetaValorDBDatasource(dbdts, pessoaDeContatoSelecionada);
             AtualizarDadosPessoaDeContato(cardcode, pessoaDeContatoSelecionada, dbdts);
         }
 
@@ -717,8 +762,8 @@ namespace CafebrasContratos
                 email = rs.Fields.Item("E_MailL").Value;
             }
 
-            dbdts.SetValue(_telefone.Datasource, 0, telefone);
-            dbdts.SetValue(_email.Datasource, 0, email);
+            _telefone.SetaValorDBDatasource(dbdts, telefone);
+            _email.SetaValorDBDatasource(dbdts, email);
         }
 
         private bool EventoEmCampoDeValor(string itemUID)
@@ -734,6 +779,16 @@ namespace CafebrasContratos
             ;
         }
 
+        private bool EventoEmCampoDePeneira(string itemUID)
+        {
+            return _peneiras.Find(p => p.ItemUID == itemUID) != null;
+        }
+
+        private bool EventoEmCampoDeDiferencial(string itemUID)
+        {
+            return _peneiras.Find(p => p.ItemUID.Replace("P", "D") == itemUID) != null;
+        }
+
         private void CalcularTotais(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
             double qtdPeso = Helpers.ToDouble(dbdts.GetValue(_quantidadeDePeso.Datasource, 0));
@@ -746,11 +801,11 @@ namespace CafebrasContratos
             try
             {
                 form.Freeze(true);
-                dbdts.SetValue(_totalLivre.Datasource, 0, Helpers.ToString(valorLivre * qtdSacas));
-                dbdts.SetValue(_totalICMS.Datasource, 0, Helpers.ToString(valorICMS * qtdSacas));
-                dbdts.SetValue(_totalSENAR.Datasource, 0, Helpers.ToString(valorSENAR * qtdSacas));
-                dbdts.SetValue(_totalFaturado.Datasource, 0, Helpers.ToString(valorFaturado * qtdSacas));
-                dbdts.SetValue(_totalBruto.Datasource, 0, Helpers.ToString(valorBruto * qtdSacas));
+                _totalLivre.SetaValorDBDatasource(dbdts, valorLivre * qtdSacas);
+                _totalICMS.SetaValorDBDatasource(dbdts, valorICMS * qtdSacas);
+                _totalSENAR.SetaValorDBDatasource(dbdts, valorSENAR * qtdSacas);
+                _totalFaturado.SetaValorDBDatasource(dbdts, valorFaturado * qtdSacas);
+                _totalBruto.SetaValorDBDatasource(dbdts, valorBruto * qtdSacas);
             }
             finally
             {
@@ -760,6 +815,7 @@ namespace CafebrasContratos
 
         private void HabilitarBotaoAberturaPorPeneira(SAPbouiCOM.Form form, string itemcode)
         {
+            /* -- código comentado porque agora a abertura de peneira são campos na tela.
             var botao_habilitado = false;
             var rs = Helpers.DoQuery($"SELECT U_UPD_TIPO_ITEM FROM OITM WHERE ItemCode = '{itemcode}'");
             if (rs.Fields.Item("U_UPD_TIPO_ITEM").Value == "B")
@@ -767,6 +823,182 @@ namespace CafebrasContratos
                 botao_habilitado = true;
             }
             form.Items.Item(_aberturaPorPeneira.ItemUID).Enabled = botao_habilitado;
+            */
+        }
+
+        private void HabilitarCamposDePeneira(SAPbouiCOM.Form form, DBDataSource dbdts, string itemcode)
+        {
+            var deve_habilitar = PreContrato.ItemTipoBica(itemcode);
+
+            foreach (var peneira in _peneiras)
+            {
+                var diferencialItemUID = peneira.ItemUID.Replace("P", "D");
+                form.Items.Item(peneira.ItemUID).Enabled = deve_habilitar;
+                form.Items.Item(diferencialItemUID).Enabled = deve_habilitar;
+
+                if (!deve_habilitar)
+                {
+                    peneira.SetaValorDBDatasource(dbdts, 0);
+                    new ItemForm() { ItemUID = diferencialItemUID, Datasource = "U_" + diferencialItemUID }.SetaValorDBDatasource(dbdts, 0);
+                }
+            }
+            AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
+            AtualizarSomaDosDiferenciais(form, dbdts);
+        }
+
+        private bool FormEstaValido(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            return CamposFormEstaoPreenchidos(form, dbdts) && RegrasDeNegocioEstaoValidas(form, dbdts);
+        }
+
+        private bool RegrasDeNegocioEstaoValidas(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            try
+            {
+                DatasEstaoValidas(form, dbdts);
+                if (PreContrato.ItemTipoBica(dbdts.GetValue(_codigoItem.Datasource, 0)))
+                {
+                    ValidarSomaDosPercentuaisDePeneira(dbdts);
+                }
+            }
+            catch (FormValidationException e)
+            {
+                Dialogs.MessageBox(e.Message);
+                if (!String.IsNullOrEmpty(e.AbaUID))
+                {
+                    form.Items.Item(e.AbaUID).Click();
+                }
+                form.Items.Item(e.Campo).Click();
+                return false;
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao realizar as validações de regras de negócio do formulário.\nErro: " + e.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void DatasEstaoValidas(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            var dataInicial = Helpers.ToDate(dbdts.GetValue(_dataInicio.Datasource, 0));
+            var dataFinal = Helpers.ToDate(dbdts.GetValue(_dataFim.Datasource, 0));
+
+            if (dataFinal < dataInicial)
+            {
+                throw new FormValidationException("O contrato não pode terminar antes do seu início.", _dataFim.ItemUID);
+            }
+        }
+
+        private void ValidarSomaDosPercentuaisDePeneira(DBDataSource dbdts)
+        {
+            if (SomaDosPercentuaisDePeneira(dbdts) != 100.00)
+            {
+                throw new FormValidationException("A soma dos percentuais deve ser 100%", "P01", abaItemUID);
+            }
+        }
+
+        private double SomaDosPercentuaisDePeneira(DBDataSource dbdts)
+        {
+            var totalPeneiras = 0.0;
+            foreach (var peneira in _peneiras)
+            {
+                totalPeneiras += Helpers.ToDouble(dbdts.GetValue(peneira.Datasource, 0));
+            }
+
+            return totalPeneiras;
+        }
+
+        private double SomaDosDiferenciais(DBDataSource dbdts)
+        {
+            var total = 0.0;
+            foreach (var peneira in _peneiras)
+            {
+                var diferencialDataSource = peneira.Datasource.Replace("P", "D");
+                total += Helpers.ToDouble(dbdts.GetValue(diferencialDataSource, 0));
+            }
+
+            return total;
+        }
+
+        private void AtualizarSomaDosPercentuaisDePeneira(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            _totalPeneira.SetaValorUserDataSource(form, SomaDosPercentuaisDePeneira(dbdts));
+        }
+
+        private void AtualizarSomaDosDiferenciais(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            _totalDiferencial.SetaValorUserDataSource(form, SomaDosDiferenciais(dbdts));
+        }
+
+        private void PosicionarCamposDeTotaisDePeneiras(SAPbouiCOM.Form form)
+        {
+            var topFromLast = 21;
+            var topLast = form.Items.Item(_peneiras[_peneiras.Count - 1].ItemUID).Top;
+
+            for (int i = 0; i < _peneiras.Count; i++)
+            {
+                var peneira = _peneiras[i];
+                if (!form.Items.Item(peneira.ItemUID).Visible)
+                {
+                    topLast = form.Items.Item(_peneiras[i - 1].ItemUID).Top;
+                    break;
+                }
+            }
+
+            var totalTop = topFromLast + topLast;
+
+            form.Items.Item("lbl" + _totalPeneira.ItemUID).Top = totalTop;
+            form.Items.Item(_totalPeneira.ItemUID).Top = totalTop;
+            form.Items.Item(_totalDiferencial.ItemUID).Top = totalTop;
+        }
+
+        private void GerirCamposPeneira(SAPbouiCOM.Form form)
+        {
+            try
+            {
+                // tem que por esse try/finally porque precisa de dar um freeze
+                // tem que dar o freeze porque eu só consigo fazer o item ficar invisivel
+                // se a aba estiver visivel.
+                // estou clicando na aba, deixando os itens invisiveis e voltando pra aba normal.
+                form.Freeze(true);
+
+                form.Items.Item(abaItemUID).Click();
+
+                var rs = Helpers.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
+                while (!rs.EoF)
+                {
+                    string peneiraUID = rs.Fields.Item("U_Peneira").Value;
+                    string nomePeneira = rs.Fields.Item("U_NomeP").Value;
+                    bool ativo = rs.Fields.Item("U_Ativo").Value == "Y";
+
+                    var itemPeneira = _peneiras.Find(p => p.ItemUID == peneiraUID);
+                    var labelPeneiraUID = "lbl" + itemPeneira.ItemUID;
+                    var diferencialUID = itemPeneira.ItemUID.Replace("P", "D");
+                    if (ativo)
+                    {
+                        ((StaticText)form.Items.Item(labelPeneiraUID).Specific).Caption = nomePeneira;
+                    }
+                    else
+                    {
+                        form.Items.Item(itemPeneira.ItemUID).Visible = false;
+                        form.Items.Item(labelPeneiraUID).Visible = false;
+                        form.Items.Item(diferencialUID).Visible = false;
+                    }
+
+                    rs.MoveNext();
+                }
+
+                // para posicionar o campo de total, tem que estar com a aba clicada, senão o visible sempre retorna false
+                PosicionarCamposDeTotaisDePeneiras(form);
+
+                form.Items.Item(abaGeralUID).Click();
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
         }
 
         #endregion

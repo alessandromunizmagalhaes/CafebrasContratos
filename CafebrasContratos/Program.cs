@@ -119,6 +119,7 @@ namespace CafebrasContratos
                 #region :: Forms Cadastro Básico
 
                 var formGrupoDeItens = new FormGrupoDeItens();
+                var formConfiguracaoPeneira = new FormConfiguracaoPeneira();
                 var formCertificado = new FormCertificado();
                 var formMetodoFinanceiro = new FormMetodoFinanceiro();
                 var formModalidade = new FormModalidade();
@@ -129,6 +130,7 @@ namespace CafebrasContratos
 
                 var formsCadastroBasico = new List<SAPHelper.Form>() {
                      formGrupoDeItens,
+                     formConfiguracaoPeneira,
                      formCertificado,
                      formMetodoFinanceiro,
                      formModalidade,
@@ -212,7 +214,8 @@ namespace CafebrasContratos
                         formAberturaPorPeneira,
                         formDetalheCertificado,
                         formComissoes,
-                        formGrupoDeItens
+                        formGrupoDeItens,
+                        formConfiguracaoPeneira
                     }),
                 });
 

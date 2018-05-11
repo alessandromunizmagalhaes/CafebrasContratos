@@ -24,9 +24,9 @@ namespace CafebrasContratos
             var values = string.Empty;
             for (int i = 1; i <= 15; i++)
             {
-                string count = i.ToString().PadLeft(2, '0');
-                string peneira = "P" + count;
-                string diferencial = "D" + count;
+                var count = i.ToString().PadLeft(2, '0');
+                var peneira = "P" + count;
+                var diferencial = "D" + count;
                 values += $@",('{i}', '{i}', '{peneira}', 'Y', '{peneira}', '{diferencial}')";
             }
 
