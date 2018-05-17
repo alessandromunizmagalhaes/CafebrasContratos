@@ -154,21 +154,21 @@ namespace CafebrasContratos
 
         #region :: Versão 0.3
 
-        public Coluna Peneira01 { get { return new ColunaPercent("P01", "Peneira 01"); } }
-        public Coluna Peneira02 { get { return new ColunaPercent("P02", "Peneira 02"); } }
-        public Coluna Peneira03 { get { return new ColunaPercent("P03", "Peneira 03"); } }
-        public Coluna Peneira04 { get { return new ColunaPercent("P04", "Peneira 04"); } }
-        public Coluna Peneira05 { get { return new ColunaPercent("P05", "Peneira 05"); } }
-        public Coluna Peneira06 { get { return new ColunaPercent("P06", "Peneira 06"); } }
-        public Coluna Peneira07 { get { return new ColunaPercent("P07", "Peneira 07"); } }
-        public Coluna Peneira08 { get { return new ColunaPercent("P08", "Peneira 08"); } }
-        public Coluna Peneira09 { get { return new ColunaPercent("P09", "Peneira 09"); } }
-        public Coluna Peneira10 { get { return new ColunaPercent("P10", "Peneira 10"); } }
-        public Coluna Peneira11 { get { return new ColunaPercent("P11", "Peneira 11"); } }
-        public Coluna Peneira12 { get { return new ColunaPercent("P12", "Peneira 12"); } }
-        public Coluna Peneira13 { get { return new ColunaPercent("P13", "Peneira 13"); } }
-        public Coluna Peneira14 { get { return new ColunaPercent("P14", "Peneira 14"); } }
-        public Coluna Peneira15 { get { return new ColunaPercent("P15", "Peneira 15"); } }
+        public Coluna Peneira01 { get { return new ColunaInt("P01", "Peneira 01"); } }
+        public Coluna Peneira02 { get { return new ColunaInt("P02", "Peneira 02"); } }
+        public Coluna Peneira03 { get { return new ColunaInt("P03", "Peneira 03"); } }
+        public Coluna Peneira04 { get { return new ColunaInt("P04", "Peneira 04"); } }
+        public Coluna Peneira05 { get { return new ColunaInt("P05", "Peneira 05"); } }
+        public Coluna Peneira06 { get { return new ColunaInt("P06", "Peneira 06"); } }
+        public Coluna Peneira07 { get { return new ColunaInt("P07", "Peneira 07"); } }
+        public Coluna Peneira08 { get { return new ColunaInt("P08", "Peneira 08"); } }
+        public Coluna Peneira09 { get { return new ColunaInt("P09", "Peneira 09"); } }
+        public Coluna Peneira10 { get { return new ColunaInt("P10", "Peneira 10"); } }
+        public Coluna Peneira11 { get { return new ColunaInt("P11", "Peneira 11"); } }
+        public Coluna Peneira12 { get { return new ColunaInt("P12", "Peneira 12"); } }
+        public Coluna Peneira13 { get { return new ColunaInt("P13", "Peneira 13"); } }
+        public Coluna Peneira14 { get { return new ColunaInt("P14", "Peneira 14"); } }
+        public Coluna Peneira15 { get { return new ColunaInt("P15", "Peneira 15"); } }
 
 
         public Coluna Diferencial01 { get { return new ColunaQuantity("D01", "Diferencial 01"); } }
