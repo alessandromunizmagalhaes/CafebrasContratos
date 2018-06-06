@@ -136,4 +136,14 @@ namespace CafebrasContratos
             }
         }
     }
+
+    public class Versao_Zero_Cinco : Versionamento
+    {
+        public override double Versao { get => 0.5; }
+
+        public override void Aplicar(Database db)
+        {
+            db.CriarTabela(new TabelaContratoFinal());
+        }
+    }
 }

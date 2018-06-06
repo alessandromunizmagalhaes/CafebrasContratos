@@ -7,48 +7,48 @@ namespace CafebrasContratos
     #region :: Tabelas Filhas
 
 
-    public class TabelaItensDoPreContrato : Tabela
+    public class TabelaItensDoContratoFinal : Tabela
     {
         public Coluna ItemCode { get { return new ColunaVarchar("ItemCode", "Código do Item", 60); } }
         public Coluna ItemName { get { return new ColunaVarchar("ItemName", "Nome do Item", 100); } }
         public Coluna Percentual { get { return new ColunaPercent("PercItem", "Percentual"); } }
         public Coluna Diferencial { get { return new ColunaQuantity("Difere", "Diferencial"); } }
 
-        public TabelaItensDoPreContrato() : base("UPD_CCC1", "Itens do Contrato", BoUTBTableType.bott_MasterDataLines)
+        public TabelaItensDoContratoFinal() : base("UPD_CFC1", "Itens do Contrato", BoUTBTableType.bott_MasterDataLines)
         {
 
         }
     }
 
-    public class TabelaCorretoresDoPreContrato : Tabela
+    public class TabelaCorretoresDoContratoFinal : Tabela
     {
         public Coluna CodigoParticipante { get { return new ColunaVarchar("PartCode", "Código do Corretor", 30); } }
         public Coluna ItemName { get { return new ColunaPercent("PercCom", "Percentual"); } }
         public Coluna Percentual { get { return new ColunaAtivo(); } }
 
-        public TabelaCorretoresDoPreContrato() : base("UPD_CCC2", "Corretores do Contrato", BoUTBTableType.bott_MasterDataLines)
+        public TabelaCorretoresDoContratoFinal() : base("UPD_CFC2", "Corretores do Contrato", BoUTBTableType.bott_MasterDataLines)
         {
 
         }
     }
 
-    public class TabelaResponsaveisDoPreContrato : Tabela
+    public class TabelaResponsaveisDoContratoFinal : Tabela
     {
         public Coluna CodigoParticipante { get { return new ColunaVarchar("PartCode", "Código do Corretor", 30); } }
         public Coluna ItemName { get { return new ColunaPercent("PercCom", "Percentual"); } }
         public Coluna Percentual { get { return new ColunaAtivo(); } }
 
-        public TabelaResponsaveisDoPreContrato() : base("UPD_CCC3", "Responsáveis do Contrato", BoUTBTableType.bott_MasterDataLines)
+        public TabelaResponsaveisDoContratoFinal() : base("UPD_CFC3", "Responsáveis do Contrato", BoUTBTableType.bott_MasterDataLines)
         {
 
         }
     }
 
-    public class TabelaCertificadosDoPreContrato : Tabela
+    public class TabelaCertificadosDoContratoFinal : Tabela
     {
         public Coluna MyProperty { get { return new ColunaVarchar("Certif", "Certificado", 30); } }
 
-        public TabelaCertificadosDoPreContrato() : base("UPD_CCC4", "Certificados do Contrato", BoUTBTableType.bott_MasterDataLines)
+        public TabelaCertificadosDoContratoFinal() : base("UPD_CFC4", "Certificados do Contrato", BoUTBTableType.bott_MasterDataLines)
         {
 
         }
@@ -58,23 +58,36 @@ namespace CafebrasContratos
     #endregion
 
 
-    #region :: Pre Contrato
+    #region :: Contrato Final
 
-    public class TabelaPreContrato : TabelaUDO
+    public class TabelaContratoFinal : TabelaUDO
     {
         #region :: Cabecalho
 
-        public Coluna NumeroDoContrato { get { return new ColunaInt("DocNumCC", "Numero do Contrato"); } }
-        public Coluna DataInicial { get { return new ColunaDate("DataIni", "Data Inicial"); } }
-        public Coluna DataFinal { get { return new ColunaDate("DataFim", "Data Final"); } }
-        public Coluna Status
+        public Coluna NumeroDoContrato { get { return new ColunaInt("DocNumCF", "Numero do Contrato"); } }
+        public Coluna NumeroDoPreContrato { get { return new ColunaInt("DocNumCC", "Numero do PréContrato"); } }
+        public Coluna StatusQualidade
         {
             get
             {
-                return new ColunaVarchar("StatusQua", "Situação", 1, false, "A", new List<ValorValido>(){
-                    new ValorValido(StatusPreContrato.Aberto, "Aberto"),
-                    new ValorValido(StatusPreContrato.Autorizado, "Autorizado"),
-                    new ValorValido(StatusPreContrato.Cancelado, "Cancelado"),
+                return new ColunaVarchar("StatusQua", "Status Qualidade", 1, false, StatusContratoFinalQualidade.PreAprovado, new List<ValorValido>(){
+                    new ValorValido(StatusContratoFinalQualidade.PreAprovado, "Pré Aprovado"),
+                    new ValorValido(StatusContratoFinalQualidade.Aprovado, "Aprovado"),
+                    new ValorValido(StatusContratoFinalQualidade.NaoAprovado, "Não Aprovado"),
+                });
+            }
+        }
+        public Coluna StatusContrato
+        {
+            get
+            {
+                return new ColunaVarchar("StatusCtr", "Status Contrato", 1, false, StatusContratoFinal.Aberto, new List<ValorValido>(){
+                    new ValorValido(StatusContratoFinal.Aberto, "Aberto"),
+                    new ValorValido(StatusContratoFinal.Renegociacao, "Renegociação"),
+                    new ValorValido(StatusContratoFinal.Liberado, "Liberado"),
+                    new ValorValido(StatusContratoFinal.Autorizado, "Autorizado"),
+                    new ValorValido(StatusContratoFinal.Cancelado, "Cancelado"),
+                    new ValorValido(StatusContratoFinal.Fechado, "Fechado"),
                 });
             }
         }
@@ -96,6 +109,10 @@ namespace CafebrasContratos
         public Coluna UnidadeComercial { get { return new ColunaVarchar("UnidCom", "Unidade Comercial", 30); } }
         public Coluna TipoOperacao { get { return new ColunaVarchar("TipoOper", "Tipo Operação", 30); } }
         public Coluna MetodoFinanceiro { get { return new ColunaVarchar("MtdFin", "Método Financeiro", 30); } }
+        public Coluna Transportadora { get { return new ColunaVarchar("Transp", "Cardcode Transportadora", 100); } }
+        public Coluna ValorSeguro { get { return new ColunaPrice("VSeguro", "Valor Seguro"); } }
+        public Coluna LocalRetirada { get { return new ColunaVarchar("LocalRet", "Local de Retirada", 100); } }
+        public Coluna NomeEstrangeiro { get { return new ColunaVarchar("FrgnName", "Nome estrangeiro do PN", 100); } }
 
         #endregion
 
@@ -142,17 +159,8 @@ namespace CafebrasContratos
         #endregion
 
 
-        #region :: Versão 0.2
 
-        public Coluna Transportadora { get { return new ColunaVarchar("Transp", "Cardcode Transportadora", 100); } }
-        public Coluna ValorSeguro { get { return new ColunaPrice("VSeguro", "Valor Seguro"); } }
-        public Coluna LocalRetirada { get { return new ColunaVarchar("LocalRet", "Local de Retirada", 100); } }
-        public Coluna NomeEstrangeiro { get { return new ColunaVarchar("FrgnName", "Nome estrangeiro do PN", 100); } }
-
-        #endregion
-
-
-        #region :: Versão 0.3
+        #region :: Campos de Peneira
 
         public Coluna Peneira01 { get { return new ColunaInt("P01", "Peneira 01"); } }
         public Coluna Peneira02 { get { return new ColunaInt("P02", "Peneira 02"); } }
@@ -190,16 +198,16 @@ namespace CafebrasContratos
         #endregion
 
 
-        public TabelaPreContrato() : base(
-            "UPD_OCCC"
-            , "Contrato de Compra Geral"
+        public TabelaContratoFinal() : base(
+            "UPD_OCFC"
+            , "Contrato de Compra Final"
             , BoUTBTableType.bott_MasterData
             , new UDOParams() { CanDelete = BoYesNoEnum.tNO, CanCancel = BoYesNoEnum.tNO }
             , new List<Tabela>() {
-                    new TabelaItensDoPreContrato()
-                    , new TabelaCorretoresDoPreContrato()
-                    , new TabelaResponsaveisDoPreContrato()
-                    , new TabelaCertificadosDoPreContrato()
+                    new TabelaItensDoContratoFinal()
+                    , new TabelaCorretoresDoContratoFinal()
+                    , new TabelaResponsaveisDoContratoFinal()
+                    , new TabelaCertificadosDoContratoFinal()
                 }
             )
         {

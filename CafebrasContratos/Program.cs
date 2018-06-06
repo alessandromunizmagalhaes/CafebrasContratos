@@ -13,7 +13,7 @@ namespace CafebrasContratos
         public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
         public static string _grupoAprovador;
-        public static double _versaoAddon = 0.4;
+        public static double _versaoAddon = 0.5;
 
         [STAThread]
         static void Main()
@@ -68,6 +68,7 @@ namespace CafebrasContratos
                         new Versao_Zero_Dois(),
                         new Versao_Zero_Tres(),
                         new Versao_Zero_Quatro(),
+                        new Versao_Zero_Cinco()
                     };
 
                     GerenciadorVersoes.Aplicar(db, versoes, _versaoAddon);
@@ -144,18 +145,21 @@ namespace CafebrasContratos
                 #endregion
 
 
-                #region :: Forms Pré Contrato
+                #region :: Forms Detalhe de Contrato
 
                 var formPreContrato = new FormPreContrato();
+                var formContratoFinal = new FormContratoFinal();
                 var formAberturaPorPeneira = new FormPreContratoAberturaPorPeneira();
                 var formDetalheCertificado = new FormPreContratoDetalheCertificado();
                 var formComissoes = new FormPreContratoComissoes();
 
-                var formsDetalhePreContrato = new List<SAPHelper.Form>() {
+                var formsDetalheContrato = new List<SAPHelper.Form>() {
                      formAberturaPorPeneira,
                      formDetalheCertificado,
                      formComissoes
                 };
+
+                var x = typeof(FormContrato);
 
                 #endregion
 
@@ -169,9 +173,9 @@ namespace CafebrasContratos
 
                 #region :: Grupos de Forms
 
-                var formsVisible = new List<SAPHelper.Form>() { formPreContrato };
+                var formsVisible = new List<SAPHelper.Form>() { formPreContrato, formContratoFinal };
                 formsVisible.AddRange(formsCadastroBasico);
-                formsVisible.AddRange(formsDetalhePreContrato);
+                formsVisible.AddRange(formsDetalheContrato);
 
                 #endregion
 
@@ -179,14 +183,22 @@ namespace CafebrasContratos
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formsVisible),
                     new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formUsuarios),
-                    new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, formPreContrato),
-                    new MapEventsToForms(BoEventTypes.et_VALIDATE, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formContratoFinal
+                    }),
+                    new MapEventsToForms(BoEventTypes.et_VALIDATE, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formContratoFinal
+                    }),
                     new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, new List<SAPHelper.Form>(){
                         formPreContrato,
+                        formContratoFinal,
                         formAberturaPorPeneira
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, new List<SAPHelper.Form>(){
                         formPreContrato,
+                        formContratoFinal,
                         formCertificado,
                         formMetodoFinanceiro,
                         formModalidade,
@@ -197,6 +209,7 @@ namespace CafebrasContratos
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_UPDATE, new List<SAPHelper.Form>(){
                         formPreContrato,
+                        formContratoFinal,
                         formCertificado,
                         formMetodoFinanceiro,
                         formModalidade,
@@ -205,26 +218,36 @@ namespace CafebrasContratos
                         formUnidadeComercial,
                         formParticipante
                     }),
-                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, formPreContrato),
+                    new MapEventsToForms(BoEventTypes.et_FORM_DATA_LOAD, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formContratoFinal
+                    }),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
                         formDetalheCertificado,
                         formComissoes
                     }),
                     new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato,
+                        formContratoFinal,
                         formAberturaPorPeneira,
                         formDetalheCertificado,
                         formComissoes,
                         formGrupoDeItens,
                         formConfiguracaoPeneira
                     }),
+                    new MapEventsToForms(BoEventTypes.et_MATRIX_LINK_PRESSED, new List<SAPHelper.Form>(){
+                        formPreContrato
+                    }),
                 });
 
-                var formsAdicionarNovo = new List<SAPHelper.Form>() { formPreContrato };
+                var formsAdicionarNovo = new List<SAPHelper.Form>() { formPreContrato, formContratoFinal };
                 formsAdicionarNovo.AddRange(formsCadastroBasico);
 
                 FormEvents.DeclararEventosInternos(EventosInternos.AdicionarNovo, formsAdicionarNovo);
-                FormEvents.DeclararEventosInternos(EventosInternos.Pesquisar, formPreContrato);
+                FormEvents.DeclararEventosInternos(EventosInternos.Pesquisar, new List<SAPHelper.Form>(){
+                    formPreContrato,
+                    formContratoFinal
+                });
             }
             catch (Exception e)
             {

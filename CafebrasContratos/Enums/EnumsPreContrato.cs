@@ -1,6 +1,6 @@
 ﻿namespace CafebrasContratos
 {
-    public static class StatusContrato
+    public static class StatusPreContrato
     {
         public const string Aberto = "O";
         public const string Autorizado = "A";

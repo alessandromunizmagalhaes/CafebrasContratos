@@ -33,23 +33,8 @@ namespace CafebrasContratos
         #region :: Campos
 
 
-        public ItemForm _numeroDoContrato = new ItemForm()
-        {
-            ItemUID = "DocNumCC",
-            Datasource = "U_DocNumCC",
-        };
-        public ItemFormObrigatorio _dataInicio = new ItemFormObrigatorio()
-        {
-            ItemUID = "DataIni",
-            Datasource = "U_DataIni",
-            Mensagem = "A Data de Início é obrigatória."
-        };
-        public ItemFormObrigatorio _dataFim = new ItemFormObrigatorio()
-        {
-            ItemUID = "DataFim",
-            Datasource = "U_DataFim",
-            Mensagem = "A Data Final é obrigatória."
-        };
+        public abstract ItemForm _numeroDoContrato { get; }
+
         public ItemForm _status = new ItemForm()
         {
             ItemUID = "StatusQua",
@@ -278,6 +263,21 @@ namespace CafebrasContratos
             ItemUID = "VlrFrete",
             Datasource = "U_VlrFrete"
         };
+        public ItemForm _valorSeguro = new ItemForm()
+        {
+            ItemUID = "VSeguro",
+            Datasource = "U_VSeguro"
+        };
+        public ItemForm _transportadora = new ItemForm()
+        {
+            ItemUID = "Transp",
+            Datasource = "U_Transp"
+        };
+        public ItemForm _localRetirada = new ItemForm()
+        {
+            ItemUID = "LocalRet",
+            Datasource = "U_LocalRet"
+        };
         public ItemForm _saldoFinanceiro = new ItemForm()
         {
             ItemUID = "SFin",
@@ -345,7 +345,7 @@ namespace CafebrasContratos
                 dbdts.SetValue("Code", 0, next_code);
                 dbdts.SetValue("Name", 0, next_code);
 
-                _numeroDoContrato.SetaValorDBDatasource(dbdts, GetNextCode(MainDbDataSource));
+                _numeroDoContrato.SetaValorDBDatasource(dbdts, ProximaChavePrimaria());
 
                 Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
@@ -393,6 +393,8 @@ namespace CafebrasContratos
             string itemcode = dbdts.GetValue(_codigoItem.Datasource, 0);
             HabilitarBotaoAberturaPorPeneira(form, itemcode);
             HabilitarCamposDePeneira(form, dbdts, itemcode);
+
+            QuandoPuderAdicionarObjetoFilho(form);
         }
 
         #endregion
@@ -470,17 +472,17 @@ namespace CafebrasContratos
             if (pVal.ItemUID == _aberturaPorPeneira.ItemUID)
             {
                 var formAberturaPorPeneira = Activator.CreateInstance(FormAberturaPorPeneiraType);
-                CriarFormFilho(baseDirectory + "/" + nomeFormAberturaPorPeneira, FormUID, (SAPHelper.Form)formAberturaPorPeneira);
+                CriarFormFilho(baseDirectory + nomeFormAberturaPorPeneira, FormUID, (SAPHelper.Form)formAberturaPorPeneira);
             }
             else if (pVal.ItemUID == _certificado.ItemUID)
             {
                 var formDetalheCertificado = Activator.CreateInstance(FormDetalheCertificadoType);
-                CriarFormFilho(baseDirectory + "/" + nomeFormDetalheCertificado, FormUID, (SAPHelper.Form)formDetalheCertificado);
+                CriarFormFilho(baseDirectory + nomeFormDetalheCertificado, FormUID, (SAPHelper.Form)formDetalheCertificado);
             }
             else if (pVal.ItemUID == _comissoes.ItemUID)
             {
                 var formComissoes = Activator.CreateInstance(FormComissoesType);
-                CriarFormFilho(baseDirectory + "/" + nomeFormComissoes, FormUID, (SAPHelper.Form)formComissoes);
+                CriarFormFilho(baseDirectory + nomeFormComissoes, FormUID, (SAPHelper.Form)formComissoes);
             }
         }
 
@@ -558,16 +560,16 @@ namespace CafebrasContratos
 
             var dbdts = GetDBDatasource(form, MainDbDataSource);
 
-            _dataInicio.SetaValorDBDatasource(dbdts, DateTime.Now);
-            _status.SetaValorDBDatasource(dbdts, "O");
-            _numeroDoContrato.SetaValorDBDatasource(dbdts, GetNextPrimaryKey(MainDbDataSource, _numeroDoContrato.Datasource));
+            IniciarValoresAoAdicionarNovo(form, dbdts);
+
+            _numeroDoContrato.SetaValorDBDatasource(dbdts, ProximaChavePrimaria());
 
             AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
             AtualizarSomaDosDiferenciais(form, dbdts);
 
             PopularPessoasDeContato(form, "", "");
 
-            form.Items.Item(_dataFim.ItemUID).Click();
+            QuandoNaoPuderAdicionarObjetoFilho(form);
         }
 
         public override void _OnPesquisar(SAPbouiCOM.Form form)
@@ -701,10 +703,8 @@ namespace CafebrasContratos
 
         #region :: Regras de negócio
 
-        private void FormEmModoVisualizacao(SAPbouiCOM.Form form)
+        protected virtual void FormEmModoVisualizacao(SAPbouiCOM.Form form)
         {
-            form.Items.Item(_dataInicio.ItemUID).Enabled = false;
-            form.Items.Item(_dataFim.ItemUID).Enabled = false;
             form.Items.Item(_descricao.ItemUID).Enabled = false;
             form.Items.Item(_codigoPN.ItemUID).Enabled = false;
             form.Items.Item(_pessoasDeContato.ItemUID).Enabled = false;
@@ -722,6 +722,9 @@ namespace CafebrasContratos
             form.Items.Item(_valorFaturado.ItemUID).Enabled = false;
             form.Items.Item(_valorBruto.ItemUID).Enabled = false;
             form.Items.Item(_valorFrete.ItemUID).Enabled = false;
+            form.Items.Item(_valorSeguro.ItemUID).Enabled = false;
+            form.Items.Item(_transportadora.ItemUID).Enabled = false;
+            form.Items.Item(_localRetirada.ItemUID).Enabled = false;
 
             form.Items.Item(_codigoItem.ItemUID).Enabled = false;
             form.Items.Item(_deposito.ItemUID).Enabled = false;
@@ -732,15 +735,22 @@ namespace CafebrasContratos
             form.Items.Item(_diferencial.ItemUID).Enabled = false;
             form.Items.Item(_taxaNY.ItemUID).Enabled = false;
             form.Items.Item(_taxaDollar.ItemUID).Enabled = false;
+
+            foreach (var peneira in _peneiras)
+            {
+                form.Items.Item(peneira.ItemUID).Enabled = false;
+                form.Items.Item(peneira.ItemUID.Replace("P", "D")).Enabled = false;
+            }
         }
 
-        private void PopularPessoasDeContato(SAPbouiCOM.Form form, string cardcode, string pessoaDeContatoSelecionada)
+        protected void PopularPessoasDeContato(SAPbouiCOM.Form form, string cardcode, string pessoaDeContatoSelecionada)
         {
             _pessoasDeContato.SQL =
                     $@"SELECT 
-	                    Name, Name
+	                    Name, ISNULL(FirstName,Name)
                     FROM OCPR 
-                    WHERE CardCode = '{cardcode}'";
+                    WHERE CardCode = '{cardcode}'
+                    ORDER BY ISNULL(FirstName,Name)";
             _pessoasDeContato.Popular(form);
 
             var dbdts = GetDBDatasource(form, MainDbDataSource);
@@ -860,7 +870,7 @@ namespace CafebrasContratos
         {
             try
             {
-                DatasEstaoValidas(form, dbdts);
+                RegrasDeNegocioAoSalvar(form, dbdts);
                 if (ItemTipoBica(dbdts.GetValue(_codigoItem.Datasource, 0)))
                 {
                     ValidarSomaDosPercentuaisDePeneira(dbdts);
@@ -883,17 +893,6 @@ namespace CafebrasContratos
             }
 
             return true;
-        }
-
-        private void DatasEstaoValidas(SAPbouiCOM.Form form, DBDataSource dbdts)
-        {
-            var dataInicial = Helpers.ToDate(dbdts.GetValue(_dataInicio.Datasource, 0));
-            var dataFinal = Helpers.ToDate(dbdts.GetValue(_dataFim.Datasource, 0));
-
-            if (dataFinal < dataInicial)
-            {
-                throw new FormValidationException("O contrato não pode terminar antes do seu início.", _dataFim.ItemUID);
-            }
         }
 
         private void ValidarSomaDosPercentuaisDePeneira(DBDataSource dbdts)
@@ -1039,6 +1038,12 @@ namespace CafebrasContratos
         public abstract Type FormAberturaPorPeneiraType { get; }
         public abstract Type FormComissoesType { get; }
         public abstract Type FormDetalheCertificadoType { get; }
+        public abstract void IniciarValoresAoAdicionarNovo(SAPbouiCOM.Form form, DBDataSource dbdts);
+        public abstract string ProximaChavePrimaria();
+        public abstract void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts);
+        public abstract void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
+        public abstract void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
+
         #endregion
     }
 }

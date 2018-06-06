@@ -45,8 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\EnumsContratoFinal.cs" />
+    <Compile Include="Enums\EnumsPreContrato.cs" />
     <Compile Include="Estrutura de Dados\TabelaConfiguracaoPeneira.cs" />
     <Compile Include="Estrutura de Dados\TabelasCadastroBasico.cs" />
+    <Compile Include="Estrutura de Dados\TabelasContratoFinal.cs" />
     <Compile Include="Estrutura de Dados\TabelasPreContrato.cs" />
     <Compile Include="Estrutura de Dados\CamposTabelaSAP.cs" />
     <Compile Include="Estrutura de Dados\TabelaGrupoCafe.cs" />
@@ -59,6 +62,10 @@
     <Compile Include="Forms\Cadastros\FormTipoOperacao.cs" />
     <Compile Include="Forms\Cadastros\FormSafra.cs" />
     <Compile Include="Forms\Configuração\FormConfiguracaoPeneira.cs" />
+    <Compile Include="Forms\Contrato Final\FormContratoFinal.cs" />
+    <Compile Include="Forms\Contrato Final\FormContratoFinalAberturaPorPeneira.cs" />
+    <Compile Include="Forms\Contrato Final\FormContratoFinalComissoes.cs" />
+    <Compile Include="Forms\Contrato Final\FormContratoFinalDetalheCertificado.cs" />
     <Compile Include="Forms\Padrão SAP\FormUsuarios.cs" />
     <Compile Include="Forms\Contrato\FormComissoes.cs" />
     <Compile Include="Forms\Contrato\FormAberturaPorPeneira.cs" />
@@ -72,7 +79,6 @@
     <Compile Include="Forms\Pré Contrato\FormPreContratoDetalheCertificado.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Enums\StatusContrato.cs" />
     <Compile Include="Versoes\Versoes.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -124,7 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\Debug\" />
-    <Folder Include="Forms\Contrato Final\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
