@@ -21,9 +21,14 @@ namespace CafebrasContratos
 
         public override string FormType { get { return "FormPreContrato"; } }
         public override string MainDbDataSource { get { return new TabelaPreContrato().NomeComArroba; } }
+
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormPreContratoAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormPreContratoComissoes); } }
         public override Type FormDetalheCertificadoType { get { return typeof(FormPreContratoDetalheCertificado); } }
+
+        public override string FormAberturaPorPeneiraSRF { get { return "FormPreContratoAberturaPorPeneira.srf"; } }
+        public override string FormComissoesSRF { get { return "FormPreContratoComissoes.srf"; } }
+        public override string FormDetalheCertificadoSRF { get { return "FormPreContratoDetalheCertificado.srf"; } }
 
         public override bool UsuarioPermitido()
         {
@@ -118,22 +123,7 @@ namespace CafebrasContratos
             base.OnAfterFormDataLoad(ref BusinessObjectInfo, out BubbleEvent);
 
             var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, MainDbDataSource);
-            var dt = GetDatatable(BusinessObjectInfo.FormUID, _matrizContratosFinais.Datasource);
-
-            var docnumcc = dbdts.GetValue(_numeroDoContrato.Datasource, 0);
-            dt.ExecuteQuery(
-                $@"SELECT 
-                        U_DocNumCF,U_CardCode, U_CardName, U_Descricao 
-                    FROM [@UPD_OCFC] 
-                    WHERE U_DocNumCC = {docnumcc} 
-                    ORDER BY U_DocNumCF"
-                );
-
-            var mtx = GetMatrix(form, _matrizContratosFinais.ItemUID);
-            mtx.LoadFromDataSource();
-
-            mtx.AutoResizeColumns();
+            AtualizarMatriz(form);
         }
 
         #endregion
@@ -166,10 +156,9 @@ namespace CafebrasContratos
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             if (pVal.ItemUID == _botaoAdicionar.ItemUID)
             {
-                CriarFormFilho(baseDirectory + "FormContratoFinal.srf", FormUID, new FormContratoFinal());
+                FormContratoFinal.AbrirCriandoNovoRegistro(FormUID);
             }
             else
             {
@@ -185,8 +174,8 @@ namespace CafebrasContratos
             {
                 var mtx = GetMatrix(FormUID, _matrizContratosFinais.ItemUID);
                 var codigo = mtx.Columns.Item(pVal.ColUID).Cells.Item(pVal.Row).Specific.Value;
-                Dialogs.MessageBox($@"abre o form no contrato {codigo}");
-                // abre o form de contrato filho em modo de edição..
+
+                FormContratoFinal.AbrirNoRegistro(codigo);
             }
         }
 
@@ -210,6 +199,41 @@ namespace CafebrasContratos
         private void ToggleBotaoAdicionar(SAPbouiCOM.Form form, bool habilitado)
         {
             form.Items.Item(_botaoAdicionar.ItemUID).Enabled = habilitado;
+        }
+
+        public void AtualizarMatriz(SAPbouiCOM.Form form)
+        {
+            var dbdts = GetDBDatasource(form, MainDbDataSource);
+            var dt = GetDatatable(form, _matrizContratosFinais.Datasource);
+
+            var docnumcc = dbdts.GetValue(_numeroDoContrato.Datasource, 0);
+
+            try
+            {
+                form.Freeze(true);
+                dt.ExecuteQuery(
+                    $@"SELECT 
+                        U_DocNumCF,U_CardCode, U_CardName, U_Descricao 
+                    FROM [@UPD_OCFC] 
+                    WHERE U_DocNumCC = {docnumcc} 
+                    ORDER BY U_DocNumCF"
+                    );
+
+                var mtx = GetMatrix(form, _matrizContratosFinais.ItemUID);
+                mtx.LoadFromDataSource();
+
+                mtx.AutoResizeColumns();
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
+        public static string GetCode(string numPreContrato)
+        {
+            var rs = Helpers.DoQuery($@"SELECT Code FROM [@UPD_OCCC] WHERE U_DocNumCC = {numPreContrato}");
+            return rs.Fields.Item("Code").Value;
         }
 
         #endregion

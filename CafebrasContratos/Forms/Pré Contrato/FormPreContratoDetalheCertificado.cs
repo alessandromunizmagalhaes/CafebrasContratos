@@ -2,7 +2,7 @@
 {
     public class FormPreContratoDetalheCertificado : FormDetalheCertificado
     {
-        public override string FormType { get { return "FormDetalheCertificado"; } }
+        public override string FormType { get { return "FormPreContratoDetalheCertificado"; } }
         public override string mainDbDataSource { get { return new TabelaCertificadosDoPreContrato().NomeComArroba; } }
 
         public override Matriz _matriz

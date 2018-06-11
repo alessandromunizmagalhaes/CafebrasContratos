@@ -6,6 +6,13 @@ namespace CafebrasContratos
 {
     public class FormContratoFinal : FormContrato
     {
+        #region :: Propriedades
+
+        private const string SRF = "FormContratoFinal.srf";
+
+        #endregion
+
+
         #region :: Overrides
 
         public override string FormType { get { return "FormContratoFinal"; } }
@@ -13,6 +20,10 @@ namespace CafebrasContratos
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormContratoFinalAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormContratoFinalComissoes); } }
         public override Type FormDetalheCertificadoType { get { return typeof(FormContratoFinalDetalheCertificado); } }
+
+        public override string FormAberturaPorPeneiraSRF { get { return "FormContratoFinalAberturaPorPeneira.srf"; } }
+        public override string FormComissoesSRF { get { return "FormContratoFinalComissoes.srf"; } }
+        public override string FormDetalheCertificadoSRF { get { return "FormContratoFinalDetalheCertificado.srf"; } }
 
         public static string _fatherFormUID = "";
 
@@ -55,7 +66,11 @@ namespace CafebrasContratos
 
         public override void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-
+            var numPreContrato = dbdts.GetValue(_numeroDoPreContrato.Datasource, 0);
+            if (string.IsNullOrEmpty(numPreContrato))
+            {
+                throw new BusinessRuleException("Não foi possível identificar qual o Pré-Contrato referente a este Contrato Final.");
+            }
         }
 
         public override void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
@@ -98,6 +113,27 @@ namespace CafebrasContratos
         #endregion
 
 
+        #region :: Eventos de Formulários
+
+        public override void OnAfterFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            base.OnAfterFormDataAdd(ref BusinessObjectInfo, out BubbleEvent);
+
+            var dbdts = GetDBDatasource(BusinessObjectInfo.FormUID, MainDbDataSource);
+            AtualizarSaldoPreContrato(dbdts);
+        }
+
+        public override void OnAfterFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            base.OnAfterFormDataUpdate(ref BusinessObjectInfo, out BubbleEvent);
+
+            var dbdts = GetDBDatasource(BusinessObjectInfo.FormUID, MainDbDataSource);
+            AtualizarSaldoPreContrato(dbdts);
+        }
+
+        #endregion
+
+
         #region :: Eventos de Item
 
         public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -106,26 +142,129 @@ namespace CafebrasContratos
 
             var form = GetForm(FormUID);
             form.EnableMenu(((int)EventosInternos.AdicionarNovo).ToString(), false);
-            form.Mode = BoFormMode.fm_ADD_MODE;
 
-            var dbdtsContratoFinal = GetDBDatasource(form, MainDbDataSource);
-
-            var fatherForm = GetForm(_fatherFormUID);
-            var dbdtsPreContrato = GetDBDatasource(_fatherFormUID, new TabelaPreContrato().NomeComArroba);
-
-            try
+            if (form.Mode == BoFormMode.fm_ADD_MODE)
             {
-                form.Freeze(true);
-                CopyIfFieldsMatch(dbdtsPreContrato, ref dbdtsContratoFinal);
+                Dialogs.Success("Carregando informações do Contrato de Compra Geral... Aguarde...");
 
-                _OnAdicionarNovo(form);
+                var fatherForm = GetForm(_fatherFormUID);
 
-                PopularPessoasDeContato(form, dbdtsPreContrato.GetValue(_codigoPN.Datasource, 0), dbdtsPreContrato.GetValue(_pessoasDeContato.Datasource, 0));
+                var dbdtsCF = GetDBDatasource(form, MainDbDataSource);
+                var dbdtsPC = GetDBDatasource(_fatherFormUID, new TabelaPreContrato().NomeComArroba);
+
+                var dbdtsCFCertificado = GetDBDatasource(form, new TabelaCertificadosDoContratoFinal().NomeComArroba);
+                var dbdtsPCCertificado = GetDBDatasource(_fatherFormUID, new TabelaCertificadosDoPreContrato().NomeComArroba);
+
+                var dbdtsCFResponsavel = GetDBDatasource(form, new TabelaResponsaveisDoContratoFinal().NomeComArroba);
+                var dbdtsPCResponsavel = GetDBDatasource(_fatherFormUID, new TabelaResponsaveisDoPreContrato().NomeComArroba);
+
+                var dbdtsCFCorretor = GetDBDatasource(form, new TabelaCorretoresDoContratoFinal().NomeComArroba);
+                var dbdtsPCCorretor = GetDBDatasource(_fatherFormUID, new TabelaCorretoresDoPreContrato().NomeComArroba);
+
+                try
+                {
+                    form.Freeze(true);
+
+                    CopyIfFieldsMatch(dbdtsPC, ref dbdtsCF);
+                    CopyIfFieldsMatch(dbdtsPCCertificado, ref dbdtsCFCertificado);
+                    CopyIfFieldsMatch(dbdtsPCResponsavel, ref dbdtsCFResponsavel);
+                    CopyIfFieldsMatch(dbdtsPCCorretor, ref dbdtsCFCorretor);
+
+                    var saldoSacas = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDeSacas.Datasource, 0));
+                    var saldoPeso = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDePeso.Datasource, 0));
+
+                    saldoSacas = saldoSacas < 0 ? 0 : saldoSacas;
+                    saldoPeso = saldoPeso < 0 ? 0 : saldoPeso;
+
+                    _quantidadeDeSacas.SetaValorDBDatasource(dbdtsCF, saldoSacas);
+                    _quantidadeDePeso.SetaValorDBDatasource(dbdtsCF, saldoPeso);
+
+                    CalcularTotais(form, dbdtsCF);
+
+                    _OnAdicionarNovo(form);
+
+                    PopularPessoasDeContato(form, dbdtsPC.GetValue(_codigoPN.Datasource, 0), dbdtsPC.GetValue(_pessoasDeContato.Datasource, 0));
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
+
+                Dialogs.Success("Ok.");
             }
-            finally
+        }
+
+        public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            base.OnAfterFormClose(FormUID, ref pVal, out BubbleEvent);
+
+            var formTypePreContrato = new FormPreContrato().FormType;
+            for (int i = 0; i < Global.SBOApplication.Forms.Count; i++)
             {
-                form.Freeze(false);
+                var currentForm = Global.SBOApplication.Forms.Item(i);
+                if (currentForm.TypeEx == formTypePreContrato)
+                {
+                    new FormPreContrato().AtualizarMatriz(currentForm);
+                }
             }
+        }
+
+        #endregion
+
+
+        #region :: Regras de Negócio
+
+        private void AtualizarSaldoPreContrato(DBDataSource dbdts)
+        {
+            var tabelaPreContrato = Global.Company.UserTables.Item(new TabelaPreContrato().NomeSemArroba);
+            var numPreContrato = dbdts.GetValue(_numeroDoPreContrato.Datasource, 0).Trim();
+            var numContratoFinal = dbdts.GetValue(_numeroDoContrato.Datasource, 0).Trim();
+            var codePreContrato = FormPreContrato.GetCode(numPreContrato);
+            if (tabelaPreContrato.GetByKey(codePreContrato))
+            {
+                var rs = Helpers.DoQuery(
+                    $@"SELECT 
+	                        SUM(U_QtdSaca) as SaldoSaca, SUM(U_QtdPeso) as SaldoPeso
+	                        FROM [@UPD_OCFC] 
+	                        WHERE 1 = 1
+		                        AND U_DocNumCC = {numPreContrato} AND U_DocNumCF <> {numContratoFinal}"
+                );
+
+                double sacasPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDeSacas.Datasource).Value;
+                double pesoPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDePeso.Datasource).Value;
+
+                double saldoSacas = rs.Fields.Item("SaldoSaca").Value;
+                double saldoPeso = rs.Fields.Item("SaldoPeso").Value;
+
+                string strSacasContratoFinal = dbdts.GetValue(_saldoDeSacas.Datasource, 0);
+                double sacasContratoFinal = Helpers.ToDouble(strSacasContratoFinal);
+
+                string strPesoContratoFinal = dbdts.GetValue(_saldoDePeso.Datasource, 0);
+                double pesoContratoFinal = Helpers.ToDouble(strPesoContratoFinal);
+
+                tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value = sacasPreContrato - saldoSacas - sacasContratoFinal;
+                tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value = pesoPreContrato - saldoPeso - pesoContratoFinal;
+
+                tabelaPreContrato.Update();
+            }
+        }
+
+        #endregion
+
+
+        #region :: Métodos Estáticos
+
+        public static void AbrirNoRegistro(string codigo)
+        {
+            var findParams = new CriarFormFindParams() { chavePrimariaUID = "DocNumCF", chavePrimariaValor = codigo };
+            var criarFormParams = new CriarFormParams() { Mode = BoFormMode.fm_FIND_MODE, FindParams = findParams };
+            CriarForm(AppDomain.CurrentDomain.BaseDirectory + SRF, criarFormParams);
+        }
+
+        public static void AbrirCriandoNovoRegistro(string fatherFormUID)
+        {
+            var formParams = new CriarFormParams() { Mode = BoFormMode.fm_ADD_MODE };
+            CriarFormFilho(AppDomain.CurrentDomain.BaseDirectory + SRF, fatherFormUID, new FormContratoFinal(), formParams);
         }
 
         #endregion

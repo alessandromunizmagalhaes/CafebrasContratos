@@ -2,7 +2,7 @@
 {
     public class FormPreContratoAberturaPorPeneira : FormAberturaPorPeneira
     {
-        public override string FormType { get { return "FormAberturaPorPeneira"; } }
+        public override string FormType { get { return "FormPreContratoAberturaPorPeneira"; } }
         public override string mainDbDataSource { get { return new TabelaItensDoPreContrato().NomeComArroba; } }
         public override string fatherFormMainDbDataSource { get { return new TabelaPreContrato().NomeComArroba; } }
 

@@ -149,17 +149,26 @@ namespace CafebrasContratos
 
                 var formPreContrato = new FormPreContrato();
                 var formContratoFinal = new FormContratoFinal();
-                var formAberturaPorPeneira = new FormPreContratoAberturaPorPeneira();
-                var formDetalheCertificado = new FormPreContratoDetalheCertificado();
-                var formComissoes = new FormPreContratoComissoes();
+
+                var formPreContratoAberturaPorPeneira = new FormPreContratoAberturaPorPeneira();
+                var formContratoFinalAberturaPorPeneira = new FormContratoFinalAberturaPorPeneira();
+
+                var formPreContratoDetalheCertificado = new FormPreContratoDetalheCertificado();
+                var formContratoFinalDetalheCertificado = new FormContratoFinalDetalheCertificado();
+
+                var formPreContratoComissoes = new FormPreContratoComissoes();
+                var formContratoFinalComissoes = new FormContratoFinalComissoes();
 
                 var formsDetalheContrato = new List<SAPHelper.Form>() {
-                     formAberturaPorPeneira,
-                     formDetalheCertificado,
-                     formComissoes
-                };
+                     formPreContratoAberturaPorPeneira,
+                     formContratoFinalAberturaPorPeneira,
 
-                var x = typeof(FormContrato);
+                     formPreContratoDetalheCertificado,
+                     formContratoFinalDetalheCertificado,
+
+                     formPreContratoComissoes,
+                     formContratoFinalComissoes
+                };
 
                 #endregion
 
@@ -193,8 +202,9 @@ namespace CafebrasContratos
                     }),
                     new MapEventsToForms(BoEventTypes.et_CHOOSE_FROM_LIST, new List<SAPHelper.Form>(){
                         formPreContrato,
+                        formPreContratoAberturaPorPeneira,
                         formContratoFinal,
-                        formAberturaPorPeneira
+                        formContratoFinalAberturaPorPeneira
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_DATA_ADD, new List<SAPHelper.Form>(){
                         formPreContrato,
@@ -223,15 +233,21 @@ namespace CafebrasContratos
                         formContratoFinal
                     }),
                     new MapEventsToForms(BoEventTypes.et_FORM_CLOSE, new List<SAPHelper.Form>(){
-                        formDetalheCertificado,
-                        formComissoes
+                        formPreContratoDetalheCertificado,
+                        formPreContratoComissoes,
+                        formContratoFinalDetalheCertificado,
+                        formContratoFinalComissoes,
+                        formContratoFinal
                     }),
                     new MapEventsToForms(BoEventTypes.et_ITEM_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato,
                         formContratoFinal,
-                        formAberturaPorPeneira,
-                        formDetalheCertificado,
-                        formComissoes,
+                        formPreContratoAberturaPorPeneira,
+                        formPreContratoDetalheCertificado,
+                        formPreContratoComissoes,
+                        formContratoFinalAberturaPorPeneira,
+                        formContratoFinalDetalheCertificado,
+                        formContratoFinalComissoes,
                         formGrupoDeItens,
                         formConfiguracaoPeneira
                     }),

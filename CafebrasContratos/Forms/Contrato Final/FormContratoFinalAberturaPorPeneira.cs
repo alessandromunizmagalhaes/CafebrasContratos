@@ -3,7 +3,7 @@ namespace CafebrasContratos
 {
     public class FormContratoFinalAberturaPorPeneira : FormAberturaPorPeneira
     {
-        public override string FormType { get { return "FormAberturaPorPeneira"; } }
+        public override string FormType { get { return "FormContratoFinalAberturaPorPeneira"; } }
         public override string mainDbDataSource { get { return new TabelaItensDoContratoFinal().NomeComArroba; } }
         public override string fatherFormMainDbDataSource { get { return new TabelaContratoFinal().NomeComArroba; } }
 

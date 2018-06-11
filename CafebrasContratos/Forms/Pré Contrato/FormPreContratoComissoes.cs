@@ -2,7 +2,7 @@
 {
     public class FormPreContratoComissoes : FormComissoes
     {
-        public override string FormType { get { return "FormComissoes"; } }
+        public override string FormType { get { return "FormPreContratoComissoes"; } }
         public override string corretorDbDataSource { get { return new TabelaCorretoresDoPreContrato().NomeComArroba; } }
         public override string responsavelDbDataSource { get { return new TabelaResponsaveisDoPreContrato().NomeComArroba; } }
 

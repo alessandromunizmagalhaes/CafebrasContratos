@@ -2,7 +2,7 @@
 {
     public class FormContratoFinalComissoes : FormComissoes
     {
-        public override string FormType { get { return "FormComissoes"; } }
+        public override string FormType { get { return "FormContratoFinalComissoes"; } }
         public override string corretorDbDataSource { get { return new TabelaCorretoresDoContratoFinal().NomeComArroba; } }
         public override string responsavelDbDataSource { get { return new TabelaResponsaveisDoContratoFinal().NomeComArroba; } }
 

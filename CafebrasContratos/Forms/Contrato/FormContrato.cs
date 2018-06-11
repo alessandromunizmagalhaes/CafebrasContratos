@@ -12,10 +12,6 @@ namespace CafebrasContratos
         public abstract override string FormType { get; }
         public abstract string MainDbDataSource { get; }
 
-        private const string nomeFormAberturaPorPeneira = "FormAberturaPorPeneira.srf";
-        private const string nomeFormDetalheCertificado = "FormDetalheCertificado.srf";
-        private const string nomeFormComissoes = "FormComissoes.srf";
-
         private const string abaGeralUID = "AbaGeral";
         private const string abaItemUID = "AbaItem";
         private const string abaContratoFinalUID = "AbaCFinal";
@@ -472,17 +468,17 @@ namespace CafebrasContratos
             if (pVal.ItemUID == _aberturaPorPeneira.ItemUID)
             {
                 var formAberturaPorPeneira = Activator.CreateInstance(FormAberturaPorPeneiraType);
-                CriarFormFilho(baseDirectory + nomeFormAberturaPorPeneira, FormUID, (SAPHelper.Form)formAberturaPorPeneira);
+                CriarFormFilho(baseDirectory + FormAberturaPorPeneiraSRF, FormUID, (SAPHelper.Form)formAberturaPorPeneira);
             }
             else if (pVal.ItemUID == _certificado.ItemUID)
             {
                 var formDetalheCertificado = Activator.CreateInstance(FormDetalheCertificadoType);
-                CriarFormFilho(baseDirectory + nomeFormDetalheCertificado, FormUID, (SAPHelper.Form)formDetalheCertificado);
+                CriarFormFilho(baseDirectory + FormDetalheCertificadoSRF, FormUID, (SAPHelper.Form)formDetalheCertificado);
             }
             else if (pVal.ItemUID == _comissoes.ItemUID)
             {
                 var formComissoes = Activator.CreateInstance(FormComissoesType);
-                CriarFormFilho(baseDirectory + nomeFormComissoes, FormUID, (SAPHelper.Form)formComissoes);
+                CriarFormFilho(baseDirectory + FormComissoesSRF, FormUID, (SAPHelper.Form)formComissoes);
             }
         }
 
@@ -804,7 +800,7 @@ namespace CafebrasContratos
             return _peneiras.Find(p => p.ItemUID.Replace("P", "D") == itemUID) != null;
         }
 
-        private void CalcularTotais(SAPbouiCOM.Form form, DBDataSource dbdts)
+        protected void CalcularTotais(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
             double qtdPeso = Helpers.ToDouble(dbdts.GetValue(_quantidadeDePeso.Datasource, 0));
             double qtdSacas = Helpers.ToDouble(dbdts.GetValue(_quantidadeDeSacas.Datasource, 0));
@@ -821,6 +817,9 @@ namespace CafebrasContratos
                 _totalSENAR.SetaValorDBDatasource(dbdts, valorSENAR * qtdSacas);
                 _totalFaturado.SetaValorDBDatasource(dbdts, valorFaturado * qtdSacas);
                 _totalBruto.SetaValorDBDatasource(dbdts, valorBruto * qtdSacas);
+
+                _saldoDePeso.SetaValorDBDatasource(dbdts, qtdPeso);
+                _saldoDeSacas.SetaValorDBDatasource(dbdts, qtdSacas);
             }
             finally
             {
@@ -875,6 +874,12 @@ namespace CafebrasContratos
                 {
                     ValidarSomaDosPercentuaisDePeneira(dbdts);
                 }
+            }
+            catch (BusinessRuleException e)
+            {
+                Dialogs.MessageBox(e.Message);
+
+                return false;
             }
             catch (FormValidationException e)
             {
@@ -1038,6 +1043,9 @@ namespace CafebrasContratos
         public abstract Type FormAberturaPorPeneiraType { get; }
         public abstract Type FormComissoesType { get; }
         public abstract Type FormDetalheCertificadoType { get; }
+        public abstract string FormAberturaPorPeneiraSRF { get; }
+        public abstract string FormComissoesSRF { get; }
+        public abstract string FormDetalheCertificadoSRF { get; }
         public abstract void IniciarValoresAoAdicionarNovo(SAPbouiCOM.Form form, DBDataSource dbdts);
         public abstract string ProximaChavePrimaria();
         public abstract void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts);
