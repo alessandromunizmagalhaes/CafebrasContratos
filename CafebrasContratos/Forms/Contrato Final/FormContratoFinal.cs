@@ -1,6 +1,7 @@
 ﻿using SAPbouiCOM;
 using SAPHelper;
 using System;
+using System.Collections.Generic;
 
 namespace CafebrasContratos
 {
@@ -75,12 +76,12 @@ namespace CafebrasContratos
 
         public override void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
         {
-            //TODO: habilitar botões que dizem respeito a criação de pedido de venda... não pode adicionar pedido se o contrato não estiver adicionado
+            ToggleBotao(form, true);
         }
 
         public override void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
         {
-            //TODO: desabilitar botões que dizem respeito a criação de pedido de venda... não pode adicionar pedido se o contrato não estiver adicionado
+            ToggleBotao(form, false);
         }
 
         #endregion
@@ -113,13 +114,32 @@ namespace CafebrasContratos
         #endregion
 
 
+        #region :: Definição de Botões
+
+        private ComboForm _botaoComboCopiar = new ComboForm()
+        {
+            ItemUID = "btnCopiar",
+            ValoresPadrao = new Dictionary<string, string>() {
+                {"1","Pedido de Compra"},
+                {"2","Adiantamento para Fornecedor"},
+                {"3","Recebimento de Mercadoria"},
+                {"4","Devolução de Mercadoria"},
+                {"5","Nota Fiscal de Entrada"},
+                {"6","Devolução de Nota Fiscal de Entrada"},
+            }
+        };
+
+        #endregion
+
+
         #region :: Eventos de Formulários
 
         public override void OnAfterFormDataAdd(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             base.OnAfterFormDataAdd(ref BusinessObjectInfo, out BubbleEvent);
 
-            var dbdts = GetDBDatasource(BusinessObjectInfo.FormUID, MainDbDataSource);
+            var form = GetForm(BusinessObjectInfo.FormUID);
+            var dbdts = GetDBDatasource(form, MainDbDataSource);
             AtualizarSaldoPreContrato(dbdts);
         }
 
@@ -142,6 +162,9 @@ namespace CafebrasContratos
 
             var form = GetForm(FormUID);
             form.EnableMenu(((int)EventosInternos.AdicionarNovo).ToString(), false);
+
+            var botaoComboCopiar = (ButtonCombo)form.Items.Item(_botaoComboCopiar.ItemUID).Specific;
+            _botaoComboCopiar.Popular(botaoComboCopiar.ValidValues);
 
             if (form.Mode == BoFormMode.fm_ADD_MODE)
             {
@@ -247,6 +270,11 @@ namespace CafebrasContratos
 
                 tabelaPreContrato.Update();
             }
+        }
+
+        private void ToggleBotao(SAPbouiCOM.Form form, bool habilitado)
+        {
+            form.Items.Item(_botaoComboCopiar.ItemUID).Enabled = habilitado;
         }
 
         #endregion

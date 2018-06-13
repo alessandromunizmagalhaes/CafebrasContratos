@@ -199,6 +199,7 @@ namespace CafebrasContratos
         private void ToggleBotaoAdicionar(SAPbouiCOM.Form form, bool habilitado)
         {
             form.Items.Item(_botaoAdicionar.ItemUID).Enabled = habilitado;
+            form.Items.Item(_botaoRemover.ItemUID).Enabled = habilitado;
         }
 
         public void AtualizarMatriz(SAPbouiCOM.Form form)
