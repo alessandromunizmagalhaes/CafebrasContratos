@@ -4,6 +4,7 @@
     {
         public override string FormType { get { return "FormPreContratoDetalheCertificado"; } }
         public override string mainDbDataSource { get { return new TabelaCertificadosDoPreContrato().NomeComArroba; } }
+        public override FormContrato formPai { get { return new FormPreContrato(); } }
 
         public override Matriz _matriz
         {
@@ -19,7 +20,7 @@
 
         public override bool UsuarioPermitido()
         {
-            return new FormPreContrato().UsuarioPermitido();
+            return formPai.UsuarioPermitido();
         }
     }
 }

@@ -17,6 +17,8 @@ namespace CafebrasContratos
             }
         }
 
+        public Coluna PercentualComissao { get { return new ColunaPercent("PercCom", "Percentual de Comissão"); } }
+
         public TabelaParticipante() : base("UPD_PART", "Cadastro de Participantes", BoUTBTableType.bott_MasterData, new UDOParams() { CanDelete = BoYesNoEnum.tNO, EnableEnhancedForm = BoYesNoEnum.tNO })
         {
 

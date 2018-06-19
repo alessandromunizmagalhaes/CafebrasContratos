@@ -151,7 +151,7 @@ namespace CafebrasContratos
             var form = GetForm(pVal.FormUID);
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            _matriz.RemoverLinha(form, dbdts);
+            _matriz.RemoverLinhaSelecionada(form, dbdts);
         }
 
         #endregion

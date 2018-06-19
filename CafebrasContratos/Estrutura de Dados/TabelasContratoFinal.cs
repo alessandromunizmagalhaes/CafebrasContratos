@@ -54,6 +54,17 @@ namespace CafebrasContratos
         }
     }
 
+    public class TabelaAnexosDoContratoFinal : Tabela
+    {
+        public Coluna Caminho { get { return new ColunaLink("Path", "Caminho"); } }
+        public Coluna Data { get { return new ColunaDate("Date", "Data"); } }
+
+        public TabelaAnexosDoContratoFinal() : base("UPD_CFC5", "Anexos do Contrato", BoUTBTableType.bott_MasterDataLines)
+        {
+
+        }
+    }
+
 
     #endregion
 
@@ -64,8 +75,10 @@ namespace CafebrasContratos
     {
         #region :: Cabecalho
 
-        public Coluna NumeroDoContrato { get { return new ColunaInt("DocNumCF", "Numero do Contrato"); } }
+        public Coluna NumeroDoContrato { get { return new ColunaVarchar("DocNumCF", "Numero do Contrato", 50); } }
         public Coluna NumeroDoPreContrato { get { return new ColunaInt("DocNumCC", "Numero do PréContrato"); } }
+        public Coluna DataInicial { get { return new ColunaDate("DataIni", "Data Inicial"); } }
+        public Coluna DataFinal { get { return new ColunaDate("DataFim", "Data Final"); } }
         public Coluna StatusQualidade
         {
             get
@@ -81,8 +94,8 @@ namespace CafebrasContratos
         {
             get
             {
-                return new ColunaVarchar("StatusCtr", "Status Contrato", 1, false, StatusContratoFinal.Aberto, new List<ValorValido>(){
-                    new ValorValido(StatusContratoFinal.Aberto, "Aberto"),
+                return new ColunaVarchar("StatusCtr", "Status Contrato", 1, false, StatusContratoFinal.Esboço, new List<ValorValido>(){
+                    new ValorValido(StatusContratoFinal.Esboço, "Aberto"),
                     new ValorValido(StatusContratoFinal.Renegociacao, "Renegociação"),
                     new ValorValido(StatusContratoFinal.Liberado, "Liberado"),
                     new ValorValido(StatusContratoFinal.Autorizado, "Autorizado"),
@@ -159,7 +172,6 @@ namespace CafebrasContratos
         #endregion
 
 
-
         #region :: Campos de Peneira
 
         public Coluna Peneira01 { get { return new ColunaInt("P01", "Peneira 01"); } }
@@ -195,6 +207,24 @@ namespace CafebrasContratos
         public Coluna Diferencial14 { get { return new ColunaQuantity("D14", "Diferencial 14"); } }
         public Coluna Diferencial15 { get { return new ColunaQuantity("D15", "Diferencial 15"); } }
 
+
+        public Coluna Label01 { get { return new ColunaVarchar("L01", "Label 01", 120); } }
+        public Coluna Label02 { get { return new ColunaVarchar("L02", "Label 02", 120); } }
+        public Coluna Label03 { get { return new ColunaVarchar("L03", "Label 03", 120); } }
+        public Coluna Label04 { get { return new ColunaVarchar("L04", "Label 04", 120); } }
+        public Coluna Label05 { get { return new ColunaVarchar("L05", "Label 05", 120); } }
+        public Coluna Label06 { get { return new ColunaVarchar("L06", "Label 06", 120); } }
+        public Coluna Label07 { get { return new ColunaVarchar("L07", "Label 07", 120); } }
+        public Coluna Label08 { get { return new ColunaVarchar("L08", "Label 08", 120); } }
+        public Coluna Label09 { get { return new ColunaVarchar("L09", "Label 09", 120); } }
+        public Coluna Label10 { get { return new ColunaVarchar("L10", "Label 10", 120); } }
+        public Coluna Label11 { get { return new ColunaVarchar("L11", "Label 11", 120); } }
+        public Coluna Label12 { get { return new ColunaVarchar("L12", "Label 12", 120); } }
+        public Coluna Label13 { get { return new ColunaVarchar("L13", "Label 13", 120); } }
+        public Coluna Label14 { get { return new ColunaVarchar("L14", "Label 14", 120); } }
+        public Coluna Label15 { get { return new ColunaVarchar("L15", "Label 15", 120); } }
+
+
         #endregion
 
 
@@ -208,6 +238,7 @@ namespace CafebrasContratos
                     , new TabelaCorretoresDoContratoFinal()
                     , new TabelaResponsaveisDoContratoFinal()
                     , new TabelaCertificadosDoContratoFinal()
+                    , new TabelaAnexosDoContratoFinal()
                 }
             )
         {

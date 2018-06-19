@@ -2,7 +2,7 @@
 {
     public static class StatusContratoFinal
     {
-        public const string Aberto = "O";
+        public const string Esboço = "O";
         public const string Renegociacao = "R";
         public const string Liberado = "L";
         public const string Autorizado = "A";

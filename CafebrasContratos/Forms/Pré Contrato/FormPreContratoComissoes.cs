@@ -5,6 +5,7 @@
         public override string FormType { get { return "FormPreContratoComissoes"; } }
         public override string corretorDbDataSource { get { return new TabelaCorretoresDoPreContrato().NomeComArroba; } }
         public override string responsavelDbDataSource { get { return new TabelaResponsaveisDoPreContrato().NomeComArroba; } }
+        public override FormContrato formPai { get { return new FormPreContrato(); } }
 
         public override MatrizCorretores _corretores
         {
@@ -32,7 +33,7 @@
 
         public override bool UsuarioPermitido()
         {
-            return new FormPreContrato().UsuarioPermitido();
+            return formPai.UsuarioPermitido();
         }
     }
 }

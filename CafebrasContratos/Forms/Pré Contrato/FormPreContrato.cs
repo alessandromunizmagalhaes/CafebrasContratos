@@ -21,6 +21,7 @@ namespace CafebrasContratos
 
         public override string FormType { get { return "FormPreContrato"; } }
         public override string MainDbDataSource { get { return new TabelaPreContrato().NomeComArroba; } }
+        public override string anexoDbDataSource { get { return new TabelaAnexosDoPreContrato().NomeComArroba; } }
 
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormPreContratoAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormPreContratoComissoes); } }
@@ -44,11 +45,10 @@ namespace CafebrasContratos
 
         public override void IniciarValoresAoAdicionarNovo(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            _dataInicio.SetaValorDBDatasource(dbdts, DateTime.Now);
-            _status.SetaValorDBDatasource(dbdts, StatusPreContrato.Aberto);
+            _status.SetValorDBDatasource(dbdts, StatusPreContrato.Esboço);
         }
 
-        public override string ProximaChavePrimaria()
+        public override string ProximaChavePrimaria(DBDataSource dbdts)
         {
             return GetNextPrimaryKey(MainDbDataSource, _numeroDoContrato.Datasource);
         }
@@ -56,20 +56,11 @@ namespace CafebrasContratos
         protected override void FormEmModoVisualizacao(SAPbouiCOM.Form form)
         {
             base.FormEmModoVisualizacao(form);
-
-            form.Items.Item(_dataInicio.ItemUID).Enabled = false;
-            form.Items.Item(_dataFim.ItemUID).Enabled = false;
         }
 
         public override void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            var dataInicial = Helpers.ToDate(dbdts.GetValue(_dataInicio.Datasource, 0));
-            var dataFinal = Helpers.ToDate(dbdts.GetValue(_dataFim.Datasource, 0));
 
-            if (dataFinal < dataInicial)
-            {
-                throw new FormValidationException("O contrato não pode terminar antes do seu início.", _dataFim.ItemUID);
-            }
         }
 
         public override void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
@@ -80,6 +71,11 @@ namespace CafebrasContratos
         public override void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
         {
             ToggleBotaoAdicionar(form, false);
+        }
+
+        public override bool ContratoPodeSerAlterado(string status)
+        {
+            return status == StatusPreContrato.Esboço;
         }
 
         #endregion
@@ -98,18 +94,6 @@ namespace CafebrasContratos
                 };
             }
         }
-        public ItemFormObrigatorio _dataInicio = new ItemFormObrigatorio()
-        {
-            ItemUID = "DataIni",
-            Datasource = "U_DataIni",
-            Mensagem = "A Data de Início é obrigatória."
-        };
-        public ItemFormObrigatorio _dataFim = new ItemFormObrigatorio()
-        {
-            ItemUID = "DataFim",
-            Datasource = "U_DataFim",
-            Mensagem = "A Data Final é obrigatória."
-        };
 
         #endregion
 
@@ -120,10 +104,13 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
+
             base.OnAfterFormDataLoad(ref BusinessObjectInfo, out BubbleEvent);
 
             var form = GetForm(BusinessObjectInfo.FormUID);
             AtualizarMatriz(form);
+
+            var dbdts = GetDBDatasource(form, MainDbDataSource);
         }
 
         #endregion
@@ -135,10 +122,6 @@ namespace CafebrasContratos
         {
             ItemUID = "btnAdd",
         };
-        private ButtonForm _botaoRemover = new ButtonForm()
-        {
-            ItemUID = "btnRmv",
-        };
 
         #endregion
 
@@ -149,8 +132,11 @@ namespace CafebrasContratos
         {
             base.OnAfterFormVisible(FormUID, ref pVal, out BubbleEvent);
 
-            var mtx = GetMatrix(FormUID, _matrizContratosFinais.ItemUID);
-            _matrizContratosFinais.Bind(mtx);
+            if (BubbleEvent)
+            {
+                var mtx = GetMatrix(FormUID, _matrizContratosFinais.ItemUID);
+                _matrizContratosFinais.Bind(mtx);
+            }
         }
 
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -158,7 +144,15 @@ namespace CafebrasContratos
             BubbleEvent = true;
             if (pVal.ItemUID == _botaoAdicionar.ItemUID)
             {
-                FormContratoFinal.AbrirCriandoNovoRegistro(FormUID);
+                var form = GetForm(FormUID);
+                if (form.Mode == BoFormMode.fm_OK_MODE)
+                {
+                    FormContratoFinal.AbrirCriandoNovoRegistro(FormUID);
+                }
+                else
+                {
+                    Dialogs.PopupError("Salve o Contrato antes de criar um novo Contrato Final.");
+                }
             }
             else
             {
@@ -199,7 +193,6 @@ namespace CafebrasContratos
         private void ToggleBotaoAdicionar(SAPbouiCOM.Form form, bool habilitado)
         {
             form.Items.Item(_botaoAdicionar.ItemUID).Enabled = habilitado;
-            form.Items.Item(_botaoRemover.ItemUID).Enabled = habilitado;
         }
 
         public void AtualizarMatriz(SAPbouiCOM.Form form)
@@ -214,7 +207,7 @@ namespace CafebrasContratos
                 form.Freeze(true);
                 dt.ExecuteQuery(
                     $@"SELECT 
-                        U_DocNumCF,U_CardCode, U_CardName, U_Descricao 
+                        U_DocNumCF,U_StatusCtr, U_CardCode, U_CardName, U_Descricao 
                     FROM [@UPD_OCFC] 
                     WHERE U_DocNumCC = {docnumcc} 
                     ORDER BY U_DocNumCF"

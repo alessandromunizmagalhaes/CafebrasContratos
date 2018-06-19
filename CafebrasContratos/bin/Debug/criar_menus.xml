@@ -87,7 +87,7 @@
             <Menu Checked="0"
 							  Enabled="1"
 							  FatherUID="mnuContrato"
-							  String="Contrato de Compra Geral"
+							  String="Contrato de Compra de Café"
 							  Type="1"
 							  UniqueID="FormPreContrato">
             </Menu>

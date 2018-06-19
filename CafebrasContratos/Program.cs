@@ -13,7 +13,7 @@ namespace CafebrasContratos
         public static Application _sBOApplication;
         public static SAPbobsCOM.Company _company;
         public static string _grupoAprovador;
-        public static double _versaoAddon = 0.5;
+        public static double _versaoAddon = 0.1;
 
         [STAThread]
         static void Main()
@@ -55,7 +55,7 @@ namespace CafebrasContratos
 
         private static void CriarEstruturaDeDados()
         {
-            Dialogs.Info(":: " + _addonName + " :: Criando tabelas e estruturas de dados ...", BoMessageTime.bmt_Long);
+            Dialogs.Info(":: " + _addonName + " :: Verificando tabelas e estruturas de dados ...", BoMessageTime.bmt_Long);
 
             try
             {
@@ -65,10 +65,6 @@ namespace CafebrasContratos
                 {
                     var versoes = new List<Versionamento>() {
                         new Versao_Zero_Um(),
-                        new Versao_Zero_Dois(),
-                        new Versao_Zero_Tres(),
-                        new Versao_Zero_Quatro(),
-                        new Versao_Zero_Cinco()
                     };
 
                     GerenciadorVersoes.Aplicar(db, versoes, _versaoAddon);
@@ -194,7 +190,9 @@ namespace CafebrasContratos
                     new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formUsuarios),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, new List<SAPHelper.Form>(){
                         formPreContrato,
-                        formContratoFinal
+                        formContratoFinal,
+                        formPreContratoComissoes,
+                        formContratoFinalComissoes
                     }),
                     new MapEventsToForms(BoEventTypes.et_VALIDATE, new List<SAPHelper.Form>(){
                         formPreContrato,
@@ -253,6 +251,10 @@ namespace CafebrasContratos
                     }),
                     new MapEventsToForms(BoEventTypes.et_MATRIX_LINK_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato
+                    }),
+                    new MapEventsToForms(BoEventTypes.et_DOUBLE_CLICK, new List<SAPHelper.Form>(){
+                        formPreContrato,
+                        formContratoFinal
                     }),
                 });
 

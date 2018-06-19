@@ -18,6 +18,8 @@ namespace CafebrasContratos
 
         public override string FormType { get { return "FormContratoFinal"; } }
         public override string MainDbDataSource { get { return new TabelaContratoFinal().NomeComArroba; } }
+        public override string anexoDbDataSource { get { return new TabelaAnexosDoContratoFinal().NomeComArroba; } }
+
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormContratoFinalAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormContratoFinalComissoes); } }
         public override Type FormDetalheCertificadoType { get { return typeof(FormContratoFinalDetalheCertificado); } }
@@ -51,18 +53,24 @@ namespace CafebrasContratos
         {
             base.FormEmModoVisualizacao(form);
 
-            form.Items.Item(_statuscontrato.ItemUID).Enabled = false;
+            form.Items.Item(_statusQualidade.ItemUID).Enabled = false;
         }
 
         public override void IniciarValoresAoAdicionarNovo(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            _status.SetaValorDBDatasource(dbdts, StatusContratoFinalQualidade.PreAprovado);
-            _statuscontrato.SetaValorDBDatasource(dbdts, StatusContratoFinal.Aberto);
+            _status.SetValorDBDatasource(dbdts, StatusContratoFinal.Esboço);
+            _statusQualidade.SetValorDBDatasource(dbdts, StatusContratoFinalQualidade.PreAprovado);
         }
 
-        public override string ProximaChavePrimaria()
+        public override string ProximaChavePrimaria(DBDataSource dbdts)
         {
-            return GetNextPrimaryKey(MainDbDataSource, _numeroDoContrato.Datasource);
+            var numPreContrato = dbdts.GetValue(_numeroDoPreContrato.Datasource, 0);
+            var rs = Helpers.DoQuery(
+                $@"SELECT 
+                        CONVERT(NVARCHAR, {numPreContrato}) + '.' + CONVERT(NVARCHAR, COUNT(*) + 1) as codigo
+                    FROM [{dbdts.TableName}] WHERE {_numeroDoPreContrato.Datasource} = {numPreContrato}");
+
+            return rs.Fields.Item("codigo").Value;
         }
 
         public override void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts)
@@ -82,6 +90,11 @@ namespace CafebrasContratos
         public override void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form)
         {
             ToggleBotao(form, false);
+        }
+
+        public override bool ContratoPodeSerAlterado(string status)
+        {
+            return status == StatusContratoFinal.Esboço;
         }
 
         #endregion
@@ -105,10 +118,10 @@ namespace CafebrasContratos
                 };
             }
         }
-        public ItemForm _statuscontrato = new ItemForm()
+        public ItemForm _statusQualidade = new ItemForm()
         {
-            ItemUID = "StatusCtr",
-            Datasource = "U_StatusCtr"
+            ItemUID = "StatusQua",
+            Datasource = "U_StatusQua"
         };
 
         #endregion
@@ -199,14 +212,15 @@ namespace CafebrasContratos
                     saldoSacas = saldoSacas < 0 ? 0 : saldoSacas;
                     saldoPeso = saldoPeso < 0 ? 0 : saldoPeso;
 
-                    _quantidadeDeSacas.SetaValorDBDatasource(dbdtsCF, saldoSacas);
-                    _quantidadeDePeso.SetaValorDBDatasource(dbdtsCF, saldoPeso);
+                    _quantidadeDeSacas.SetValorDBDatasource(dbdtsCF, saldoSacas);
+                    _quantidadeDePeso.SetValorDBDatasource(dbdtsCF, saldoPeso);
 
                     CalcularTotais(form, dbdtsCF);
 
                     _OnAdicionarNovo(form);
 
                     PopularPessoasDeContato(form, dbdtsPC.GetValue(_codigoPN.Datasource, 0), dbdtsPC.GetValue(_pessoasDeContato.Datasource, 0));
+                    HabilitarCamposDePeneira(form, dbdtsCF, dbdtsCF.GetValue(_codigoItem.Datasource, 0));
                 }
                 finally
                 {
@@ -230,6 +244,18 @@ namespace CafebrasContratos
                     new FormPreContrato().AtualizarMatriz(currentForm);
                 }
             }
+        }
+
+        #endregion
+
+
+        #region :: Eventos Internos
+
+
+        public override void _OnPesquisar(SAPbouiCOM.Form form)
+        {
+            base._OnPesquisar(form);
+            form.Items.Item(_statusQualidade.ItemUID).Enabled = true;
         }
 
         #endregion

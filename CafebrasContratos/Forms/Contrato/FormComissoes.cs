@@ -71,7 +71,8 @@ namespace CafebrasContratos
                 _corretores._participante.Popular(mtxCorretores);
                 _responsaveis._participante.Popular(mtxResponsaveis);
 
-                form.Items.Item("1").Enabled = UsuarioPermitido();
+                var statusContratoPai = formPai.GetStatus(_fatherFormUID);
+                form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
             }
             catch (Exception e)
             {
@@ -139,6 +140,38 @@ namespace CafebrasContratos
             }
         }
 
+        public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            var form = GetForm(FormUID);
+            var matrix = GetMatrix(form, pVal.ItemUID);
+            matrix.FlushToDataSource();
+
+            var dbdtsName = string.Empty;
+            Matriz matriz = null;
+
+            if (pVal.ItemUID == _corretores.ItemUID)
+            {
+                dbdtsName = corretorDbDataSource;
+                matriz = _corretores;
+            }
+            else if (pVal.ItemUID == _responsaveis.ItemUID)
+            {
+                dbdtsName = responsavelDbDataSource;
+                matriz = _responsaveis;
+            }
+
+            var dbdts = GetDBDatasource(form, dbdtsName);
+            var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, pVal.Row - 1);
+            if (!String.IsNullOrEmpty(participante))
+            {
+                matriz._comissao.GetValorDBDatasource<int>(dbdts);
+                var comissao = GetComissaoPadrao(participante);
+                matriz._comissao.SetValorDBDatasource(dbdts, comissao);
+                matrix.LoadFromDataSourceEx();
+            }
+        }
+
         private void OnAdicionarCorretorClick(ItemEvent pVal)
         {
             var form = GetForm(pVal.FormUID);
@@ -152,7 +185,7 @@ namespace CafebrasContratos
             var form = GetForm(pVal.FormUID);
             var dbdts = GetDBDatasource(form, corretorDbDataSource);
 
-            _corretores.RemoverLinha(form, dbdts);
+            _corretores.RemoverLinhaSelecionada(form, dbdts);
         }
 
         private void OnAdicionarResponsavelClick(ItemEvent pVal)
@@ -168,7 +201,7 @@ namespace CafebrasContratos
             var form = GetForm(pVal.FormUID);
             var dbdts = GetDBDatasource(form, responsavelDbDataSource);
 
-            _responsaveis.RemoverLinha(form, dbdts);
+            _responsaveis.RemoverLinhaSelecionada(form, dbdts);
         }
 
         #endregion
@@ -182,6 +215,12 @@ namespace CafebrasContratos
             {
                 mtx.Columns.Item(colunaUID).Cells.Item(i).Click();
             }
+        }
+
+        private double GetComissaoPadrao(string codigoParticipante)
+        {
+            var rs = Helpers.DoQuery($"SELECT U_PercCom FROM [@UPD_PART] WHERE Code = '{codigoParticipante}'");
+            return rs.Fields.Item("U_PercCom").Value;
         }
 
         #endregion
@@ -237,6 +276,7 @@ namespace CafebrasContratos
         #region :: Abstracts
 
         public abstract bool UsuarioPermitido();
+        public abstract FormContrato formPai { get; }
 
         #endregion
     }

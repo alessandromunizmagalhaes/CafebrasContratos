@@ -11,6 +11,7 @@ namespace CafebrasContratos
 
         public abstract override string FormType { get; }
         public abstract string MainDbDataSource { get; }
+        public abstract string anexoDbDataSource { get; }
 
         private const string abaGeralUID = "AbaGeral";
         private const string abaItemUID = "AbaItem";
@@ -33,8 +34,8 @@ namespace CafebrasContratos
 
         public ItemForm _status = new ItemForm()
         {
-            ItemUID = "StatusQua",
-            Datasource = "U_StatusQua"
+            ItemUID = "StatusCtr",
+            Datasource = "U_StatusCtr"
         };
         public ItemFormObrigatorio _descricao = new ItemFormObrigatorio()
         {
@@ -42,8 +43,20 @@ namespace CafebrasContratos
             Datasource = "U_Descricao",
             Mensagem = "A Descrição Geral é obrigatória."
         };
+        public ItemFormObrigatorioAutorizavel _dataInicio = new ItemFormObrigatorioAutorizavel()
+        {
+            ItemUID = "DataIni",
+            Datasource = "U_DataIni",
+            Mensagem = "A Data de Início é obrigatória."
+        };
+        public ItemFormObrigatorio _dataFim = new ItemFormObrigatorio()
+        {
+            ItemUID = "DataFim",
+            Datasource = "U_DataFim",
+            Mensagem = "A Data Final é obrigatória."
+        };
 
-        public ItemFormObrigatorio _codigoPN = new ItemFormObrigatorio()
+        public ItemFormObrigatorioAutorizavel _codigoPN = new ItemFormObrigatorioAutorizavel()
         {
             ItemUID = "CardCode",
             Datasource = "U_CardCode",
@@ -70,7 +83,7 @@ namespace CafebrasContratos
             ItemUID = "EMail",
             Datasource = "U_EMail",
         };
-        public ComboFormObrigatorio _pessoasDeContato = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _pessoasDeContato = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "CtName",
             Datasource = "U_CtName",
@@ -78,18 +91,18 @@ namespace CafebrasContratos
             AbaUID = abaGeralUID,
         };
 
-        public ItemForm _previsaoEntrega = new ItemForm()
+        public ItemFormAutorizavel _previsaoEntrega = new ItemFormAutorizavel()
         {
             ItemUID = "DtPrEnt",
             Datasource = "U_DtPrEnt",
         };
-        public ItemForm _previsaoPagamento = new ItemForm()
+        public ItemFormAutorizavel _previsaoPagamento = new ItemFormAutorizavel()
         {
             ItemUID = "DtPrPgt",
             Datasource = "U_DtPrPgt",
         };
 
-        public ComboFormObrigatorio _modalidade = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _modalidade = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "ModCtto",
             Datasource = "U_ModCtto",
@@ -97,7 +110,7 @@ namespace CafebrasContratos
             SQL = "SELECT Code, Name FROM [@UPD_OMOD] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
         };
-        public ComboFormObrigatorio _unidadeComercial = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _unidadeComercial = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "UnidCom",
             Datasource = "U_UnidCom",
@@ -105,7 +118,7 @@ namespace CafebrasContratos
             SQL = "SELECT Code, Name FROM [@UPD_OUCM] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
         };
-        public ComboFormObrigatorio _tipoDeOperacao = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _tipoDeOperacao = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "TipoOper",
             Datasource = "U_TipoOper",
@@ -113,13 +126,13 @@ namespace CafebrasContratos
             SQL = "SELECT Code, Name FROM [@UPD_OTOP] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
         };
-        public ComboForm _metodoFinanceiro = new ComboForm()
+        public ComboFormAutorizavel _metodoFinanceiro = new ComboFormAutorizavel()
         {
             ItemUID = "MtdFin",
             Datasource = "U_MtdFin",
             SQL = "SELECT Code, Name FROM [@UPD_OMFN] WHERE Canceled = 'N' ORDER BY Name",
         };
-        public ItemFormObrigatorio _codigoItem = new ItemFormObrigatorio()
+        public ItemFormObrigatorioAutorizavel _codigoItem = new ItemFormObrigatorioAutorizavel()
         {
             ItemUID = "ItemCode",
             Datasource = "U_ItemCode",
@@ -131,14 +144,14 @@ namespace CafebrasContratos
             ItemUID = "ItemName",
             Datasource = "U_ItemName"
         };
-        public ItemFormObrigatorio _deposito = new ItemFormObrigatorio()
+        public ItemFormObrigatorioAutorizavel _deposito = new ItemFormObrigatorioAutorizavel()
         {
             ItemUID = "WhsCode",
             Datasource = "U_WhsCode",
             Mensagem = "O depósito é obrigatório.",
             AbaUID = abaItemUID,
         };
-        public ComboFormObrigatorio _utilizacao = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _utilizacao = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "Usage",
             Datasource = "U_Usage",
@@ -146,7 +159,7 @@ namespace CafebrasContratos
             SQL = "SELECT ID, Usage FROM OUSG ORDER BY Usage",
             AbaUID = abaItemUID,
         };
-        public ComboFormObrigatorio _safra = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _safra = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "Safra",
             Datasource = "U_Safra",
@@ -154,7 +167,7 @@ namespace CafebrasContratos
             SQL = "SELECT Code, Name FROM [@UPD_OSAF] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaItemUID,
         };
-        public ComboFormObrigatorio _embalagem = new ComboFormObrigatorio()
+        public ComboFormObrigatorioAutorizavel _embalagem = new ComboFormObrigatorioAutorizavel()
         {
             ItemUID = "Packg",
             Datasource = "U_Packg",
@@ -162,28 +175,28 @@ namespace CafebrasContratos
             SQL = "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType",
             AbaUID = abaItemUID,
         };
-        public ItemForm _bebida = new ItemForm()
+        public ItemFormAutorizavel _bebida = new ItemFormAutorizavel()
         {
             ItemUID = "Bebida",
             Datasource = "U_Bebida",
         };
-        public ItemForm _diferencial = new ItemForm()
+        public ItemFormAutorizavel _diferencial = new ItemFormAutorizavel()
         {
             ItemUID = "Difere",
             Datasource = "U_Difere",
         };
-        public ItemForm _taxaNY = new ItemForm()
+        public ItemFormAutorizavel _taxaNY = new ItemFormAutorizavel()
         {
             ItemUID = "RateNY",
             Datasource = "U_RateNY",
         };
-        public ItemForm _taxaDollar = new ItemForm()
+        public ItemFormAutorizavel _taxaDollar = new ItemFormAutorizavel()
         {
             ItemUID = "RateUSD",
             Datasource = "U_RateUSD",
         };
 
-        public ItemForm _quantidadeDePeso = new ItemForm()
+        public ItemFormAutorizavel _quantidadeDePeso = new ItemFormAutorizavel()
         {
             ItemUID = "QtdPeso",
             Datasource = "U_QtdPeso"
@@ -193,7 +206,7 @@ namespace CafebrasContratos
             ItemUID = "SPesoRec",
             Datasource = "U_SPesoRec"
         };
-        public ItemForm _quantidadeDeSacas = new ItemForm()
+        public ItemFormAutorizavel _quantidadeDeSacas = new ItemFormAutorizavel()
         {
             ItemUID = "QtdSaca",
             Datasource = "U_QtdSaca"
@@ -203,7 +216,7 @@ namespace CafebrasContratos
             ItemUID = "SPesoNCT",
             Datasource = "U_SPesoNCT"
         };
-        public ItemForm _valorLivre = new ItemForm()
+        public ItemFormAutorizavel _valorLivre = new ItemFormAutorizavel()
         {
             ItemUID = "VLivre",
             Datasource = "U_VLivre"
@@ -213,7 +226,7 @@ namespace CafebrasContratos
             ItemUID = "TLivre",
             Datasource = "U_TLivre"
         };
-        public ItemForm _valorICMS = new ItemForm()
+        public ItemFormAutorizavel _valorICMS = new ItemFormAutorizavel()
         {
             ItemUID = "VICMS",
             Datasource = "U_VICMS"
@@ -223,7 +236,7 @@ namespace CafebrasContratos
             ItemUID = "TICMS",
             Datasource = "U_TICMS"
         };
-        public ItemForm _valorSENAR = new ItemForm()
+        public ItemFormAutorizavel _valorSENAR = new ItemFormAutorizavel()
         {
             ItemUID = "VSenar",
             Datasource = "U_VSenar"
@@ -233,7 +246,7 @@ namespace CafebrasContratos
             ItemUID = "TSenar",
             Datasource = "U_TSenar"
         };
-        public ItemForm _valorFaturado = new ItemForm()
+        public ItemFormAutorizavel _valorFaturado = new ItemFormAutorizavel()
         {
             ItemUID = "VFat",
             Datasource = "U_VFat"
@@ -243,7 +256,7 @@ namespace CafebrasContratos
             ItemUID = "TFat",
             Datasource = "U_TFat"
         };
-        public ItemForm _valorBruto = new ItemForm()
+        public ItemFormAutorizavel _valorBruto = new ItemFormAutorizavel()
         {
             ItemUID = "VBruto",
             Datasource = "U_VBruto"
@@ -254,22 +267,22 @@ namespace CafebrasContratos
             Datasource = "U_TBruto"
         };
 
-        public ItemForm _valorFrete = new ItemForm()
+        public ItemFormAutorizavel _valorFrete = new ItemFormAutorizavel()
         {
             ItemUID = "VlrFrete",
             Datasource = "U_VlrFrete"
         };
-        public ItemForm _valorSeguro = new ItemForm()
+        public ItemFormAutorizavel _valorSeguro = new ItemFormAutorizavel()
         {
             ItemUID = "VSeguro",
             Datasource = "U_VSeguro"
         };
-        public ItemForm _transportadora = new ItemForm()
+        public ItemFormAutorizavel _transportadora = new ItemFormAutorizavel()
         {
             ItemUID = "Transp",
             Datasource = "U_Transp"
         };
-        public ItemForm _localRetirada = new ItemForm()
+        public ItemFormAutorizavel _localRetirada = new ItemFormAutorizavel()
         {
             ItemUID = "LocalRet",
             Datasource = "U_LocalRet"
@@ -285,26 +298,33 @@ namespace CafebrasContratos
 
         #region :: Campos Peneira
 
-        public readonly List<ItemForm> _peneiras = new List<ItemForm>() {
-            new ItemForm(){ ItemUID = "P01", Datasource = "U_P01" },
-            new ItemForm(){ ItemUID = "P02", Datasource = "U_P02" },
-            new ItemForm(){ ItemUID = "P03", Datasource = "U_P03" },
-            new ItemForm(){ ItemUID = "P04", Datasource = "U_P04" },
-            new ItemForm(){ ItemUID = "P05", Datasource = "U_P05" },
-            new ItemForm(){ ItemUID = "P06", Datasource = "U_P06" },
-            new ItemForm(){ ItemUID = "P07", Datasource = "U_P07" },
-            new ItemForm(){ ItemUID = "P08", Datasource = "U_P08" },
-            new ItemForm(){ ItemUID = "P09", Datasource = "U_P09" },
-            new ItemForm(){ ItemUID = "P10", Datasource = "U_P10" },
-            new ItemForm(){ ItemUID = "P11", Datasource = "U_P11" },
-            new ItemForm(){ ItemUID = "P12", Datasource = "U_P12" },
-            new ItemForm(){ ItemUID = "P13", Datasource = "U_P13" },
-            new ItemForm(){ ItemUID = "P14", Datasource = "U_P14" },
-            new ItemForm(){ ItemUID = "P15", Datasource = "U_P15" },
+        public readonly List<ItemFormAutorizavel> _peneiras = new List<ItemFormAutorizavel>() {
+            new ItemFormAutorizavel(){ ItemUID = "P01", Datasource = "U_P01" },
+            new ItemFormAutorizavel(){ ItemUID = "P02", Datasource = "U_P02" },
+            new ItemFormAutorizavel(){ ItemUID = "P03", Datasource = "U_P03" },
+            new ItemFormAutorizavel(){ ItemUID = "P04", Datasource = "U_P04" },
+            new ItemFormAutorizavel(){ ItemUID = "P05", Datasource = "U_P05" },
+            new ItemFormAutorizavel(){ ItemUID = "P06", Datasource = "U_P06" },
+            new ItemFormAutorizavel(){ ItemUID = "P07", Datasource = "U_P07" },
+            new ItemFormAutorizavel(){ ItemUID = "P08", Datasource = "U_P08" },
+            new ItemFormAutorizavel(){ ItemUID = "P09", Datasource = "U_P09" },
+            new ItemFormAutorizavel(){ ItemUID = "P10", Datasource = "U_P10" },
+            new ItemFormAutorizavel(){ ItemUID = "P11", Datasource = "U_P11" },
+            new ItemFormAutorizavel(){ ItemUID = "P12", Datasource = "U_P12" },
+            new ItemFormAutorizavel(){ ItemUID = "P13", Datasource = "U_P13" },
+            new ItemFormAutorizavel(){ ItemUID = "P14", Datasource = "U_P14" },
+            new ItemFormAutorizavel(){ ItemUID = "P15", Datasource = "U_P15" },
         };
 
         public ItemForm _totalPeneira = new ItemForm() { ItemUID = "totalP", Datasource = "totalP" };
         public ItemForm _totalDiferencial = new ItemForm() { ItemUID = "totalD", Datasource = "totalD" };
+
+        #endregion
+
+
+        #region :: Matrizes
+
+        public MatrizAnexos _matrixAnexos = new MatrizAnexos() { ItemUID = "mtxAnexos" };
 
         #endregion
 
@@ -341,7 +361,8 @@ namespace CafebrasContratos
                 dbdts.SetValue("Code", 0, next_code);
                 dbdts.SetValue("Name", 0, next_code);
 
-                _numeroDoContrato.SetaValorDBDatasource(dbdts, ProximaChavePrimaria());
+                _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
+                SalvarLabelPeneiras(form, dbdts);
 
                 Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
@@ -390,7 +411,17 @@ namespace CafebrasContratos
             HabilitarBotaoAberturaPorPeneira(form, itemcode);
             HabilitarCamposDePeneira(form, dbdts, itemcode);
 
-            QuandoPuderAdicionarObjetoFilho(form);
+            var status = dbdts.GetValue(_status.Datasource, 0);
+            GerenciarCamposQuandoAutorizado(form, ContratoPodeSerAlterado(status));
+
+            if (status == StatusPreContrato.Autorizado)
+            {
+                QuandoPuderAdicionarObjetoFilho(form);
+            }
+            else
+            {
+                QuandoNaoPuderAdicionarObjetoFilho(form);
+            }
         }
 
         #endregion
@@ -406,6 +437,7 @@ namespace CafebrasContratos
                 Dialogs.PopupError("Nenhum Grupo Aprovador foi configurado para este usúario.\nNão será possível abrir a tela de contratos.");
                 var form = GetForm(FormUID);
                 form.Close();
+                BubbleEvent = false;
             }
             else
             {
@@ -459,6 +491,14 @@ namespace CafebrasContratos
                 string cardcode = dbdts.GetValue(_codigoPN.Datasource, 0);
                 AtualizarDadosPessoaDeContato(cardcode, pessoaDeContato, dbdts);
             }
+            else if (pVal.ItemUID == _status.ItemUID)
+            {
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, MainDbDataSource);
+                var status = _status.GetValorDBDatasource<string>(dbdts);
+
+                GerenciarCamposQuandoAutorizado(form, status == StatusPreContrato.Esboço);
+            }
         }
 
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -479,6 +519,34 @@ namespace CafebrasContratos
             {
                 var formComissoes = Activator.CreateInstance(FormComissoesType);
                 CriarFormFilho(baseDirectory + FormComissoesSRF, FormUID, (SAPHelper.Form)formComissoes);
+            }
+            else if (pVal.ItemUID == _matrixAnexos._adicionar.ItemUID)
+            {
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, anexoDbDataSource);
+                _matrixAnexos.AdicionarLinha(form, dbdts);
+            }
+            else if (pVal.ItemUID == _matrixAnexos._remover.ItemUID)
+            {
+                var form = GetForm(FormUID);
+                var dbdts = GetDBDatasource(form, anexoDbDataSource);
+                _matrixAnexos.RemoverLinhaSelecionada(form, dbdts);
+            }
+        }
+
+        public override void OnAfterDoubleClick(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            if (pVal.ItemUID == _matrixAnexos.ItemUID)
+            {
+                var form = GetForm(FormUID);
+                var matrix = GetMatrix(form, _matrixAnexos.ItemUID);
+
+                var data = matrix.GetCellSpecific(_matrixAnexos._data.ItemUID, pVal.Row).Value.ToString();
+                if (String.IsNullOrEmpty(data))
+                {
+                    matrix.SetCellWithoutValidation(pVal.Row, _matrixAnexos._data.ItemUID, DateTime.Now.ToString("yyyyMMdd"));
+                }
             }
         }
 
@@ -522,7 +590,7 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            if (!choose.IsSystem)
+            if (!choose.IsSystem && form.Mode != BoFormMode.fm_FIND_MODE)
             {
                 var dbdts = GetDBDatasource(pVal.FormUID, MainDbDataSource);
                 var dataTable = chooseEvent.SelectedObjects;
@@ -558,13 +626,15 @@ namespace CafebrasContratos
 
             IniciarValoresAoAdicionarNovo(form, dbdts);
 
-            _numeroDoContrato.SetaValorDBDatasource(dbdts, ProximaChavePrimaria());
+            _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
+            _dataInicio.SetValorDBDatasource(dbdts, DateTime.Now);
 
             AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
             AtualizarSomaDosDiferenciais(form, dbdts);
 
             PopularPessoasDeContato(form, "", "");
 
+            GerenciarCamposQuandoAutorizado(form, true);
             QuandoNaoPuderAdicionarObjetoFilho(form);
         }
 
@@ -572,6 +642,8 @@ namespace CafebrasContratos
         {
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = true;
             form.Items.Item(_status.ItemUID).Enabled = true;
+
+            form.Items.Item(_numeroDoContrato.ItemUID).Click();
         }
 
         #endregion
@@ -584,8 +656,8 @@ namespace CafebrasContratos
             string itemcode = dataTable.GetValue("ItemCode", 0);
             string itemname = dataTable.GetValue("ItemName", 0);
 
-            _codigoItem.SetaValorDBDatasource(dbdts, itemcode);
-            _nomeItem.SetaValorDBDatasource(dbdts, itemname);
+            _codigoItem.SetValorDBDatasource(dbdts, itemcode);
+            _nomeItem.SetValorDBDatasource(dbdts, itemname);
 
             HabilitarBotaoAberturaPorPeneira(form, itemcode);
             HabilitarCamposDePeneira(form, dbdts, itemcode);
@@ -594,7 +666,7 @@ namespace CafebrasContratos
         private void OnWhsCodeChoose(DBDataSource dbdts, DataTable dataTable)
         {
             string whscode = dataTable.GetValue("WhsCode", 0);
-            _deposito.SetaValorDBDatasource(dbdts, whscode);
+            _deposito.SetValorDBDatasource(dbdts, whscode);
         }
 
         private void OnCardCodeChoose(SAPbouiCOM.Form form, DBDataSource dbdts, DataTable dataTable)
@@ -604,9 +676,9 @@ namespace CafebrasContratos
             string pessoaDeContato = dataTable.GetValue("CntctPrsn", 0);
             string nomeEstrangeiro = dataTable.GetValue("CardFName", 0);
 
-            _codigoPN.SetaValorDBDatasource(dbdts, cardcode);
-            _nomePN.SetaValorDBDatasource(dbdts, cardname);
-            _nomeEstrangeiro.SetaValorDBDatasource(dbdts, nomeEstrangeiro);
+            _codigoPN.SetValorDBDatasource(dbdts, cardcode);
+            _nomePN.SetValorDBDatasource(dbdts, cardname);
+            _nomeEstrangeiro.SetValorDBDatasource(dbdts, nomeEstrangeiro);
 
             PopularPessoasDeContato(form, cardcode, pessoaDeContato);
         }
@@ -703,6 +775,8 @@ namespace CafebrasContratos
         {
             form.Items.Item(_descricao.ItemUID).Enabled = false;
             form.Items.Item(_codigoPN.ItemUID).Enabled = false;
+            form.Items.Item(_dataInicio.ItemUID).Enabled = false;
+            form.Items.Item(_dataFim.ItemUID).Enabled = false;
             form.Items.Item(_pessoasDeContato.ItemUID).Enabled = false;
             form.Items.Item(_previsaoEntrega.ItemUID).Enabled = false;
             form.Items.Item(_previsaoPagamento.ItemUID).Enabled = false;
@@ -750,7 +824,7 @@ namespace CafebrasContratos
             _pessoasDeContato.Popular(form);
 
             var dbdts = GetDBDatasource(form, MainDbDataSource);
-            _pessoasDeContato.SetaValorDBDatasource(dbdts, pessoaDeContatoSelecionada);
+            _pessoasDeContato.SetValorDBDatasource(dbdts, pessoaDeContatoSelecionada);
             AtualizarDadosPessoaDeContato(cardcode, pessoaDeContatoSelecionada, dbdts);
         }
 
@@ -773,8 +847,8 @@ namespace CafebrasContratos
                 email = rs.Fields.Item("E_MailL").Value;
             }
 
-            _telefone.SetaValorDBDatasource(dbdts, telefone);
-            _email.SetaValorDBDatasource(dbdts, email);
+            _telefone.SetValorDBDatasource(dbdts, telefone);
+            _email.SetValorDBDatasource(dbdts, email);
         }
 
         private bool EventoEmCampoDeValor(string itemUID)
@@ -802,24 +876,27 @@ namespace CafebrasContratos
 
         protected void CalcularTotais(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            double qtdPeso = Helpers.ToDouble(dbdts.GetValue(_quantidadeDePeso.Datasource, 0));
-            double qtdSacas = Helpers.ToDouble(dbdts.GetValue(_quantidadeDeSacas.Datasource, 0));
-            double valorLivre = Helpers.ToDouble(dbdts.GetValue(_valorLivre.Datasource, 0));
-            double valorICMS = Helpers.ToDouble(dbdts.GetValue(_valorICMS.Datasource, 0));
-            double valorSENAR = Helpers.ToDouble(dbdts.GetValue(_valorSENAR.Datasource, 0));
-            double valorFaturado = Helpers.ToDouble(dbdts.GetValue(_valorFaturado.Datasource, 0));
-            double valorBruto = Helpers.ToDouble(dbdts.GetValue(_valorBruto.Datasource, 0));
+            double qtdPeso = _quantidadeDePeso.GetValorDBDatasource<double>(dbdts);
+            double qtdSacas = _quantidadeDeSacas.GetValorDBDatasource<double>(dbdts);
+            double valorLivre = _valorLivre.GetValorDBDatasource<double>(dbdts);
+            double valorICMS = _valorICMS.GetValorDBDatasource<double>(dbdts);
+            double valorSENAR = _valorSENAR.GetValorDBDatasource<double>(dbdts);
+            double valorFaturado = _valorFaturado.GetValorDBDatasource<double>(dbdts);
+            double valorBruto = _valorBruto.GetValorDBDatasource<double>(dbdts);
+
             try
             {
                 form.Freeze(true);
-                _totalLivre.SetaValorDBDatasource(dbdts, valorLivre * qtdSacas);
-                _totalICMS.SetaValorDBDatasource(dbdts, valorICMS * qtdSacas);
-                _totalSENAR.SetaValorDBDatasource(dbdts, valorSENAR * qtdSacas);
-                _totalFaturado.SetaValorDBDatasource(dbdts, valorFaturado * qtdSacas);
-                _totalBruto.SetaValorDBDatasource(dbdts, valorBruto * qtdSacas);
+                var totalLivre = valorLivre * qtdSacas;
+                _totalLivre.SetValorDBDatasource(dbdts, totalLivre);
+                _totalICMS.SetValorDBDatasource(dbdts, valorICMS * qtdSacas);
+                _totalSENAR.SetValorDBDatasource(dbdts, valorSENAR * qtdSacas);
+                _totalFaturado.SetValorDBDatasource(dbdts, valorFaturado * qtdSacas);
+                _totalBruto.SetValorDBDatasource(dbdts, valorBruto * qtdSacas);
 
-                _saldoDePeso.SetaValorDBDatasource(dbdts, qtdPeso);
-                _saldoDeSacas.SetaValorDBDatasource(dbdts, qtdSacas);
+                _saldoDePeso.SetValorDBDatasource(dbdts, qtdPeso);
+                _saldoDeSacas.SetValorDBDatasource(dbdts, qtdSacas);
+                _saldoFinanceiro.SetValorDBDatasource(dbdts, totalLivre);
             }
             finally
             {
@@ -840,7 +917,7 @@ namespace CafebrasContratos
             */
         }
 
-        private void HabilitarCamposDePeneira(SAPbouiCOM.Form form, DBDataSource dbdts, string itemcode)
+        protected void HabilitarCamposDePeneira(SAPbouiCOM.Form form, DBDataSource dbdts, string itemcode)
         {
             var deve_habilitar = ItemTipoBica(itemcode);
 
@@ -852,8 +929,8 @@ namespace CafebrasContratos
 
                 if (!deve_habilitar)
                 {
-                    peneira.SetaValorDBDatasource(dbdts, 0);
-                    new ItemForm() { ItemUID = diferencialItemUID, Datasource = "U_" + diferencialItemUID }.SetaValorDBDatasource(dbdts, 0);
+                    peneira.SetValorDBDatasource(dbdts, 0);
+                    new ItemForm() { ItemUID = diferencialItemUID, Datasource = "U_" + diferencialItemUID }.SetValorDBDatasource(dbdts, 0);
                 }
             }
             AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
@@ -869,6 +946,14 @@ namespace CafebrasContratos
         {
             try
             {
+                var dataInicial = _dataInicio.GetValorDBDatasource<DateTime>(dbdts);
+                var dataFinal = _dataFim.GetValorDBDatasource<DateTime>(dbdts);
+
+                if (dataFinal < dataInicial)
+                {
+                    throw new FormValidationException("Data final do contrato não pode ser menor do que a Data inicial.", _dataFim.ItemUID);
+                }
+
                 RegrasDeNegocioAoSalvar(form, dbdts);
                 if (ItemTipoBica(dbdts.GetValue(_codigoItem.Datasource, 0)))
                 {
@@ -937,12 +1022,12 @@ namespace CafebrasContratos
 
         private void AtualizarSomaDosPercentuaisDePeneira(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            _totalPeneira.SetaValorUserDataSource(form, SomaDosPercentuaisDePeneira(dbdts));
+            _totalPeneira.SetValorUserDataSource(form, SomaDosPercentuaisDePeneira(dbdts));
         }
 
         private void AtualizarSomaDosDiferenciais(SAPbouiCOM.Form form, DBDataSource dbdts)
         {
-            _totalDiferencial.SetaValorUserDataSource(form, SomaDosDiferenciais(dbdts));
+            _totalDiferencial.SetValorUserDataSource(form, SomaDosDiferenciais(dbdts));
         }
 
         private void PosicionarCamposDeTotaisDePeneiras(SAPbouiCOM.Form form)
@@ -1034,6 +1119,55 @@ namespace CafebrasContratos
             }
         }
 
+        private void SalvarLabelPeneiras(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            for (int i = 0; i < _peneiras.Count; i++)
+            {
+                var lblUID = "lbl" + _peneiras[i].ItemUID;
+                var label = ((StaticText)form.Items.Item(lblUID).Specific).Caption;
+
+                var labelPadrao = _peneiras[i].ItemUID;
+                if (label != labelPadrao)
+                {
+                    var lblDataSource = _peneiras[i].Datasource.Replace("P", "L");
+                    dbdts.SetValue(lblDataSource, 0, label);
+                }
+            }
+        }
+
+        private void GerenciarCamposQuandoAutorizado(SAPbouiCOM.Form form, bool habilitar)
+        {
+            var fields = GetType().GetFields();
+            foreach (var field in fields)
+            {
+                if (field.FieldType == typeof(ItemFormAutorizavel)
+                    || field.FieldType == typeof(ItemFormObrigatorioAutorizavel)
+                    || field.FieldType == typeof(ComboFormAutorizavel)
+                    || field.FieldType == typeof(ComboFormObrigatorioAutorizavel))
+                {
+                    var prop = (ItemForm)field.GetValue(this);
+                    form.Items.Item(prop.ItemUID).Enabled = habilitar;
+                }
+                else if (field.FieldType == typeof(List<ItemFormAutorizavel>))
+                {
+                    var prop = (List<ItemFormAutorizavel>)field.GetValue(this);
+                    foreach (var item in prop)
+                    {
+                        form.Items.Item(item.ItemUID).Enabled = habilitar;
+                        form.Items.Item(item.ItemUID.Replace("P", "D")).Enabled = habilitar;
+                    }
+                }
+            }
+        }
+
+        public string GetStatus(string formUID)
+        {
+            var dbdts = GetDBDatasource(formUID, MainDbDataSource);
+            var status = _status.GetValorDBDatasource<string>(dbdts);
+
+            return status;
+        }
+
         #endregion
 
 
@@ -1047,11 +1181,52 @@ namespace CafebrasContratos
         public abstract string FormComissoesSRF { get; }
         public abstract string FormDetalheCertificadoSRF { get; }
         public abstract void IniciarValoresAoAdicionarNovo(SAPbouiCOM.Form form, DBDataSource dbdts);
-        public abstract string ProximaChavePrimaria();
+        public abstract string ProximaChavePrimaria(DBDataSource dbdts);
         public abstract void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts);
         public abstract void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
         public abstract void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
+        public abstract bool ContratoPodeSerAlterado(string status);
 
         #endregion
+
+
+        public class ItemFormAutorizavel : ItemForm
+        {
+        }
+
+        public class ItemFormObrigatorioAutorizavel : ItemFormObrigatorio
+        {
+        }
+
+        public class ComboFormAutorizavel : ComboForm
+        {
+        }
+
+        public class ComboFormObrigatorioAutorizavel : ComboFormObrigatorio
+        {
+        }
+
+        public class MatrizAnexos : MatrizChildForm
+        {
+            public ItemForm _arquivoAnexado = new ItemForm()
+            {
+                ItemUID = "U_Path",
+                Datasource = "U_Path"
+            };
+            public ItemForm _data = new ItemForm()
+            {
+                ItemUID = "U_Date",
+                Datasource = "U_Date"
+            };
+
+            public ButtonForm _adicionar = new ButtonForm()
+            {
+                ItemUID = "btAddAnexo"
+            };
+            public ButtonForm _remover = new ButtonForm()
+            {
+                ItemUID = "btRmvAnexo"
+            };
+        }
     }
 }

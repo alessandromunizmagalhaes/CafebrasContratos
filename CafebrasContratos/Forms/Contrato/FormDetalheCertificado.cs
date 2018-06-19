@@ -43,7 +43,8 @@ namespace CafebrasContratos
 
                 CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
-                form.Items.Item("1").Enabled = UsuarioPermitido();
+                var statusContratoPai = formPai.GetStatus(_fatherFormUID);
+                form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
             }
             catch (Exception e)
             {
@@ -110,7 +111,7 @@ namespace CafebrasContratos
             var form = GetForm(pVal.FormUID);
             var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            _matriz.RemoverLinha(form, dbdts);
+            _matriz.RemoverLinhaSelecionada(form, dbdts);
         }
 
         #endregion
@@ -136,6 +137,7 @@ namespace CafebrasContratos
         #region :: Abstracts
 
         public abstract bool UsuarioPermitido();
+        public abstract FormContrato formPai { get; }
 
         #endregion
     }
