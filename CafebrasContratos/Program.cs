@@ -15,6 +15,8 @@ namespace CafebrasContratos
         public static string _grupoAprovador;
         public static double _versaoAddon = 0.1;
 
+        public static readonly List<Peneira> _peneiras = new List<Peneira>() { };
+
         [STAThread]
         static void Main()
         {
@@ -29,6 +31,8 @@ namespace CafebrasContratos
             Dialogs.Success(".:: " + _addonName + " ::. Iniciado", BoMessageTime.bmt_Medium);
 
             SetGrupoAprovador();
+
+            CarregarPeneirasVindoDaConfiguracao();
 
             // deixa a aplicação ativa
             System.Windows.Forms.Application.Run();
@@ -310,6 +314,23 @@ namespace CafebrasContratos
         {
             var rs = Helpers.DoQuery($"SELECT U_GrupoAprov FROM OUSR WHERE USER_CODE = '{Global.Company.UserName}'");
             _grupoAprovador = rs.Fields.Item("U_GrupoAprov").Value;
+        }
+
+        public static void CarregarPeneirasVindoDaConfiguracao()
+        {
+            var rs = Helpers.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
+            while (!rs.EoF)
+            {
+                string peneiraUID = rs.Fields.Item("U_Peneira").Value;
+                _peneiras.Add(new Peneira()
+                {
+                    UID = rs.Fields.Item("U_Peneira").Value,
+                    Nome = rs.Fields.Item("U_NomeP").Value,
+                    Ativo = rs.Fields.Item("U_Ativo").Value == "Y",
+                });
+
+                rs.MoveNext();
+            }
         }
 
         #endregion

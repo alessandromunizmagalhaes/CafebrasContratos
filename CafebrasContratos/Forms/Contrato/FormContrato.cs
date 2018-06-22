@@ -11,7 +11,8 @@ namespace CafebrasContratos
 
         public abstract override string FormType { get; }
         public abstract string MainDbDataSource { get; }
-        public abstract string anexoDbDataSource { get; }
+        public abstract string AnexoDbDataSource { get; }
+        public abstract AbasContrato Abas { get; }
 
         private const string abaGeralUID = "AbaGeral";
         private const string abaItemUID = "AbaItem";
@@ -35,13 +36,13 @@ namespace CafebrasContratos
         public ItemForm _status = new ItemForm()
         {
             ItemUID = "StatusCtr",
-            Datasource = "U_StatusCtr"
+            Datasource = "U_StatusCtr",
         };
         public ItemFormObrigatorio _descricao = new ItemFormObrigatorio()
         {
             ItemUID = "Descricao",
             Datasource = "U_Descricao",
-            Mensagem = "A Descrição Geral é obrigatória."
+            Mensagem = "A Descrição Geral é obrigatória.",
         };
         public ItemFormObrigatorioAutorizavel _dataInicio = new ItemFormObrigatorioAutorizavel()
         {
@@ -356,17 +357,19 @@ namespace CafebrasContratos
                 var form = GetForm(BusinessObjectInfo.FormUID);
                 var dbdts = GetDBDatasource(form, MainDbDataSource);
 
-                string next_code = GetNextCode(MainDbDataSource);
-
-                dbdts.SetValue("Code", 0, next_code);
-                dbdts.SetValue("Name", 0, next_code);
-
-                _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
-                SalvarLabelPeneiras(form, dbdts);
-
                 Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
                 BubbleEvent = FormEstaValido(form, dbdts);
+                if (BubbleEvent)
+                {
+                    string next_code = GetNextCode(MainDbDataSource);
+
+                    dbdts.SetValue("Code", 0, next_code);
+                    dbdts.SetValue("Name", 0, next_code);
+
+                    _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
+                    SalvarLabelPeneiras(form, dbdts);
+                }
             }
             else
             {
@@ -398,21 +401,39 @@ namespace CafebrasContratos
             BubbleEvent = true;
             var form = GetForm(BusinessObjectInfo.FormUID);
 
-            form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+            if (form.Items.Item(_numeroDoContrato.ItemUID).Enabled)
+            {
+                form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+            }
+
             form.Items.Item(_status.ItemUID).Enabled = UsuarioPermitido();
 
             var dbdts = GetDBDatasource(form, MainDbDataSource);
 
-            string codigoPN = dbdts.GetValue(_codigoPN.Datasource, 0);
-            string pessoasDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
+            GerirCamposPeneiraPegandoDoBanco(form, dbdts);
+
+            var codigoPN = _codigoPN.GetValorDBDatasource<string>(dbdts);
+            var pessoasDeContato = _pessoasDeContato.GetValorDBDatasource<string>(dbdts);
             PopularPessoasDeContato(form, codigoPN, pessoasDeContato);
 
-            string itemcode = dbdts.GetValue(_codigoItem.Datasource, 0);
-            HabilitarBotaoAberturaPorPeneira(form, itemcode);
-            HabilitarCamposDePeneira(form, dbdts, itemcode);
 
-            var status = dbdts.GetValue(_status.Datasource, 0);
-            GerenciarCamposQuandoAutorizado(form, ContratoPodeSerAlterado(status));
+            var status = _status.GetValorDBDatasource<string>(dbdts);
+            bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
+            if (contratoPodeSerAlterado && CamposAutorizaveisNaoEstaoAtivos(form))
+            {
+                GerenciarCamposQuandoAutorizado(form, true);
+            }
+            else if (!contratoPodeSerAlterado && CamposAutorizaveisEstaoAtivos(form))
+            {
+                GerenciarCamposQuandoAutorizado(form, false);
+            }
+
+            if (contratoPodeSerAlterado)
+            {
+                var itemcode = _codigoItem.GetValorDBDatasource<string>(dbdts);
+                HabilitarBotaoAberturaPorPeneira(form, itemcode);
+                HabilitarCamposDePeneira(form, dbdts, itemcode);
+            }
 
             if (status == StatusPreContrato.Autorizado)
             {
@@ -461,13 +482,11 @@ namespace CafebrasContratos
                     }
 
                     // clicando para a primeira aba já vir selecionada
-                    form.Items.Item(abaGeralUID).Click();
+                    form.Items.Item(Abas.DefinicoesGerais.ItemUID).Click();
 
                     ConditionsParaFornecedores(form);
                     ConditionsParaDeposito(form);
                     ConditionsParaItens(form);
-
-                    GerirCamposPeneira(form);
                 }
                 catch (Exception e)
                 {
@@ -495,9 +514,17 @@ namespace CafebrasContratos
             {
                 var form = GetForm(FormUID);
                 var dbdts = GetDBDatasource(form, MainDbDataSource);
-                var status = _status.GetValorDBDatasource<string>(dbdts);
 
-                GerenciarCamposQuandoAutorizado(form, status == StatusPreContrato.Esboço);
+                var status = _status.GetValorDBDatasource<string>(dbdts);
+                bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
+                if (contratoPodeSerAlterado && CamposAutorizaveisNaoEstaoAtivos(form))
+                {
+                    GerenciarCamposQuandoAutorizado(form, true);
+                }
+                else if (!contratoPodeSerAlterado && CamposAutorizaveisEstaoAtivos(form))
+                {
+                    GerenciarCamposQuandoAutorizado(form, false);
+                }
             }
         }
 
@@ -523,13 +550,13 @@ namespace CafebrasContratos
             else if (pVal.ItemUID == _matrixAnexos._adicionar.ItemUID)
             {
                 var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, anexoDbDataSource);
+                var dbdts = GetDBDatasource(form, AnexoDbDataSource);
                 _matrixAnexos.AdicionarLinha(form, dbdts);
             }
             else if (pVal.ItemUID == _matrixAnexos._remover.ItemUID)
             {
                 var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, anexoDbDataSource);
+                var dbdts = GetDBDatasource(form, AnexoDbDataSource);
                 _matrixAnexos.RemoverLinhaSelecionada(form, dbdts);
             }
         }
@@ -543,7 +570,8 @@ namespace CafebrasContratos
                 var matrix = GetMatrix(form, _matrixAnexos.ItemUID);
 
                 var data = matrix.GetCellSpecific(_matrixAnexos._data.ItemUID, pVal.Row).Value.ToString();
-                if (String.IsNullOrEmpty(data))
+                var arquivo = matrix.GetCellSpecific(_matrixAnexos._arquivoAnexado.ItemUID, pVal.Row).Value.ToString();
+                if (String.IsNullOrEmpty(data) && !String.IsNullOrEmpty(arquivo))
                 {
                     matrix.SetCellWithoutValidation(pVal.Row, _matrixAnexos._data.ItemUID, DateTime.Now.ToString("yyyyMMdd"));
                 }
@@ -634,7 +662,12 @@ namespace CafebrasContratos
 
             PopularPessoasDeContato(form, "", "");
 
-            GerenciarCamposQuandoAutorizado(form, true);
+            GerirCamposPeneiraPegandoDaConfiguracao(form);
+
+            if (CamposAutorizaveisNaoEstaoAtivos(form))
+            {
+                GerenciarCamposQuandoAutorizado(form, true);
+            }
             QuandoNaoPuderAdicionarObjetoFilho(form);
         }
 
@@ -933,6 +966,7 @@ namespace CafebrasContratos
                     new ItemForm() { ItemUID = diferencialItemUID, Datasource = "U_" + diferencialItemUID }.SetValorDBDatasource(dbdts, 0);
                 }
             }
+
             AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
             AtualizarSomaDosDiferenciais(form, dbdts);
         }
@@ -1032,27 +1066,37 @@ namespace CafebrasContratos
 
         private void PosicionarCamposDeTotaisDePeneiras(SAPbouiCOM.Form form)
         {
-            var topFromLast = 21;
-            var topLast = form.Items.Item(_peneiras[_peneiras.Count - 1].ItemUID).Top;
-
-            for (int i = 0; i < _peneiras.Count; i++)
+            try
             {
-                var peneira = _peneiras[i];
-                if (!form.Items.Item(peneira.ItemUID).Visible)
+                var topFromLast = 21;
+                var topLast = form.Items.Item(_peneiras[_peneiras.Count - 1].ItemUID).Top;
+
+                if (form.Items.Item(_peneiras[0].ItemUID).Visible)
                 {
-                    topLast = form.Items.Item(_peneiras[i - 1].ItemUID).Top;
-                    break;
+                    for (int i = 0; i < _peneiras.Count; i++)
+                    {
+                        var peneira = _peneiras[i];
+                        if (!form.Items.Item(peneira.ItemUID).Visible)
+                        {
+                            topLast = form.Items.Item(_peneiras[i - 1].ItemUID).Top;
+                            break;
+                        }
+                    }
                 }
+
+                var totalTop = topFromLast + topLast;
+
+                form.Items.Item("lbl" + _totalPeneira.ItemUID).Top = totalTop;
+                form.Items.Item(_totalPeneira.ItemUID).Top = totalTop;
+                form.Items.Item(_totalDiferencial.ItemUID).Top = totalTop;
             }
-
-            var totalTop = topFromLast + topLast;
-
-            form.Items.Item("lbl" + _totalPeneira.ItemUID).Top = totalTop;
-            form.Items.Item(_totalPeneira.ItemUID).Top = totalTop;
-            form.Items.Item(_totalDiferencial.ItemUID).Top = totalTop;
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao posicionar campos totalizadores de peneiras.\nErro:" + e.Message);
+            }
         }
 
-        private void GerirCamposPeneira(SAPbouiCOM.Form form)
+        private void GerirCamposPeneiraPegandoDaConfiguracao(SAPbouiCOM.Form form)
         {
             try
             {
@@ -1061,42 +1105,122 @@ namespace CafebrasContratos
                 // se a aba estiver visivel.
                 // estou clicando na aba, deixando os itens invisiveis e voltando pra aba normal.
                 form.Freeze(true);
+                var ultimaAbaSelecionada = Abas.ActiveFolder(form);
+                form.Items.Item(Abas.Itens.ItemUID).Click();
 
-                form.Items.Item(abaItemUID).Click();
-
-                var rs = Helpers.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
-                while (!rs.EoF)
+                for (int i = 0; i < Program._peneiras.Count; i++)
                 {
-                    string peneiraUID = rs.Fields.Item("U_Peneira").Value;
-                    string nomePeneira = rs.Fields.Item("U_NomeP").Value;
-                    bool ativo = rs.Fields.Item("U_Ativo").Value == "Y";
+                    string peneiraUID = Program._peneiras[i].UID;
+                    bool ativo = Program._peneiras[i].Ativo;
+                    var itemVisivel = form.Items.Item(peneiraUID).Visible;
+                    var labelPeneiraUID = "lbl" + peneiraUID;
+                    var diferencialUID = peneiraUID.Replace("P", "D");
 
-                    var itemPeneira = _peneiras.Find(p => p.ItemUID == peneiraUID);
-                    var labelPeneiraUID = "lbl" + itemPeneira.ItemUID;
-                    var diferencialUID = itemPeneira.ItemUID.Replace("P", "D");
                     if (ativo)
                     {
-                        ((StaticText)form.Items.Item(labelPeneiraUID).Specific).Caption = nomePeneira;
+                        ((StaticText)form.Items.Item(labelPeneiraUID).Specific).Caption = Program._peneiras[i].Nome;
                     }
-                    else
+
+                    if (ativo && !itemVisivel)
                     {
-                        form.Items.Item(itemPeneira.ItemUID).Visible = false;
+                        form.Items.Item(peneiraUID).Visible = true;
+                        form.Items.Item(labelPeneiraUID).Visible = true;
+                        form.Items.Item(diferencialUID).Visible = true;
+                    }
+                    else if (!ativo && itemVisivel)
+                    {
+                        form.Items.Item(peneiraUID).Visible = false;
                         form.Items.Item(labelPeneiraUID).Visible = false;
                         form.Items.Item(diferencialUID).Visible = false;
                     }
-
-                    rs.MoveNext();
                 }
 
                 // para posicionar o campo de total, tem que estar com a aba clicada, senão o visible sempre retorna false
                 PosicionarCamposDeTotaisDePeneiras(form);
 
-                form.Items.Item(abaGeralUID).Click();
+                form.Items.Item(ultimaAbaSelecionada).Click();
             }
             finally
             {
                 form.Freeze(false);
             }
+        }
+
+        private void GerirCamposPeneiraPegandoDoBanco(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            try
+            {
+                // tem que por esse try/finally porque precisa de dar um freeze
+                // tem que dar o freeze porque eu só consigo fazer o item ficar invisivel
+                // se a aba estiver visivel.
+                // estou clicando na aba, deixando os itens invisiveis e voltando pra aba normal.
+                form.Freeze(true);
+                var ultimaAbaSelecionada = Abas.ActiveFolder(form);
+                form.Items.Item(Abas.Itens.ItemUID).Click();
+
+                for (int i = 0; i < _peneiras.Count; i++)
+                {
+                    var itemPeneira = _peneiras[i];
+                    var labelPeneiraDataSource = itemPeneira.Datasource.Replace("P", "L");
+                    var labelPeneira = dbdts.GetValue(labelPeneiraDataSource, 0).Trim();
+                    var ativo = !String.IsNullOrEmpty(labelPeneira);
+                    var itemVisivel = form.Items.Item(itemPeneira.ItemUID).Visible;
+                    var labelPeneiraUID = "lbl" + itemPeneira.ItemUID;
+                    var diferencialUID = itemPeneira.ItemUID.Replace("P", "D");
+
+                    if (ativo)
+                    {
+                        ((StaticText)form.Items.Item(labelPeneiraUID).Specific).Caption = labelPeneira;
+                    }
+
+                    if (ativo && !itemVisivel)
+                    {
+                        form.Items.Item(itemPeneira.ItemUID).Visible = true;
+                        form.Items.Item(labelPeneiraUID).Visible = true;
+                        form.Items.Item(diferencialUID).Visible = true;
+                    }
+                    else if (!ativo && itemVisivel)
+                    {
+                        form.Items.Item(itemPeneira.ItemUID).Visible = false;
+                        form.Items.Item(labelPeneiraUID).Visible = false;
+                        form.Items.Item(diferencialUID).Visible = false;
+                    }
+                }
+
+                // para posicionar o campo de total, tem que estar com a aba clicada, senão o visible sempre retorna false
+                PosicionarCamposDeTotaisDePeneiras(form);
+
+                form.Items.Item(ultimaAbaSelecionada).Click();
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao gerir campos gravados deste formulário.\nErro: " + e.Message);
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
+        private void SalvarLabelPeneiras(SAPbouiCOM.Form form, DBDataSource dbdts)
+        {
+            var lastAbaUID = Abas.ActiveFolder(form);
+
+            form.Items.Item(abaItemUID).Click();
+
+            for (int i = 0; i < _peneiras.Count; i++)
+            {
+                var lblUID = "lbl" + _peneiras[i].ItemUID;
+
+                if (form.Items.Item(lblUID).Visible)
+                {
+                    var label = ((StaticText)form.Items.Item(lblUID).Specific).Caption;
+                    var lblDataSource = _peneiras[i].Datasource.Replace("P", "L");
+                    dbdts.SetValue(lblDataSource, 0, label);
+                }
+            }
+
+            form.Items.Item(lastAbaUID).Click();
         }
 
         private bool ItemTipoBica(string itemcode)
@@ -1119,45 +1243,51 @@ namespace CafebrasContratos
             }
         }
 
-        private void SalvarLabelPeneiras(SAPbouiCOM.Form form, DBDataSource dbdts)
-        {
-            for (int i = 0; i < _peneiras.Count; i++)
-            {
-                var lblUID = "lbl" + _peneiras[i].ItemUID;
-                var label = ((StaticText)form.Items.Item(lblUID).Specific).Caption;
-
-                var labelPadrao = _peneiras[i].ItemUID;
-                if (label != labelPadrao)
-                {
-                    var lblDataSource = _peneiras[i].Datasource.Replace("P", "L");
-                    dbdts.SetValue(lblDataSource, 0, label);
-                }
-            }
-        }
-
         private void GerenciarCamposQuandoAutorizado(SAPbouiCOM.Form form, bool habilitar)
         {
-            var fields = GetType().GetFields();
-            foreach (var field in fields)
+            try
             {
-                if (field.FieldType == typeof(ItemFormAutorizavel)
-                    || field.FieldType == typeof(ItemFormObrigatorioAutorizavel)
-                    || field.FieldType == typeof(ComboFormAutorizavel)
-                    || field.FieldType == typeof(ComboFormObrigatorioAutorizavel))
+                form.Freeze(true);
+                var fields = GetType().GetFields();
+                foreach (var field in fields)
                 {
-                    var prop = (ItemForm)field.GetValue(this);
-                    form.Items.Item(prop.ItemUID).Enabled = habilitar;
-                }
-                else if (field.FieldType == typeof(List<ItemFormAutorizavel>))
-                {
-                    var prop = (List<ItemFormAutorizavel>)field.GetValue(this);
-                    foreach (var item in prop)
+                    if (field.FieldType == typeof(ItemFormAutorizavel)
+                        || field.FieldType == typeof(ItemFormObrigatorioAutorizavel)
+                        || field.FieldType == typeof(ComboFormAutorizavel)
+                        || field.FieldType == typeof(ComboFormObrigatorioAutorizavel))
                     {
-                        form.Items.Item(item.ItemUID).Enabled = habilitar;
-                        form.Items.Item(item.ItemUID.Replace("P", "D")).Enabled = habilitar;
+                        var prop = (ItemForm)field.GetValue(this);
+                        form.Items.Item(prop.ItemUID).Enabled = habilitar;
+                    }
+                    else if (field.FieldType == typeof(List<ItemFormAutorizavel>))
+                    {
+                        var prop = (List<ItemFormAutorizavel>)field.GetValue(this);
+                        foreach (var item in prop)
+                        {
+                            form.Items.Item(item.ItemUID).Enabled = habilitar;
+                            form.Items.Item(item.ItemUID.Replace("P", "D")).Enabled = habilitar;
+                        }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro ao desabilitar campos ao trocar status do contrato. Erro: " + e.Message);
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
+        private bool CamposAutorizaveisEstaoAtivos(SAPbouiCOM.Form form)
+        {
+            return form.Items.Item(_codigoPN.ItemUID).Enabled;
+        }
+
+        private bool CamposAutorizaveisNaoEstaoAtivos(SAPbouiCOM.Form form)
+        {
+            return !CamposAutorizaveisEstaoAtivos(form);
         }
 
         public string GetStatus(string formUID)
@@ -1166,6 +1296,14 @@ namespace CafebrasContratos
             var status = _status.GetValorDBDatasource<string>(dbdts);
 
             return status;
+        }
+
+        public string GetStatusFromDB(SAPbouiCOM.Form form)
+        {
+            var dbdts = GetDBDatasource(form, MainDbDataSource);
+            var code = dbdts.GetValue("Code", 0).Trim();
+            var rs = Helpers.DoQuery($"SELECT {_status.Datasource} FROM [{MainDbDataSource}] WHERE Code = '{code}'");
+            return rs.Fields.Item(_status.Datasource).Value;
         }
 
         #endregion
@@ -1204,6 +1342,31 @@ namespace CafebrasContratos
 
         public class ComboFormObrigatorioAutorizavel : ComboFormObrigatorio
         {
+        }
+
+        public class AbasContrato : TabsForm
+        {
+            public TabForm DefinicoesGerais = new TabForm()
+            {
+                ItemUID = abaGeralUID,
+                PaneLevel = 1
+            };
+            public TabForm Itens = new TabForm()
+            {
+                ItemUID = abaItemUID,
+                PaneLevel = 2
+            };
+
+            public TabForm Observacoes = new TabForm()
+            {
+                ItemUID = abaObsUID,
+                PaneLevel = 4
+            };
+            public TabForm Anexos = new TabForm()
+            {
+                ItemUID = "AbaAnexos",
+                PaneLevel = 5
+            };
         }
 
         public class MatrizAnexos : MatrizChildForm

@@ -74,7 +74,7 @@ namespace CafebrasContratos
     {
         #region :: Cabecalho
 
-        public Coluna NumeroDoContrato { get { return new ColunaInt("DocNumCC", "Numero do Contrato"); } }
+        public Coluna NumeroDoContrato { get { return new ColunaVarchar("DocNumCC", "Numero do Contrato", 50); } }
         public Coluna DataInicial { get { return new ColunaDate("DataIni", "Data Inicial"); } }
         public Coluna DataFinal { get { return new ColunaDate("DataFim", "Data Final"); } }
         public Coluna Status
@@ -106,6 +106,10 @@ namespace CafebrasContratos
         public Coluna UnidadeComercial { get { return new ColunaVarchar("UnidCom", "Unidade Comercial", 30); } }
         public Coluna TipoOperacao { get { return new ColunaVarchar("TipoOper", "Tipo Operação", 30); } }
         public Coluna MetodoFinanceiro { get { return new ColunaVarchar("MtdFin", "Método Financeiro", 30); } }
+        public Coluna Transportadora { get { return new ColunaVarchar("Transp", "Cardcode Transportadora", 100); } }
+        public Coluna ValorSeguro { get { return new ColunaPrice("VSeguro", "Valor Seguro"); } }
+        public Coluna LocalRetirada { get { return new ColunaVarchar("LocalRet", "Local de Retirada", 100); } }
+        public Coluna NomeEstrangeiro { get { return new ColunaVarchar("FrgnName", "Nome estrangeiro do PN", 100); } }
 
         #endregion
 
@@ -152,17 +156,7 @@ namespace CafebrasContratos
         #endregion
 
 
-        #region :: Versão 0.2
-
-        public Coluna Transportadora { get { return new ColunaVarchar("Transp", "Cardcode Transportadora", 100); } }
-        public Coluna ValorSeguro { get { return new ColunaPrice("VSeguro", "Valor Seguro"); } }
-        public Coluna LocalRetirada { get { return new ColunaVarchar("LocalRet", "Local de Retirada", 100); } }
-        public Coluna NomeEstrangeiro { get { return new ColunaVarchar("FrgnName", "Nome estrangeiro do PN", 100); } }
-
-        #endregion
-
-
-        #region :: Versão 0.3
+        #region :: Campos de Peneira
 
         public Coluna Peneira01 { get { return new ColunaInt("P01", "Peneira 01"); } }
         public Coluna Peneira02 { get { return new ColunaInt("P02", "Peneira 02"); } }

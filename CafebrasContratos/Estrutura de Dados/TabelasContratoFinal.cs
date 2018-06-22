@@ -76,7 +76,7 @@ namespace CafebrasContratos
         #region :: Cabecalho
 
         public Coluna NumeroDoContrato { get { return new ColunaVarchar("DocNumCF", "Numero do Contrato", 50); } }
-        public Coluna NumeroDoPreContrato { get { return new ColunaInt("DocNumCC", "Numero do PréContrato"); } }
+        public Coluna NumeroDoPreContrato { get { return new ColunaVarchar("DocNumCC", "Numero do PréContrato", 50); } }
         public Coluna DataInicial { get { return new ColunaDate("DataIni", "Data Inicial"); } }
         public Coluna DataFinal { get { return new ColunaDate("DataFim", "Data Final"); } }
         public Coluna StatusQualidade

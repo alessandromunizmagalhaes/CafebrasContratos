@@ -1,4 +1,4 @@
-- Criação de anexos para contrato pai e contrato filho
++ Criação de anexos para contrato pai e contrato filho
 
 + alteração no Menu : Contrato Compra de Café
 + alteração no título do form: mesmo do de cima
@@ -6,9 +6,8 @@
 + formulário de cadastro de pré contrato:
 	+ saldo financeiro = total livre.
 
-- calcular dinamicamente as peneiras
-- cadastro de participante:
-	+ possibilitar o cadastro de percentual padrão e refletir no contrato
++ calcular dinamicamente as peneiras
++ possibilitar o inserção de percentual no cadastro do participante e refletir no contrato
 
 + 'data final do contrato não pode ser menor do que a data inicial'
 

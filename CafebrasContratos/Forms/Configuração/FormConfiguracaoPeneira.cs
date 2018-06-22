@@ -57,6 +57,8 @@ namespace CafebrasContratos
                 var mtx = GetMatrix(form, _matriz.ItemUID);
 
                 Salvar(form, dbdts, mtx);
+
+                Program.CarregarPeneirasVindoDaConfiguracao();
             }
             catch (Exception e)
             {

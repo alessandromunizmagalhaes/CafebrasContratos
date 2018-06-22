@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Enums\EnumsContratoFinal.cs" />
     <Compile Include="Enums\EnumsPreContrato.cs" />
+    <Compile Include="Enums\Peneira.cs" />
     <Compile Include="Estrutura de Dados\TabelaConfiguracaoPeneira.cs" />
     <Compile Include="Estrutura de Dados\TabelasCadastroBasico.cs" />
     <Compile Include="Estrutura de Dados\TabelasContratoFinal.cs" />

@@ -18,7 +18,8 @@ namespace CafebrasContratos
 
         public override string FormType { get { return "FormContratoFinal"; } }
         public override string MainDbDataSource { get { return new TabelaContratoFinal().NomeComArroba; } }
-        public override string anexoDbDataSource { get { return new TabelaAnexosDoContratoFinal().NomeComArroba; } }
+        public override string AnexoDbDataSource { get { return new TabelaAnexosDoContratoFinal().NomeComArroba; } }
+        public override AbasContrato Abas { get { return new AbasContratoFinal(); } }
 
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormContratoFinalAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormContratoFinalComissoes); } }
@@ -94,7 +95,10 @@ namespace CafebrasContratos
 
         public override bool ContratoPodeSerAlterado(string status)
         {
-            return status == StatusContratoFinal.Esboço;
+            return status == StatusContratoFinal.Esboço
+                || status == StatusContratoFinal.Renegociacao
+                || status == StatusContratoFinal.Liberado
+            ;
         }
 
         #endregion
@@ -322,5 +326,15 @@ namespace CafebrasContratos
         }
 
         #endregion
+
+
+        public class AbasContratoFinal : AbasContrato
+        {
+            public TabForm Documentos = new TabForm()
+            {
+                ItemUID = "AbaCFinal",
+                PaneLevel = 4
+            };
+        }
     }
 }

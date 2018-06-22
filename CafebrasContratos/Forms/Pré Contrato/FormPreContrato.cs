@@ -21,7 +21,8 @@ namespace CafebrasContratos
 
         public override string FormType { get { return "FormPreContrato"; } }
         public override string MainDbDataSource { get { return new TabelaPreContrato().NomeComArroba; } }
-        public override string anexoDbDataSource { get { return new TabelaAnexosDoPreContrato().NomeComArroba; } }
+        public override string AnexoDbDataSource { get { return new TabelaAnexosDoPreContrato().NomeComArroba; } }
+        public override AbasContrato Abas { get { return new AbasPreContrato(); } }
 
         public override Type FormAberturaPorPeneiraType { get { return typeof(FormPreContratoAberturaPorPeneira); } }
         public override Type FormComissoesType { get { return typeof(FormPreContratoComissoes); } }
@@ -217,6 +218,8 @@ namespace CafebrasContratos
                 mtx.LoadFromDataSource();
 
                 mtx.AutoResizeColumns();
+
+                var status = dt.GetValue("U_StatusCtr", 0);
             }
             finally
             {
@@ -240,6 +243,11 @@ namespace CafebrasContratos
                 ItemUID = "contrato",
                 Datasource = "U_DocNumCF"
             };
+            public ItemForm Status = new ItemForm()
+            {
+                ItemUID = "status",
+                Datasource = "U_StatusCtr"
+            };
             public ItemForm CodigoPN = new ItemForm()
             {
                 ItemUID = "cardcode",
@@ -254,6 +262,15 @@ namespace CafebrasContratos
             {
                 ItemUID = "descricao",
                 Datasource = "U_Descricao"
+            };
+        }
+
+        public class AbasPreContrato : AbasContrato
+        {
+            public TabForm ContratoFinal = new TabForm()
+            {
+                ItemUID = "AbaCFinal",
+                PaneLevel = 3
             };
         }
     }
