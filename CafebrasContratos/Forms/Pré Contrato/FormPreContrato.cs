@@ -79,6 +79,44 @@ namespace CafebrasContratos
             return status == StatusPreContrato.Esboço;
         }
 
+        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus)
+        {
+            var tabelaContratoFinal = "[@UPD_OCFC]";
+            if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Esboço)
+            {
+                var rs = Helpers.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                if (rs.Fields.Item("cont").Value > 0)
+                {
+                    throw new BusinessRuleException(
+                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Esboço)}'.
+                        Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                }
+            }
+            else if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Encerrado)
+            {
+                var rs = Helpers.DoQuery(
+                    $@"SELECT 
+                            COUNT(*) as cont FROM {tabelaContratoFinal} 
+                        WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND {_status.Datasource} <> '{StatusContratoFinal.Encerrado}'  ");
+                if (rs.Fields.Item("cont").Value > 0)
+                {
+                    throw new BusinessRuleException(
+                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Encerrado)}'.
+                        Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                }
+            }
+            else if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Cancelado)
+            {
+                var rs = Helpers.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                if (rs.Fields.Item("cont").Value > 0)
+                {
+                    throw new BusinessRuleException(
+                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Cancelado)}'.
+                        Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                }
+            }
+        }
+
         #endregion
 
 

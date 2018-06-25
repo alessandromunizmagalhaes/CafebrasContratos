@@ -101,6 +101,11 @@ namespace CafebrasContratos
             ;
         }
 
+        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus)
+        {
+
+        }
+
         #endregion
 
 
@@ -122,10 +127,19 @@ namespace CafebrasContratos
                 };
             }
         }
-        public ItemForm _statusQualidade = new ItemForm()
+        public ItemFormContrato _statusQualidade = new ItemFormContrato()
         {
             ItemUID = "StatusQua",
-            Datasource = "U_StatusQua"
+            Datasource = "U_StatusQua",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
 
         #endregion

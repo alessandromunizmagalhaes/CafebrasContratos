@@ -33,36 +33,81 @@ namespace CafebrasContratos
 
         public abstract ItemForm _numeroDoContrato { get; }
 
-        public ItemForm _status = new ItemForm()
+        public ItemFormContrato _status = new ItemFormContrato()
         {
             ItemUID = "StatusCtr",
             Datasource = "U_StatusCtr",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = true,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormObrigatorio _descricao = new ItemFormObrigatorio()
+        public ItemFormObrigatorioContrato _descricao = new ItemFormObrigatorioContrato()
         {
             ItemUID = "Descricao",
             Datasource = "U_Descricao",
             Mensagem = "A Descrição Geral é obrigatória.",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = true,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormObrigatorioAutorizavel _dataInicio = new ItemFormObrigatorioAutorizavel()
+        public ItemFormObrigatorioContrato _dataInicio = new ItemFormObrigatorioContrato()
         {
             ItemUID = "DataIni",
             Datasource = "U_DataIni",
-            Mensagem = "A Data de Início é obrigatória."
+            Mensagem = "A Data de Início é obrigatória.",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormObrigatorio _dataFim = new ItemFormObrigatorio()
+        public ItemFormObrigatorioContrato _dataFim = new ItemFormObrigatorioContrato()
         {
             ItemUID = "DataFim",
             Datasource = "U_DataFim",
-            Mensagem = "A Data Final é obrigatória."
+            Mensagem = "A Data Final é obrigatória.",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = true,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
 
-        public ItemFormObrigatorioAutorizavel _codigoPN = new ItemFormObrigatorioAutorizavel()
+        public ItemFormObrigatorioContrato _codigoPN = new ItemFormObrigatorioContrato()
         {
             ItemUID = "CardCode",
             Datasource = "U_CardCode",
             Mensagem = "O Parceiro de Negócios é obrigatório.",
             AbaUID = abaGeralUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _nomePN = new ItemForm()
         {
@@ -84,183 +129,390 @@ namespace CafebrasContratos
             ItemUID = "EMail",
             Datasource = "U_EMail",
         };
-        public ComboFormObrigatorioAutorizavel _pessoasDeContato = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _pessoasDeContato = new ComboFormObrigatorioContrato()
         {
             ItemUID = "CtName",
             Datasource = "U_CtName",
             Mensagem = "A pessoa de contato é obrigatória.",
             AbaUID = abaGeralUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
 
-        public ItemFormAutorizavel _previsaoEntrega = new ItemFormAutorizavel()
+        public ItemFormContrato _previsaoEntrega = new ItemFormContrato()
         {
             ItemUID = "DtPrEnt",
             Datasource = "U_DtPrEnt",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _previsaoPagamento = new ItemFormAutorizavel()
+        public ItemFormContrato _previsaoPagamento = new ItemFormContrato()
         {
             ItemUID = "DtPrPgt",
             Datasource = "U_DtPrPgt",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
 
-        public ComboFormObrigatorioAutorizavel _modalidade = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _modalidade = new ComboFormObrigatorioContrato()
         {
             ItemUID = "ModCtto",
             Datasource = "U_ModCtto",
             Mensagem = "A modalidade do contrato é obrigatória",
             SQL = "SELECT Code, Name FROM [@UPD_OMOD] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormObrigatorioAutorizavel _unidadeComercial = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _unidadeComercial = new ComboFormObrigatorioContrato()
         {
             ItemUID = "UnidCom",
             Datasource = "U_UnidCom",
             Mensagem = "A unidade de comercial é obrigatória.",
             SQL = "SELECT Code, Name FROM [@UPD_OUCM] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormObrigatorioAutorizavel _tipoDeOperacao = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _tipoDeOperacao = new ComboFormObrigatorioContrato()
         {
             ItemUID = "TipoOper",
             Datasource = "U_TipoOper",
             Mensagem = "O tipo de operação é obrigatório.",
             SQL = "SELECT Code, Name FROM [@UPD_OTOP] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaGeralUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormAutorizavel _metodoFinanceiro = new ComboFormAutorizavel()
+        public ComboFormContrato _metodoFinanceiro = new ComboFormContrato()
         {
             ItemUID = "MtdFin",
             Datasource = "U_MtdFin",
             SQL = "SELECT Code, Name FROM [@UPD_OMFN] WHERE Canceled = 'N' ORDER BY Name",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormObrigatorioAutorizavel _codigoItem = new ItemFormObrigatorioAutorizavel()
+        public ItemFormObrigatorioContrato _codigoItem = new ItemFormObrigatorioContrato()
         {
             ItemUID = "ItemCode",
             Datasource = "U_ItemCode",
             Mensagem = "O Item é obrigatório.",
             AbaUID = abaItemUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _nomeItem = new ItemForm()
         {
             ItemUID = "ItemName",
             Datasource = "U_ItemName"
         };
-        public ItemFormObrigatorioAutorizavel _deposito = new ItemFormObrigatorioAutorizavel()
+        public ItemFormObrigatorioContrato _deposito = new ItemFormObrigatorioContrato()
         {
             ItemUID = "WhsCode",
             Datasource = "U_WhsCode",
             Mensagem = "O depósito é obrigatório.",
             AbaUID = abaItemUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormObrigatorioAutorizavel _utilizacao = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _utilizacao = new ComboFormObrigatorioContrato()
         {
             ItemUID = "Usage",
             Datasource = "U_Usage",
             Mensagem = "A utilização é obrigatória.",
             SQL = "SELECT ID, Usage FROM OUSG ORDER BY Usage",
             AbaUID = abaItemUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormObrigatorioAutorizavel _safra = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _safra = new ComboFormObrigatorioContrato()
         {
             ItemUID = "Safra",
             Datasource = "U_Safra",
             Mensagem = "A safra é obrigatória.",
             SQL = "SELECT Code, Name FROM [@UPD_OSAF] WHERE Canceled = 'N' ORDER BY Name",
             AbaUID = abaItemUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ComboFormObrigatorioAutorizavel _embalagem = new ComboFormObrigatorioAutorizavel()
+        public ComboFormObrigatorioContrato _embalagem = new ComboFormObrigatorioContrato()
         {
             ItemUID = "Packg",
             Datasource = "U_Packg",
             Mensagem = "A embalagem é obrigatória.",
             SQL = "SELECT PkgCode, PkgType FROM OPKG ORDER BY PkgType",
             AbaUID = abaItemUID,
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _bebida = new ItemFormAutorizavel()
+        public ItemFormContrato _bebida = new ItemFormContrato()
         {
             ItemUID = "Bebida",
             Datasource = "U_Bebida",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _diferencial = new ItemFormAutorizavel()
+        public ItemFormContrato _diferencial = new ItemFormContrato()
         {
             ItemUID = "Difere",
             Datasource = "U_Difere",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _taxaNY = new ItemFormAutorizavel()
+        public ItemFormContrato _taxaNY = new ItemFormContrato()
         {
             ItemUID = "RateNY",
             Datasource = "U_RateNY",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _taxaDollar = new ItemFormAutorizavel()
+        public ItemFormContrato _taxaDollar = new ItemFormContrato()
         {
             ItemUID = "RateUSD",
             Datasource = "U_RateUSD",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
 
-        public ItemFormAutorizavel _quantidadeDePeso = new ItemFormAutorizavel()
+        public ItemFormContrato _quantidadeDePeso = new ItemFormContrato()
         {
             ItemUID = "QtdPeso",
-            Datasource = "U_QtdPeso"
+            Datasource = "U_QtdPeso",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _saldoDePeso = new ItemForm()
         {
             ItemUID = "SPesoRec",
-            Datasource = "U_SPesoRec"
+            Datasource = "U_SPesoRec",
         };
-        public ItemFormAutorizavel _quantidadeDeSacas = new ItemFormAutorizavel()
+        public ItemFormContrato _quantidadeDeSacas = new ItemFormContrato()
         {
             ItemUID = "QtdSaca",
-            Datasource = "U_QtdSaca"
+            Datasource = "U_QtdSaca",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _saldoDeSacas = new ItemForm()
         {
             ItemUID = "SPesoNCT",
-            Datasource = "U_SPesoNCT"
+            Datasource = "U_SPesoNCT",
         };
-        public ItemFormAutorizavel _valorLivre = new ItemFormAutorizavel()
+        public ItemFormContrato _valorLivre = new ItemFormContrato()
         {
             ItemUID = "VLivre",
-            Datasource = "U_VLivre"
+            Datasource = "U_VLivre",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _totalLivre = new ItemForm()
         {
             ItemUID = "TLivre",
             Datasource = "U_TLivre"
         };
-        public ItemFormAutorizavel _valorICMS = new ItemFormAutorizavel()
+        public ItemFormContrato _valorICMS = new ItemFormContrato()
         {
             ItemUID = "VICMS",
-            Datasource = "U_VICMS"
+            Datasource = "U_VICMS",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _totalICMS = new ItemForm()
         {
             ItemUID = "TICMS",
             Datasource = "U_TICMS"
         };
-        public ItemFormAutorizavel _valorSENAR = new ItemFormAutorizavel()
+        public ItemFormContrato _valorSENAR = new ItemFormContrato()
         {
             ItemUID = "VSenar",
-            Datasource = "U_VSenar"
+            Datasource = "U_VSenar",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _totalSENAR = new ItemForm()
         {
             ItemUID = "TSenar",
             Datasource = "U_TSenar"
         };
-        public ItemFormAutorizavel _valorFaturado = new ItemFormAutorizavel()
+        public ItemFormContrato _valorFaturado = new ItemFormContrato()
         {
             ItemUID = "VFat",
-            Datasource = "U_VFat"
+            Datasource = "U_VFat",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _totalFaturado = new ItemForm()
         {
             ItemUID = "TFat",
             Datasource = "U_TFat"
         };
-        public ItemFormAutorizavel _valorBruto = new ItemFormAutorizavel()
+        public ItemFormContrato _valorBruto = new ItemFormContrato()
         {
             ItemUID = "VBruto",
-            Datasource = "U_VBruto"
+            Datasource = "U_VBruto",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _totalBruto = new ItemForm()
         {
@@ -268,25 +520,59 @@ namespace CafebrasContratos
             Datasource = "U_TBruto"
         };
 
-        public ItemFormAutorizavel _valorFrete = new ItemFormAutorizavel()
+        public ItemFormContrato _valorFrete = new ItemFormContrato()
         {
             ItemUID = "VlrFrete",
-            Datasource = "U_VlrFrete"
+            Datasource = "U_VlrFrete",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _valorSeguro = new ItemFormAutorizavel()
+        public ItemFormContrato _valorSeguro = new ItemFormContrato()
         {
             ItemUID = "VSeguro",
-            Datasource = "U_VSeguro"
+            Datasource = "U_VSeguro",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _transportadora = new ItemFormAutorizavel()
+        public ItemFormContrato _transportadora = new ItemFormContrato()
         {
             ItemUID = "Transp",
-            Datasource = "U_Transp"
+            Datasource = "U_Transp",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
-        public ItemFormAutorizavel _localRetirada = new ItemFormAutorizavel()
+        public ItemFormContrato _localRetirada = new ItemFormContrato()
         {
             ItemUID = "LocalRet",
-            Datasource = "U_LocalRet"
+            Datasource = "U_LocalRet",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
         };
         public ItemForm _saldoFinanceiro = new ItemForm()
         {
@@ -299,22 +585,202 @@ namespace CafebrasContratos
 
         #region :: Campos Peneira
 
-        public readonly List<ItemFormAutorizavel> _peneiras = new List<ItemFormAutorizavel>() {
-            new ItemFormAutorizavel(){ ItemUID = "P01", Datasource = "U_P01" },
-            new ItemFormAutorizavel(){ ItemUID = "P02", Datasource = "U_P02" },
-            new ItemFormAutorizavel(){ ItemUID = "P03", Datasource = "U_P03" },
-            new ItemFormAutorizavel(){ ItemUID = "P04", Datasource = "U_P04" },
-            new ItemFormAutorizavel(){ ItemUID = "P05", Datasource = "U_P05" },
-            new ItemFormAutorizavel(){ ItemUID = "P06", Datasource = "U_P06" },
-            new ItemFormAutorizavel(){ ItemUID = "P07", Datasource = "U_P07" },
-            new ItemFormAutorizavel(){ ItemUID = "P08", Datasource = "U_P08" },
-            new ItemFormAutorizavel(){ ItemUID = "P09", Datasource = "U_P09" },
-            new ItemFormAutorizavel(){ ItemUID = "P10", Datasource = "U_P10" },
-            new ItemFormAutorizavel(){ ItemUID = "P11", Datasource = "U_P11" },
-            new ItemFormAutorizavel(){ ItemUID = "P12", Datasource = "U_P12" },
-            new ItemFormAutorizavel(){ ItemUID = "P13", Datasource = "U_P13" },
-            new ItemFormAutorizavel(){ ItemUID = "P14", Datasource = "U_P14" },
-            new ItemFormAutorizavel(){ ItemUID = "P15", Datasource = "U_P15" },
+        public readonly List<ItemFormContrato> _peneiras = new List<ItemFormContrato>() {
+            new ItemFormContrato(){
+                ItemUID = "P01"
+                , Datasource = "U_P01",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P02"
+                , Datasource = "U_P02",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P03"
+                , Datasource = "U_P03",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P04"
+                , Datasource = "U_P04",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P05"
+                , Datasource = "U_P05",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P06"
+                , Datasource = "U_P06",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P07"
+                , Datasource = "U_P07",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P08"
+                , Datasource = "U_P08",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P09"
+                , Datasource = "U_P09",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P10"
+                , Datasource = "U_P10",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P11"
+                , Datasource = "U_P11",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P12"
+                , Datasource = "U_P12",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P13"
+                , Datasource = "U_P13",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P14"
+                , Datasource = "U_P14",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
+            new ItemFormContrato(){
+                ItemUID = "P15"
+                , Datasource = "U_P15",
+                gestaoCamposEmStatus = new GestaoCamposContrato()
+                {
+                    QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                    QuandoEmAutorizado = false,
+                    QuandoEmEncerrado = false,
+                    QuandoEmCancelado = false,
+                }
+            },
         };
 
         public ItemForm _totalPeneira = new ItemForm() { ItemUID = "totalP", Datasource = "totalP" };
@@ -388,6 +854,37 @@ namespace CafebrasContratos
                 Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
                 BubbleEvent = FormEstaValido(form, dbdts);
+                if (!BubbleEvent)
+                {
+                    return;
+                }
+
+                var gestaoStatus = new GestaoStatusContrato(GetStatusPersistent(form), GetStatusVolatil(form.UniqueID));
+                if (gestaoStatus.EstaTrocandoStatus())
+                {
+                    try
+                    {
+                        ValidaAlteracaoDeStatus(gestaoStatus);
+                    }
+                    catch (BusinessRuleException e)
+                    {
+                        Dialogs.PopupError(e.Message);
+                        BubbleEvent = false;
+                    }
+                    catch (Exception e)
+                    {
+                        Dialogs.PopupError("Erro interno. Erro ao tentar validar a troca de status do contrato.\nErro: " + e.Message);
+                        BubbleEvent = false;
+                    }
+
+                    if (!BubbleEvent)
+                    {
+                        return;
+                    }
+
+                    GerenciarCamposQuandoEmStatus(form, gestaoStatus.StatusVolatil);
+                    GerenciarQuandoPodeAdicionarObjetoFilho(form, gestaoStatus.StatusVolatil);
+                }
             }
             else
             {
@@ -418,16 +915,9 @@ namespace CafebrasContratos
 
 
             var status = _status.GetValorDBDatasource<string>(dbdts);
-            bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
-            if (contratoPodeSerAlterado && CamposAutorizaveisNaoEstaoAtivos(form))
-            {
-                GerenciarCamposQuandoAutorizado(form, true);
-            }
-            else if (!contratoPodeSerAlterado && CamposAutorizaveisEstaoAtivos(form))
-            {
-                GerenciarCamposQuandoAutorizado(form, false);
-            }
+            GerenciarCamposQuandoEmStatus(form, status);
 
+            bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
             if (contratoPodeSerAlterado)
             {
                 var itemcode = _codigoItem.GetValorDBDatasource<string>(dbdts);
@@ -435,14 +925,7 @@ namespace CafebrasContratos
                 HabilitarCamposDePeneira(form, dbdts, itemcode);
             }
 
-            if (status == StatusPreContrato.Autorizado)
-            {
-                QuandoPuderAdicionarObjetoFilho(form);
-            }
-            else
-            {
-                QuandoNaoPuderAdicionarObjetoFilho(form);
-            }
+            GerenciarQuandoPodeAdicionarObjetoFilho(form, status);
         }
 
         #endregion
@@ -509,23 +992,15 @@ namespace CafebrasContratos
                 string pessoaDeContato = dbdts.GetValue(_pessoasDeContato.Datasource, 0);
                 string cardcode = dbdts.GetValue(_codigoPN.Datasource, 0);
                 AtualizarDadosPessoaDeContato(cardcode, pessoaDeContato, dbdts);
-            }
+            }/*
             else if (pVal.ItemUID == _status.ItemUID)
             {
                 var form = GetForm(FormUID);
                 var dbdts = GetDBDatasource(form, MainDbDataSource);
 
                 var status = _status.GetValorDBDatasource<string>(dbdts);
-                bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
-                if (contratoPodeSerAlterado && CamposAutorizaveisNaoEstaoAtivos(form))
-                {
-                    GerenciarCamposQuandoAutorizado(form, true);
-                }
-                else if (!contratoPodeSerAlterado && CamposAutorizaveisEstaoAtivos(form))
-                {
-                    GerenciarCamposQuandoAutorizado(form, false);
-                }
-            }
+                GerenciarCamposQuandoEmStatus(form, status);
+            }*/
         }
 
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -664,10 +1139,7 @@ namespace CafebrasContratos
 
             GerirCamposPeneiraPegandoDaConfiguracao(form);
 
-            if (CamposAutorizaveisNaoEstaoAtivos(form))
-            {
-                GerenciarCamposQuandoAutorizado(form, true);
-            }
+            GerenciarCamposQuandoEmStatus(form, StatusPreContrato.Esboço);
             QuandoNaoPuderAdicionarObjetoFilho(form);
         }
 
@@ -1243,29 +1715,36 @@ namespace CafebrasContratos
             }
         }
 
-        private void GerenciarCamposQuandoAutorizado(SAPbouiCOM.Form form, bool habilitar)
+        private void GerenciarCamposQuandoEmStatus(SAPbouiCOM.Form form, string status)
         {
             try
             {
+                form.Items.Item("focus").Click();
+
                 form.Freeze(true);
                 var fields = GetType().GetFields();
                 foreach (var field in fields)
                 {
-                    if (field.FieldType == typeof(ItemFormAutorizavel)
-                        || field.FieldType == typeof(ItemFormObrigatorioAutorizavel)
-                        || field.FieldType == typeof(ComboFormAutorizavel)
-                        || field.FieldType == typeof(ComboFormObrigatorioAutorizavel))
+                    if (field.FieldType == typeof(ItemFormContrato)
+                        || field.FieldType == typeof(ItemFormObrigatorioContrato)
+                        || field.FieldType == typeof(ComboFormContrato)
+                        || field.FieldType == typeof(ComboFormObrigatorioContrato))
                     {
                         var prop = (ItemForm)field.GetValue(this);
-                        form.Items.Item(prop.ItemUID).Enabled = habilitar;
+                        var propInterface = (IItemFormContrato)field.GetValue(this);
+
+                        var enable = DefinirStatusCampo(status, propInterface);
+                        form.Items.Item(prop.ItemUID).Enabled = enable;
                     }
-                    else if (field.FieldType == typeof(List<ItemFormAutorizavel>))
+                    else if (field.FieldType == typeof(List<ItemFormContrato>))
                     {
-                        var prop = (List<ItemFormAutorizavel>)field.GetValue(this);
+                        var prop = (List<ItemFormContrato>)field.GetValue(this);
                         foreach (var item in prop)
                         {
-                            form.Items.Item(item.ItemUID).Enabled = habilitar;
-                            form.Items.Item(item.ItemUID.Replace("P", "D")).Enabled = habilitar;
+                            var propInterface = (IItemFormContrato)item;
+                            var enable = DefinirStatusCampo(status, propInterface);
+                            form.Items.Item(item.ItemUID).Enabled = enable;
+                            form.Items.Item(item.ItemUID.Replace("P", "D")).Enabled = enable;
                         }
                     }
                 }
@@ -1280,6 +1759,28 @@ namespace CafebrasContratos
             }
         }
 
+        private bool DefinirStatusCampo(string status, IItemFormContrato propInterface)
+        {
+            switch (status)
+            {
+                case StatusContratoFinal.Esboço:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmEsboco;
+                case StatusContratoFinal.Renegociacao:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmRenegociacao;
+                case StatusContratoFinal.Liberado:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmLiberado;
+                case StatusContratoFinal.Autorizado:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmAutorizado;
+                case StatusContratoFinal.Encerrado:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmEncerrado;
+                case StatusContratoFinal.Cancelado:
+                    return propInterface.gestaoCamposEmStatus.QuandoEmCancelado;
+                default:
+                    Dialogs.PopupError($"Erro interno. Tipo de situação {status} não encontrado");
+                    return false;
+            }
+        }
+
         private bool CamposAutorizaveisEstaoAtivos(SAPbouiCOM.Form form)
         {
             return form.Items.Item(_codigoPN.ItemUID).Enabled;
@@ -1290,7 +1791,7 @@ namespace CafebrasContratos
             return !CamposAutorizaveisEstaoAtivos(form);
         }
 
-        public string GetStatus(string formUID)
+        public string GetStatusVolatil(string formUID)
         {
             var dbdts = GetDBDatasource(formUID, MainDbDataSource);
             var status = _status.GetValorDBDatasource<string>(dbdts);
@@ -1298,12 +1799,24 @@ namespace CafebrasContratos
             return status;
         }
 
-        public string GetStatusFromDB(SAPbouiCOM.Form form)
+        public string GetStatusPersistent(SAPbouiCOM.Form form)
         {
             var dbdts = GetDBDatasource(form, MainDbDataSource);
             var code = dbdts.GetValue("Code", 0).Trim();
             var rs = Helpers.DoQuery($"SELECT {_status.Datasource} FROM [{MainDbDataSource}] WHERE Code = '{code}'");
             return rs.Fields.Item(_status.Datasource).Value;
+        }
+
+        private void GerenciarQuandoPodeAdicionarObjetoFilho(SAPbouiCOM.Form form, string status)
+        {
+            if (status == StatusPreContrato.Autorizado)
+            {
+                QuandoPuderAdicionarObjetoFilho(form);
+            }
+            else
+            {
+                QuandoNaoPuderAdicionarObjetoFilho(form);
+            }
         }
 
         #endregion
@@ -1324,24 +1837,34 @@ namespace CafebrasContratos
         public abstract void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
         public abstract void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
         public abstract bool ContratoPodeSerAlterado(string status);
+        public abstract void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus);
 
         #endregion
 
 
-        public class ItemFormAutorizavel : ItemForm
+        public interface IItemFormContrato
         {
+            GestaoCamposContrato gestaoCamposEmStatus { get; set; }
         }
 
-        public class ItemFormObrigatorioAutorizavel : ItemFormObrigatorio
+        public class ItemFormContrato : ItemForm, IItemFormContrato
         {
+            public GestaoCamposContrato gestaoCamposEmStatus { get; set; }
         }
 
-        public class ComboFormAutorizavel : ComboForm
+        public class ItemFormObrigatorioContrato : ItemFormObrigatorio, IItemFormContrato
         {
+            public GestaoCamposContrato gestaoCamposEmStatus { get; set; }
         }
 
-        public class ComboFormObrigatorioAutorizavel : ComboFormObrigatorio
+        public class ComboFormContrato : ComboForm, IItemFormContrato
         {
+            public GestaoCamposContrato gestaoCamposEmStatus { get; set; }
+        }
+
+        public class ComboFormObrigatorioContrato : ComboFormObrigatorio, IItemFormContrato
+        {
+            public GestaoCamposContrato gestaoCamposEmStatus { get; set; }
         }
 
         public class AbasContrato : TabsForm

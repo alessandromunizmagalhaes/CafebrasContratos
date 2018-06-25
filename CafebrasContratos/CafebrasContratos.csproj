@@ -67,6 +67,8 @@
     <Compile Include="Forms\Contrato Final\FormContratoFinalAberturaPorPeneira.cs" />
     <Compile Include="Forms\Contrato Final\FormContratoFinalComissoes.cs" />
     <Compile Include="Forms\Contrato Final\FormContratoFinalDetalheCertificado.cs" />
+    <Compile Include="Forms\Contrato\GestaoCamposContrato.cs" />
+    <Compile Include="Forms\Contrato\GestaoStatusContrato.cs" />
     <Compile Include="Forms\Padrão SAP\FormUsuarios.cs" />
     <Compile Include="Forms\Contrato\FormComissoes.cs" />
     <Compile Include="Forms\Contrato\FormAberturaPorPeneira.cs" />

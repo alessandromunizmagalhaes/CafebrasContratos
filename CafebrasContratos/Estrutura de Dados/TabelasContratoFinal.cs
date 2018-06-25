@@ -100,7 +100,7 @@ namespace CafebrasContratos
                     new ValorValido(StatusContratoFinal.Liberado, "Liberado"),
                     new ValorValido(StatusContratoFinal.Autorizado, "Autorizado"),
                     new ValorValido(StatusContratoFinal.Cancelado, "Cancelado"),
-                    new ValorValido(StatusContratoFinal.Fechado, "Fechado"),
+                    new ValorValido(StatusContratoFinal.Encerrado, "Fechado"),
                 });
             }
         }

@@ -43,7 +43,7 @@ namespace CafebrasContratos
 
                 CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
-                var statusContratoPai = formPai.GetStatus(_fatherFormUID);
+                var statusContratoPai = formPai.GetStatusPersistent(GetForm(_fatherFormUID));
                 form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
             }
             catch (Exception e)

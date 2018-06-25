@@ -71,7 +71,7 @@ namespace CafebrasContratos
                 _corretores._participante.Popular(mtxCorretores);
                 _responsaveis._participante.Popular(mtxResponsaveis);
 
-                var statusContratoPai = formPai.GetStatus(_fatherFormUID);
+                var statusContratoPai = formPai.GetStatusPersistent(GetForm(_fatherFormUID));
                 form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
             }
             catch (Exception e)
