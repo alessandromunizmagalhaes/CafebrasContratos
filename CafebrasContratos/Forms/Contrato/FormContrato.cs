@@ -555,6 +555,8 @@ namespace CafebrasContratos
             gestaoCamposEmStatus = new GestaoCamposContrato()
             {
                 QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
                 QuandoEmAutorizado = false,
                 QuandoEmEncerrado = false,
                 QuandoEmCancelado = false,
@@ -1123,7 +1125,6 @@ namespace CafebrasContratos
         public override void _OnAdicionarNovo(SAPbouiCOM.Form form)
         {
             form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
-            form.Items.Item(_status.ItemUID).Enabled = false;
 
             var dbdts = GetDBDatasource(form, MainDbDataSource);
 
@@ -1141,6 +1142,8 @@ namespace CafebrasContratos
 
             GerenciarCamposQuandoEmStatus(form, StatusPreContrato.Esboço);
             QuandoNaoPuderAdicionarObjetoFilho(form);
+
+            form.Items.Item(_status.ItemUID).Enabled = false;
         }
 
         public override void _OnPesquisar(SAPbouiCOM.Form form)
@@ -1226,48 +1229,51 @@ namespace CafebrasContratos
             ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
             Conditions oConds = oCFL.GetConditions();
 
-            var rs = Helpers.DoQuery(SQLGrupoDeItensPermitidos);
-            if (rs.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                int i = 0;
-                while (!rs.EoF)
+                var rs = recordset.DoQuery(SQLGrupoDeItensPermitidos);
+                if (rs.RecordCount > 0)
                 {
-                    i++;
-                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
-
-                    Condition oCond = oConds.Add();
-
-                    if (i == 1)
+                    int i = 0;
+                    while (!rs.EoF)
                     {
-                        oCond.BracketOpenNum = 1;
+                        i++;
+                        string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
+
+                        Condition oCond = oConds.Add();
+
+                        if (i == 1)
+                        {
+                            oCond.BracketOpenNum = 1;
+                        }
+
+                        oCond.Alias = "ItmsGrpCod";
+                        oCond.Operation = BoConditionOperation.co_EQUAL;
+                        oCond.CondVal = grupoDeItem;
+
+                        if (i == rs.RecordCount)
+                        {
+                            oCond.BracketCloseNum = 1;
+                            oCond.Relationship = BoConditionRelationship.cr_AND;
+                        }
+                        else
+                        {
+                            oCond.Relationship = BoConditionRelationship.cr_OR;
+                        }
+
+                        rs.MoveNext();
                     }
 
-                    oCond.Alias = "ItmsGrpCod";
-                    oCond.Operation = BoConditionOperation.co_EQUAL;
-                    oCond.CondVal = grupoDeItem;
+                    // só trazer itens ativos
+                    Condition oCondAtivo = oConds.Add();
+                    oCondAtivo.BracketOpenNum = 2;
+                    oCondAtivo.Alias = "frozenFor";
+                    oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
+                    oCondAtivo.CondVal = "N";
+                    oCondAtivo.BracketCloseNum = 2;
 
-                    if (i == rs.RecordCount)
-                    {
-                        oCond.BracketCloseNum = 1;
-                        oCond.Relationship = BoConditionRelationship.cr_AND;
-                    }
-                    else
-                    {
-                        oCond.Relationship = BoConditionRelationship.cr_OR;
-                    }
-
-                    rs.MoveNext();
+                    oCFL.SetConditions(oConds);
                 }
-
-                // só trazer itens ativos
-                Condition oCondAtivo = oConds.Add();
-                oCondAtivo.BracketOpenNum = 2;
-                oCondAtivo.Alias = "frozenFor";
-                oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
-                oCondAtivo.CondVal = "N";
-                oCondAtivo.BracketCloseNum = 2;
-
-                oCFL.SetConditions(oConds);
             }
         }
 
@@ -1341,19 +1347,22 @@ namespace CafebrasContratos
 	                    , E_MailL
                     FROM OCPR 
                     WHERE CardCode = '{cardcode}' AND Name = '{pessoaDeContato}'";
-            var rs = Helpers.DoQuery(sql);
-
-            var telefone = "";
-            var email = "";
-
-            if (rs.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                telefone = rs.Fields.Item("Tel1").Value;
-                email = rs.Fields.Item("E_MailL").Value;
-            }
+                var rs = recordset.DoQuery(sql);
 
-            _telefone.SetValorDBDatasource(dbdts, telefone);
-            _email.SetValorDBDatasource(dbdts, email);
+                var telefone = "";
+                var email = "";
+
+                if (rs.RecordCount > 0)
+                {
+                    telefone = rs.Fields.Item("Tel1").Value;
+                    email = rs.Fields.Item("E_MailL").Value;
+                }
+
+                _telefone.SetValorDBDatasource(dbdts, telefone);
+                _email.SetValorDBDatasource(dbdts, email);
+            }
         }
 
         private bool EventoEmCampoDeValor(string itemUID)
@@ -1697,21 +1706,27 @@ namespace CafebrasContratos
 
         private bool ItemTipoBica(string itemcode)
         {
-            var rs = Helpers.DoQuery($"SELECT U_UPD_TIPO_ITEM FROM OITM WHERE ItemCode = '{itemcode}'");
-            return rs.Fields.Item("U_UPD_TIPO_ITEM").Value == "B";
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery($"SELECT U_UPD_TIPO_ITEM FROM OITM WHERE ItemCode = '{itemcode}'");
+                return rs.Fields.Item("U_UPD_TIPO_ITEM").Value == "B";
+            }
         }
 
         public static bool TemGrupoDeItemConfiguradoParaChoose()
         {
-            var rs = Helpers.DoQuery(SQLGrupoDeItensPermitidos);
-            if (rs.RecordCount == 0)
+            using (var recordset = new RecordSet())
             {
-                Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
-                return false;
-            }
-            else
-            {
-                return true;
+                var rs = recordset.DoQuery(SQLGrupoDeItensPermitidos);
+                if (rs.RecordCount == 0)
+                {
+                    Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
 
@@ -1803,8 +1818,11 @@ namespace CafebrasContratos
         {
             var dbdts = GetDBDatasource(form, MainDbDataSource);
             var code = dbdts.GetValue("Code", 0).Trim();
-            var rs = Helpers.DoQuery($"SELECT {_status.Datasource} FROM [{MainDbDataSource}] WHERE Code = '{code}'");
-            return rs.Fields.Item(_status.Datasource).Value;
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery($"SELECT {_status.Datasource} FROM [{MainDbDataSource}] WHERE Code = '{code}'");
+                return rs.Fields.Item(_status.Datasource).Value;
+            }
         }
 
         private void GerenciarQuandoPodeAdicionarObjetoFilho(SAPbouiCOM.Form form, string status)

@@ -45,22 +45,25 @@ namespace CafebrasContratos
             var dbdts = GetDBDatasource(form, mainDbDataSource);
             dbdts.Clear();
 
-            var rs = Helpers.DoQuery("SELECT U_ItmsGrpCod FROM [@UPD_OCTC] ORDER BY CONVERT(INT,Code)");
-            if (rs.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                while (!rs.EoF)
+                var rs = recordset.DoQuery("SELECT U_ItmsGrpCod FROM [@UPD_OCTC] ORDER BY CONVERT(INT,Code)");
+                if (rs.RecordCount > 0)
                 {
-                    var grupoDeItem = rs.Fields.Item(_matriz._grupoDeItem.Datasource).Value;
-                    dbdts.InsertRecord(dbdts.Size);
-                    dbdts.SetValue(_matriz._grupoDeItem.Datasource, dbdts.Size - 1, grupoDeItem);
-                    rs.MoveNext();
-                }
+                    while (!rs.EoF)
+                    {
+                        var grupoDeItem = rs.Fields.Item(_matriz._grupoDeItem.Datasource).Value;
+                        dbdts.InsertRecord(dbdts.Size);
+                        dbdts.SetValue(_matriz._grupoDeItem.Datasource, dbdts.Size - 1, grupoDeItem);
+                        rs.MoveNext();
+                    }
 
-                mtx.LoadFromDataSourceEx();
-            }
-            else
-            {
-                _matriz.AdicionarLinha(form);
+                    mtx.LoadFromDataSourceEx();
+                }
+                else
+                {
+                    _matriz.AdicionarLinha(form);
+                }
             }
         }
 
@@ -109,27 +112,32 @@ namespace CafebrasContratos
                 Global.Company.StartTransaction();
 
                 var dbdts = GetDBDatasource(form, mainDbDataSource);
-                var rs = Helpers.DoQuery($"DELETE FROM [{dbdts.TableName}];");
-                var userTable = Global.Company.UserTables.Item(dbdts.TableName.Remove(0, 1));
-
-                var mtx = GetMatrix(form, _matriz.ItemUID);
-                mtx.FlushToDataSource();
-                var grupoDeItemDataSource = _matriz._grupoDeItem.Datasource;
                 bool ok = true;
-                for (int i = 0; i < dbdts.Size; i++)
-                {
-                    var grupoDeItem = dbdts.GetValue(grupoDeItemDataSource, i);
-                    if (!string.IsNullOrEmpty(grupoDeItem))
-                    {
-                        var codigo = (i + 1).ToString();
-                        userTable.Code = codigo;
-                        userTable.Name = codigo;
-                        userTable.UserFields.Fields.Item(grupoDeItemDataSource).Value = grupoDeItem;
 
-                        if (userTable.Add() != 0)
+                using (var recordset = new RecordSet())
+                {
+                    var rs = recordset.DoQuery($"DELETE FROM [{dbdts.TableName}];");
+                    var userTable = Global.Company.UserTables.Item(dbdts.TableName.Remove(0, 1));
+
+                    var mtx = GetMatrix(form, _matriz.ItemUID);
+                    mtx.FlushToDataSource();
+                    var grupoDeItemDataSource = _matriz._grupoDeItem.Datasource;
+
+                    for (int i = 0; i < dbdts.Size; i++)
+                    {
+                        var grupoDeItem = dbdts.GetValue(grupoDeItemDataSource, i);
+                        if (!string.IsNullOrEmpty(grupoDeItem))
                         {
-                            ok = false;
-                            break;
+                            var codigo = (i + 1).ToString();
+                            userTable.Code = codigo;
+                            userTable.Name = codigo;
+                            userTable.UserFields.Fields.Item(grupoDeItemDataSource).Value = grupoDeItem;
+
+                            if (userTable.Add() != 0)
+                            {
+                                ok = false;
+                                break;
+                            }
                         }
                     }
                 }

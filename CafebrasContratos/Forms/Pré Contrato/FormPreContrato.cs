@@ -76,7 +76,7 @@ namespace CafebrasContratos
 
         public override bool ContratoPodeSerAlterado(string status)
         {
-            return status == StatusPreContrato.Esboço;
+            return status == StatusPreContrato.Esboço || String.IsNullOrEmpty(status);
         }
 
         public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus)
@@ -84,35 +84,44 @@ namespace CafebrasContratos
             var tabelaContratoFinal = "[@UPD_OCFC]";
             if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Esboço)
             {
-                var rs = Helpers.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
-                if (rs.Fields.Item("cont").Value > 0)
+                using (var recordset = new RecordSet())
                 {
-                    throw new BusinessRuleException(
-                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Esboço)}'.
+                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                    if (rs.Fields.Item("cont").Value > 0)
+                    {
+                        throw new BusinessRuleException(
+                            $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Esboço)}'.
                         Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                    }
                 }
             }
             else if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Encerrado)
             {
-                var rs = Helpers.DoQuery(
-                    $@"SELECT 
+                using (var recordset = new RecordSet())
+                {
+                    var rs = recordset.DoQuery(
+                        $@"SELECT 
                             COUNT(*) as cont FROM {tabelaContratoFinal} 
                         WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND {_status.Datasource} <> '{StatusContratoFinal.Encerrado}'  ");
-                if (rs.Fields.Item("cont").Value > 0)
-                {
-                    throw new BusinessRuleException(
-                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Encerrado)}'.
+                    if (rs.Fields.Item("cont").Value > 0)
+                    {
+                        throw new BusinessRuleException(
+                            $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Encerrado)}'.
                         Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                    }
                 }
             }
             else if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Cancelado)
             {
-                var rs = Helpers.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
-                if (rs.Fields.Item("cont").Value > 0)
+                using (var recordset = new RecordSet())
                 {
-                    throw new BusinessRuleException(
-                        $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Cancelado)}'.
+                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                    if (rs.Fields.Item("cont").Value > 0)
+                    {
+                        throw new BusinessRuleException(
+                            $@"Não é possível alterar a situação do contrato de '{nameof(StatusPreContrato.Autorizado)}' para '{nameof(StatusPreContrato.Cancelado)}'.
                         Existem Contratos Finais neste contrato, que impossibilitam a alteração.");
+                    }
                 }
             }
         }
@@ -267,8 +276,11 @@ namespace CafebrasContratos
 
         public static string GetCode(string numPreContrato)
         {
-            var rs = Helpers.DoQuery($@"SELECT Code FROM [@UPD_OCCC] WHERE U_DocNumCC = {numPreContrato}");
-            return rs.Fields.Item("Code").Value;
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery($@"SELECT Code FROM [@UPD_OCCC] WHERE U_DocNumCC = {numPreContrato}");
+                return rs.Fields.Item("Code").Value;
+            }
         }
 
         #endregion

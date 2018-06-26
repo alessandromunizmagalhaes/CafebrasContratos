@@ -16,22 +16,25 @@ namespace CafebrasContratos
 
         public void Popular()
         {
-            var insert =
+            using (var recordset = new RecordSet())
+            {
+                var insert =
                 $@"INSERT INTO [{NomeComArroba}] 
                     (Code, Name, {Peneira.NomeComU_NaFrente}, {Ativo.NomeComU_NaFrente}, {NomePeneira.NomeComU_NaFrente}, {NomeDiferencial.NomeComU_NaFrente})
                     VALUES ";
 
-            var values = string.Empty;
-            for (int i = 1; i <= 15; i++)
-            {
-                var count = i.ToString().PadLeft(2, '0');
-                var peneira = "P" + count;
-                var diferencial = "D" + count;
-                values += $@",('{i}', '{i}', '{peneira}', 'Y', '{peneira}', '{diferencial}')";
-            }
+                var values = string.Empty;
+                for (int i = 1; i <= 15; i++)
+                {
+                    var count = i.ToString().PadLeft(2, '0');
+                    var peneira = "P" + count;
+                    var diferencial = "D" + count;
+                    values += $@",('{i}', '{i}', '{peneira}', 'Y', '{peneira}', '{diferencial}')";
+                }
 
-            values = values.Remove(0, 1);
-            Helpers.DoQuery(insert + values);
+                values = values.Remove(0, 1);
+                recordset.DoQuery(insert + values);
+            }
         }
     }
 }

@@ -66,12 +66,14 @@ namespace CafebrasContratos
         public override string ProximaChavePrimaria(DBDataSource dbdts)
         {
             var numPreContrato = dbdts.GetValue(_numeroDoPreContrato.Datasource, 0);
-            var rs = Helpers.DoQuery(
-                $@"SELECT 
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery(
+                    $@"SELECT 
                         CONVERT(NVARCHAR, {numPreContrato}) + '.' + CONVERT(NVARCHAR, COUNT(*) + 1) as codigo
                     FROM [{dbdts.TableName}] WHERE {_numeroDoPreContrato.Datasource} = {numPreContrato}");
-
-            return rs.Fields.Item("codigo").Value;
+                return rs.Fields.Item("codigo").Value;
+            }
         }
 
         public override void RegrasDeNegocioAoSalvar(SAPbouiCOM.Form form, DBDataSource dbdts)
@@ -98,6 +100,7 @@ namespace CafebrasContratos
             return status == StatusContratoFinal.Esboço
                 || status == StatusContratoFinal.Renegociacao
                 || status == StatusContratoFinal.Liberado
+                || String.IsNullOrEmpty(status)
             ;
         }
 
@@ -219,7 +222,13 @@ namespace CafebrasContratos
                 {
                     form.Freeze(true);
 
-                    CopyIfFieldsMatch(dbdtsPC, ref dbdtsCF);
+                    var labelsIn = string.Empty;
+                    for (int i = 0; i < _peneiras.Count; i++)
+                    {
+                        labelsIn += ",'" + _peneiras[i].Datasource.Replace("P", "L") + "'";
+                    }
+
+                    CopyIfFieldsMatch(dbdtsPC, ref dbdtsCF, labelsIn);
                     CopyIfFieldsMatch(dbdtsPCCertificado, ref dbdtsCFCertificado);
                     CopyIfFieldsMatch(dbdtsPCResponsavel, ref dbdtsCFResponsavel);
                     CopyIfFieldsMatch(dbdtsPCCorretor, ref dbdtsCFCorretor);
@@ -289,30 +298,33 @@ namespace CafebrasContratos
             var codePreContrato = FormPreContrato.GetCode(numPreContrato);
             if (tabelaPreContrato.GetByKey(codePreContrato))
             {
-                var rs = Helpers.DoQuery(
-                    $@"SELECT 
+                using (var recordset = new RecordSet())
+                {
+                    var rs = recordset.DoQuery(
+                        $@"SELECT 
 	                        SUM(U_QtdSaca) as SaldoSaca, SUM(U_QtdPeso) as SaldoPeso
 	                        FROM [@UPD_OCFC] 
 	                        WHERE 1 = 1
 		                        AND U_DocNumCC = {numPreContrato} AND U_DocNumCF <> {numContratoFinal}"
-                );
+                    );
 
-                double sacasPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDeSacas.Datasource).Value;
-                double pesoPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDePeso.Datasource).Value;
+                    double sacasPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDeSacas.Datasource).Value;
+                    double pesoPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDePeso.Datasource).Value;
 
-                double saldoSacas = rs.Fields.Item("SaldoSaca").Value;
-                double saldoPeso = rs.Fields.Item("SaldoPeso").Value;
+                    double saldoSacas = rs.Fields.Item("SaldoSaca").Value;
+                    double saldoPeso = rs.Fields.Item("SaldoPeso").Value;
 
-                string strSacasContratoFinal = dbdts.GetValue(_saldoDeSacas.Datasource, 0);
-                double sacasContratoFinal = Helpers.ToDouble(strSacasContratoFinal);
+                    string strSacasContratoFinal = dbdts.GetValue(_saldoDeSacas.Datasource, 0);
+                    double sacasContratoFinal = Helpers.ToDouble(strSacasContratoFinal);
 
-                string strPesoContratoFinal = dbdts.GetValue(_saldoDePeso.Datasource, 0);
-                double pesoContratoFinal = Helpers.ToDouble(strPesoContratoFinal);
+                    string strPesoContratoFinal = dbdts.GetValue(_saldoDePeso.Datasource, 0);
+                    double pesoContratoFinal = Helpers.ToDouble(strPesoContratoFinal);
 
-                tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value = sacasPreContrato - saldoSacas - sacasContratoFinal;
-                tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value = pesoPreContrato - saldoPeso - pesoContratoFinal;
+                    tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value = sacasPreContrato - saldoSacas - sacasContratoFinal;
+                    tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value = pesoPreContrato - saldoPeso - pesoContratoFinal;
 
-                tabelaPreContrato.Update();
+                    tabelaPreContrato.Update();
+                }
             }
         }
 

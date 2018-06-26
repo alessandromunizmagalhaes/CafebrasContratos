@@ -10,8 +10,6 @@ namespace CafebrasContratos
     static class Program
     {
         private static string _addonName = "Cafébras Contratos";
-        public static Application _sBOApplication;
-        public static SAPbobsCOM.Company _company;
         public static string _grupoAprovador;
         public static double _versaoAddon = 0.1;
 
@@ -40,15 +38,9 @@ namespace CafebrasContratos
 
         private static void ConectarComSAP()
         {
-            SAPConnection.applicationHandler += Global.RecebeSBOApplication;
-            SAPConnection.applicationHandler += applicationParam => _sBOApplication = applicationParam;
-
-            SAPConnection.companyHandler += Global.RecebeCompany;
-            SAPConnection.companyHandler += companyParam => _company = companyParam;
-
             try
             {
-                SAPConnection.Connect();
+                SAPConnection.GetDICompany();
             }
             catch (Exception e)
             {
@@ -63,7 +55,7 @@ namespace CafebrasContratos
 
             try
             {
-                _company.StartTransaction();
+                Global.Company.StartTransaction();
 
                 using (Database db = new Database())
                 {
@@ -74,7 +66,7 @@ namespace CafebrasContratos
                     GerenciadorVersoes.Aplicar(db, versoes, _versaoAddon);
                 }
 
-                _company.EndTransaction(BoWfTransOpt.wf_Commit);
+                Global.Company.EndTransaction(BoWfTransOpt.wf_Commit);
             }
             catch (DatabaseException e)
             {
@@ -83,9 +75,9 @@ namespace CafebrasContratos
             catch (Exception e)
             {
                 Dialogs.PopupError("Erro interno. Erro ao criar estrutura de dados.\nErro: " + e.Message);
-                if (_company.InTransaction)
+                if (Global.Company.InTransaction)
                 {
-                    _company.EndTransaction(BoWfTransOpt.wf_RollBack);
+                    Global.Company.EndTransaction(BoWfTransOpt.wf_RollBack);
                 }
             }
         }
@@ -285,10 +277,10 @@ namespace CafebrasContratos
                 Dialogs.PopupError("Erro ao setar eventos declarados da aplicação.\nErro: " + e.Message);
             }
 
-            _sBOApplication.AppEvent += AppEvent;
-            _sBOApplication.ItemEvent += FormEvents.ItemEvent;
-            _sBOApplication.FormDataEvent += FormEvents.FormDataEvent;
-            _sBOApplication.MenuEvent += Menu.MenuEvent;
+            Global.SBOApplication.AppEvent += AppEvent;
+            Global.SBOApplication.ItemEvent += FormEvents.ItemEvent;
+            Global.SBOApplication.FormDataEvent += FormEvents.FormDataEvent;
+            Global.SBOApplication.MenuEvent += Menu.MenuEvent;
         }
 
 
@@ -312,24 +304,30 @@ namespace CafebrasContratos
 
         public static void SetGrupoAprovador()
         {
-            var rs = Helpers.DoQuery($"SELECT U_GrupoAprov FROM OUSR WHERE USER_CODE = '{Global.Company.UserName}'");
-            _grupoAprovador = rs.Fields.Item("U_GrupoAprov").Value;
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery($"SELECT U_GrupoAprov FROM OUSR WHERE USER_CODE = '{Global.Company.UserName}'");
+                _grupoAprovador = rs.Fields.Item("U_GrupoAprov").Value;
+            }
         }
 
         public static void CarregarPeneirasVindoDaConfiguracao()
         {
-            var rs = Helpers.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
-            while (!rs.EoF)
+            using (var recordset = new RecordSet())
             {
-                string peneiraUID = rs.Fields.Item("U_Peneira").Value;
-                _peneiras.Add(new Peneira()
+                var rs = recordset.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
+                while (!rs.EoF)
                 {
-                    UID = rs.Fields.Item("U_Peneira").Value,
-                    Nome = rs.Fields.Item("U_NomeP").Value,
-                    Ativo = rs.Fields.Item("U_Ativo").Value == "Y",
-                });
+                    string peneiraUID = rs.Fields.Item("U_Peneira").Value;
+                    _peneiras.Add(new Peneira()
+                    {
+                        UID = rs.Fields.Item("U_Peneira").Value,
+                        Nome = rs.Fields.Item("U_NomeP").Value,
+                        Ativo = rs.Fields.Item("U_Ativo").Value == "Y",
+                    });
 
-                rs.MoveNext();
+                    rs.MoveNext();
+                }
             }
         }
 

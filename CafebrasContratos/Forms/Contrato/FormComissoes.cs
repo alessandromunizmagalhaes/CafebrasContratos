@@ -161,13 +161,14 @@ namespace CafebrasContratos
                 matriz = _responsaveis;
             }
 
+            var row = pVal.Row - 1;
             var dbdts = GetDBDatasource(form, dbdtsName);
-            var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, pVal.Row - 1);
+            var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, row);
             if (!String.IsNullOrEmpty(participante))
             {
                 matriz._comissao.GetValorDBDatasource<int>(dbdts);
                 var comissao = GetComissaoPadrao(participante);
-                matriz._comissao.SetValorDBDatasource(dbdts, comissao);
+                matriz._comissao.SetValorDBDatasource(dbdts, comissao, row);
                 matrix.LoadFromDataSourceEx();
             }
         }
@@ -219,8 +220,11 @@ namespace CafebrasContratos
 
         private double GetComissaoPadrao(string codigoParticipante)
         {
-            var rs = Helpers.DoQuery($"SELECT U_PercCom FROM [@UPD_PART] WHERE Code = '{codigoParticipante}'");
-            return rs.Fields.Item("U_PercCom").Value;
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery($"SELECT U_PercCom FROM [@UPD_PART] WHERE Code = '{codigoParticipante}'");
+                return rs.Fields.Item("U_PercCom").Value;
+            }
         }
 
         #endregion

@@ -114,33 +114,36 @@ namespace CafebrasContratos
         {
             dbdts.Clear();
 
-            var rs = Helpers.DoQuery("SELECT * FROM [@UPD_CONF_PENEIRA] ORDER BY CONVERT(INT,Code)");
-            if (rs.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                while (!rs.EoF)
+                var rs = recordset.DoQuery("SELECT * FROM [@UPD_CONF_PENEIRA] ORDER BY CONVERT(INT,Code)");
+                if (rs.RecordCount > 0)
                 {
-                    var code = rs.Fields.Item("Code").Value;
-                    var peneira = rs.Fields.Item(_matriz._peneira.Datasource).Value;
-                    var nomePeneira = rs.Fields.Item(_matriz._nomepeneira.Datasource).Value;
-                    var ativo = rs.Fields.Item(_matriz._ativo.Datasource).Value;
+                    while (!rs.EoF)
+                    {
+                        var code = rs.Fields.Item("Code").Value;
+                        var peneira = rs.Fields.Item(_matriz._peneira.Datasource).Value;
+                        var nomePeneira = rs.Fields.Item(_matriz._nomepeneira.Datasource).Value;
+                        var ativo = rs.Fields.Item(_matriz._ativo.Datasource).Value;
 
-                    dbdts.InsertRecord(dbdts.Size);
+                        dbdts.InsertRecord(dbdts.Size);
 
-                    int row = dbdts.Size - 1;
+                        int row = dbdts.Size - 1;
 
-                    dbdts.SetValue("Code", row, code);
-                    dbdts.SetValue(_matriz._peneira.Datasource, row, peneira);
-                    dbdts.SetValue(_matriz._nomepeneira.Datasource, row, nomePeneira);
-                    dbdts.SetValue(_matriz._ativo.Datasource, row, ativo);
+                        dbdts.SetValue("Code", row, code);
+                        dbdts.SetValue(_matriz._peneira.Datasource, row, peneira);
+                        dbdts.SetValue(_matriz._nomepeneira.Datasource, row, nomePeneira);
+                        dbdts.SetValue(_matriz._ativo.Datasource, row, ativo);
 
-                    rs.MoveNext();
+                        rs.MoveNext();
+                    }
+
+                    mtx.LoadFromDataSourceEx();
                 }
-
-                mtx.LoadFromDataSourceEx();
-            }
-            else
-            {
-                _matriz.AdicionarLinha(form);
+                else
+                {
+                    _matriz.AdicionarLinha(form);
+                }
             }
         }
 

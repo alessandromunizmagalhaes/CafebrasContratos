@@ -215,37 +215,40 @@ namespace CafebrasContratos
             ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
             Conditions oConds = oCFL.GetConditions();
 
-            var rsGrupo = Helpers.DoQuery(FormContrato.SQLGrupoDeItensPermitidos);
-            if (rsGrupo.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                int i = 0;
-                while (!rsGrupo.EoF)
+                var rsGrupo = recordset.DoQuery(FormContrato.SQLGrupoDeItensPermitidos);
+                if (rsGrupo.RecordCount > 0)
                 {
-                    i++;
-                    string grupoDeItem = rsGrupo.Fields.Item("U_ItmsGrpCod").Value;
-
-                    Condition oCond = oConds.Add();
-
-                    if (i == 1)
+                    int i = 0;
+                    while (!rsGrupo.EoF)
                     {
-                        oCond.BracketOpenNum = 1;
-                    }
+                        i++;
+                        string grupoDeItem = rsGrupo.Fields.Item("U_ItmsGrpCod").Value;
 
-                    oCond.Alias = "ItmsGrpCod";
-                    oCond.Operation = BoConditionOperation.co_EQUAL;
-                    oCond.CondVal = grupoDeItem;
+                        Condition oCond = oConds.Add();
 
-                    if (i == rsGrupo.RecordCount)
-                    {
-                        oCond.BracketCloseNum = 1;
-                        oCond.Relationship = BoConditionRelationship.cr_AND;
-                    }
-                    else
-                    {
-                        oCond.Relationship = BoConditionRelationship.cr_OR;
-                    }
+                        if (i == 1)
+                        {
+                            oCond.BracketOpenNum = 1;
+                        }
 
-                    rsGrupo.MoveNext();
+                        oCond.Alias = "ItmsGrpCod";
+                        oCond.Operation = BoConditionOperation.co_EQUAL;
+                        oCond.CondVal = grupoDeItem;
+
+                        if (i == rsGrupo.RecordCount)
+                        {
+                            oCond.BracketCloseNum = 1;
+                            oCond.Relationship = BoConditionRelationship.cr_AND;
+                        }
+                        else
+                        {
+                            oCond.Relationship = BoConditionRelationship.cr_OR;
+                        }
+
+                        rsGrupo.MoveNext();
+                    }
                 }
             }
 
@@ -258,40 +261,43 @@ namespace CafebrasContratos
             oCondAtivo.BracketCloseNum = 2;
             oCondAtivo.Relationship = BoConditionRelationship.cr_AND;
 
-            // só trazer os itens de peneira do item base
-            var rsItens = Helpers.DoQuery($"SELECT ItemCode FROM OITM WHERE U_UPD_ITEMBASE = '{itemcodeBase}' AND ItemCode <> '{itemcodeBase}'");
-            if (rsItens.RecordCount > 0)
+            using (var recordset = new RecordSet())
             {
-                int i = 0;
-                while (!rsItens.EoF)
+                // só trazer os itens de peneira do item base
+                var rsItens = recordset.DoQuery($"SELECT ItemCode FROM OITM WHERE U_UPD_ITEMBASE = '{itemcodeBase}' AND ItemCode <> '{itemcodeBase}'");
+                if (rsItens.RecordCount > 0)
                 {
-                    i++;
-                    string itemcode = rsItens.Fields.Item("ItemCode").Value;
-
-                    Condition oCond = oConds.Add();
-
-                    if (i == 1)
+                    int i = 0;
+                    while (!rsItens.EoF)
                     {
-                        oCond.BracketOpenNum = 3;
+                        i++;
+                        string itemcode = rsItens.Fields.Item("ItemCode").Value;
+
+                        Condition oCond = oConds.Add();
+
+                        if (i == 1)
+                        {
+                            oCond.BracketOpenNum = 3;
+                        }
+
+                        oCond.Alias = "ItemCode";
+                        oCond.Operation = BoConditionOperation.co_EQUAL;
+                        oCond.CondVal = itemcode;
+
+                        if (i == rsItens.RecordCount)
+                        {
+                            oCond.BracketCloseNum = 3;
+                        }
+                        else
+                        {
+                            oCond.Relationship = BoConditionRelationship.cr_OR;
+                        }
+
+                        rsItens.MoveNext();
                     }
 
-                    oCond.Alias = "ItemCode";
-                    oCond.Operation = BoConditionOperation.co_EQUAL;
-                    oCond.CondVal = itemcode;
-
-                    if (i == rsItens.RecordCount)
-                    {
-                        oCond.BracketCloseNum = 3;
-                    }
-                    else
-                    {
-                        oCond.Relationship = BoConditionRelationship.cr_OR;
-                    }
-
-                    rsItens.MoveNext();
+                    oCFL.SetConditions(oConds);
                 }
-
-                oCFL.SetConditions(oConds);
             }
         }
 
