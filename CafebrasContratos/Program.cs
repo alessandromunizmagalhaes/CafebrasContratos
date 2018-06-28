@@ -14,6 +14,7 @@ namespace CafebrasContratos
         public static double _versaoAddon = 0.1;
 
         public static readonly List<Peneira> _peneiras = new List<Peneira>() { };
+        public static readonly List<string> _gruposDeItensPermitidos = new List<string>() { };
 
         [STAThread]
         static void Main()
@@ -31,6 +32,7 @@ namespace CafebrasContratos
             SetGrupoAprovador();
 
             CarregarPeneirasVindoDaConfiguracao();
+            CarregarGruposDeItensPermitidos();
 
             // deixa a aplicação ativa
             System.Windows.Forms.Application.Run();
@@ -313,6 +315,7 @@ namespace CafebrasContratos
 
         public static void CarregarPeneirasVindoDaConfiguracao()
         {
+            _peneiras.Clear();
             using (var recordset = new RecordSet())
             {
                 var rs = recordset.DoQuery("SELECT U_Peneira, U_NomeP, U_Ativo FROM [@UPD_CONF_PENEIRA]");
@@ -326,6 +329,21 @@ namespace CafebrasContratos
                         Ativo = rs.Fields.Item("U_Ativo").Value == "Y",
                     });
 
+                    rs.MoveNext();
+                }
+            }
+        }
+
+        public static void CarregarGruposDeItensPermitidos()
+        {
+            _gruposDeItensPermitidos.Clear();
+            using (var recordset = new RecordSet())
+            {
+                var rs = recordset.DoQuery("SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]");
+                while (!rs.EoF)
+                {
+                    string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
+                    _gruposDeItensPermitidos.Add(grupoDeItem);
                     rs.MoveNext();
                 }
             }

@@ -38,23 +38,35 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            string nextCode = GetNextCode(mainDbDataSource);
-            dbdts.SetValue(_codigo.ItemUID, 0, nextCode);
+                    string nextCode = GetNextCode(mainDbDataSource);
+                    dbdts.SetValue(_codigo.ItemUID, 0, nextCode);
 
-            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                    BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                }
+            }
         }
 
         public override void OnBeforeFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             BubbleEvent = true;
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                    BubbleEvent = CamposFormEstaoPreenchidos(form, dbdts);
+                }
+            }
         }
 
         #endregion
@@ -65,8 +77,11 @@ namespace CafebrasContratos
         public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            var form = GetForm(FormUID);
-            _OnAdicionarNovo(form);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                _OnAdicionarNovo(form);
+            }
         }
 
         #endregion

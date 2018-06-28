@@ -30,11 +30,17 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(FormUID);
-            var mtx = GetMatrix(form, _matriz.ItemUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                var mtx = GetMatrix(form, _matriz.ItemUID);
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            PreencherDadosMatriz(form, mtx, dbdts);
+                    PreencherDadosMatriz(form, mtx, dbdts);
+                }
+            }
         }
 
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
@@ -49,40 +55,50 @@ namespace CafebrasContratos
 
         private void OnSalvar(string formUID)
         {
-            var form = GetForm(formUID);
-            try
+            using (var formCOM = new FormCOM(formUID))
             {
-                form.Freeze(true);
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-                var mtx = GetMatrix(form, _matriz.ItemUID);
+                var form = formCOM.Form;
+                try
+                {
+                    form.Freeze(true);
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+                        var mtx = GetMatrix(form, _matriz.ItemUID);
 
-                Salvar(form, dbdts, mtx);
+                        Salvar(form, dbdts, mtx);
 
-                Program.CarregarPeneirasVindoDaConfiguracao();
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao salvar dados.\nErro: " + e.Message);
-                Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-            }
-            finally
-            {
-                form.Freeze(false);
+                        Program.CarregarPeneirasVindoDaConfiguracao();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Dialogs.PopupError("Erro interno. Erro ao salvar dados.\nErro: " + e.Message);
+                    Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
             }
         }
 
         private void OnRemoverLinha(string FormUID)
         {
-            var form = GetForm(FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
-            _matriz.RemoverLinha(form);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                _matriz.RemoverLinha(form);
+            }
         }
 
         private void OnAdicionarLinha(string FormUID)
         {
-            var form = GetForm(FormUID);
-
-            _matriz.AdicionarLinha(form);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                _matriz.AdicionarLinha(form);
+            }
         }
 
         #endregion

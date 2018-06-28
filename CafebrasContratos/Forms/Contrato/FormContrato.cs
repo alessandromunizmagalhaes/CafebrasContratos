@@ -23,8 +23,6 @@ namespace CafebrasContratos
         private const string chooseItemUID = "Item";
         private const string chooseDepositoUID = "Warehouse";
 
-        public static string SQLGrupoDeItensPermitidos = "SELECT DISTINCT U_ItmsGrpCod FROM [@UPD_OCTC]";
-
         #endregion
 
 
@@ -822,21 +820,27 @@ namespace CafebrasContratos
         {
             if (UsuarioPermitido())
             {
-                var form = GetForm(BusinessObjectInfo.FormUID);
-                var dbdts = GetDBDatasource(form, MainDbDataSource);
-
-                Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
-
-                BubbleEvent = FormEstaValido(form, dbdts);
-                if (BubbleEvent)
+                using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
                 {
-                    string next_code = GetNextCode(MainDbDataSource);
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
 
-                    dbdts.SetValue("Code", 0, next_code);
-                    dbdts.SetValue("Name", 0, next_code);
+                        Dialogs.Info("Adicionando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-                    _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
-                    SalvarLabelPeneiras(form, dbdts);
+                        BubbleEvent = FormEstaValido(form, dbdts);
+                        if (BubbleEvent)
+                        {
+                            string next_code = GetNextCode(MainDbDataSource);
+
+                            dbdts.SetValue("Code", 0, next_code);
+                            dbdts.SetValue("Name", 0, next_code);
+
+                            _numeroDoContrato.SetValorDBDatasource(dbdts, ProximaChavePrimaria(dbdts));
+                            SalvarLabelPeneiras(form, dbdts);
+                        }
+                    }
                 }
             }
             else
@@ -850,42 +854,48 @@ namespace CafebrasContratos
         {
             if (UsuarioPermitido())
             {
-                var form = GetForm(BusinessObjectInfo.FormUID);
-                var dbdts = GetDBDatasource(form, MainDbDataSource);
-
-                Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
-
-                BubbleEvent = FormEstaValido(form, dbdts);
-                if (!BubbleEvent)
+                using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
                 {
-                    return;
-                }
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
 
-                var gestaoStatus = new GestaoStatusContrato(GetStatusPersistent(form), GetStatusVolatil(form.UniqueID));
-                if (gestaoStatus.EstaTrocandoStatus())
-                {
-                    try
-                    {
-                        ValidaAlteracaoDeStatus(gestaoStatus);
-                    }
-                    catch (BusinessRuleException e)
-                    {
-                        Dialogs.PopupError(e.Message);
-                        BubbleEvent = false;
-                    }
-                    catch (Exception e)
-                    {
-                        Dialogs.PopupError("Erro interno. Erro ao tentar validar a troca de status do contrato.\nErro: " + e.Message);
-                        BubbleEvent = false;
-                    }
+                        Dialogs.Info("Atualizando pré contrato... Aguarde...", BoMessageTime.bmt_Medium);
 
-                    if (!BubbleEvent)
-                    {
-                        return;
-                    }
+                        BubbleEvent = FormEstaValido(form, dbdts);
+                        if (!BubbleEvent)
+                        {
+                            return;
+                        }
 
-                    GerenciarCamposQuandoEmStatus(form, gestaoStatus.StatusVolatil);
-                    GerenciarQuandoPodeAdicionarObjetoFilho(form, gestaoStatus.StatusVolatil);
+                        var gestaoStatus = new GestaoStatusContrato(GetStatusPersistent(form), GetStatusVolatil(form.UniqueID));
+                        if (gestaoStatus.EstaTrocandoStatus())
+                        {
+                            try
+                            {
+                                ValidaAlteracaoDeStatus(gestaoStatus, _numeroDoContrato.GetValorDBDatasource<string>(dbdts));
+                            }
+                            catch (BusinessRuleException e)
+                            {
+                                Dialogs.PopupError(e.Message);
+                                BubbleEvent = false;
+                            }
+                            catch (Exception e)
+                            {
+                                Dialogs.PopupError("Erro interno. Erro ao tentar validar a troca de status do contrato.\nErro: " + e.Message);
+                                BubbleEvent = false;
+                            }
+
+                            if (!BubbleEvent)
+                            {
+                                return;
+                            }
+
+                            GerenciarCamposQuandoEmStatus(form, gestaoStatus.StatusVolatil);
+                            GerenciarQuandoPodeAdicionarObjetoFilho(form, gestaoStatus.StatusVolatil);
+                        }
+                    }
                 }
             }
             else
@@ -898,36 +908,42 @@ namespace CafebrasContratos
         public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            var form = GetForm(BusinessObjectInfo.FormUID);
-
-            if (form.Items.Item(_numeroDoContrato.ItemUID).Enabled)
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
             {
-                form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+                var form = formCOM.Form;
+
+                if (form.Items.Item(_numeroDoContrato.ItemUID).Enabled)
+                {
+                    form.Items.Item(_numeroDoContrato.ItemUID).Enabled = false;
+                }
+
+                form.Items.Item(_status.ItemUID).Enabled = UsuarioPermitido();
+
+                using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
+
+                    GerirCamposPeneiraPegandoDoBanco(form, dbdts);
+
+                    var codigoPN = _codigoPN.GetValorDBDatasource<string>(dbdts);
+                    var pessoasDeContato = _pessoasDeContato.GetValorDBDatasource<string>(dbdts);
+                    PopularPessoasDeContato(form, codigoPN, pessoasDeContato);
+
+
+                    var status = _status.GetValorDBDatasource<string>(dbdts);
+                    GerenciarCamposQuandoEmStatus(form, status);
+
+                    bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
+                    if (contratoPodeSerAlterado)
+                    {
+                        var itemcode = _codigoItem.GetValorDBDatasource<string>(dbdts);
+                        HabilitarBotaoAberturaPorPeneira(form, itemcode);
+                        HabilitarCamposDePeneira(form, dbdts, itemcode);
+                    }
+
+                    GerenciarQuandoPodeAdicionarObjetoFilho(form, status);
+                }
             }
-
-            form.Items.Item(_status.ItemUID).Enabled = UsuarioPermitido();
-
-            var dbdts = GetDBDatasource(form, MainDbDataSource);
-
-            GerirCamposPeneiraPegandoDoBanco(form, dbdts);
-
-            var codigoPN = _codigoPN.GetValorDBDatasource<string>(dbdts);
-            var pessoasDeContato = _pessoasDeContato.GetValorDBDatasource<string>(dbdts);
-            PopularPessoasDeContato(form, codigoPN, pessoasDeContato);
-
-
-            var status = _status.GetValorDBDatasource<string>(dbdts);
-            GerenciarCamposQuandoEmStatus(form, status);
-
-            bool contratoPodeSerAlterado = ContratoPodeSerAlterado(status);
-            if (contratoPodeSerAlterado)
-            {
-                var itemcode = _codigoItem.GetValorDBDatasource<string>(dbdts);
-                HabilitarBotaoAberturaPorPeneira(form, itemcode);
-                HabilitarCamposDePeneira(form, dbdts, itemcode);
-            }
-
-            GerenciarQuandoPodeAdicionarObjetoFilho(form, status);
         }
 
         #endregion
@@ -938,48 +954,50 @@ namespace CafebrasContratos
         public override void OnAfterFormVisible(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            if (String.IsNullOrEmpty(Program._grupoAprovador))
+            using (var formCOM = new FormCOM(FormUID))
             {
-                Dialogs.PopupError("Nenhum Grupo Aprovador foi configurado para este usúario.\nNão será possível abrir a tela de contratos.");
-                var form = GetForm(FormUID);
-                form.Close();
-                BubbleEvent = false;
-            }
-            else
-            {
-                var form = GetForm(FormUID);
-
-                try
+                var form = formCOM.Form;
+                if (String.IsNullOrEmpty(Program._grupoAprovador))
                 {
-                    form.Freeze(true);
+                    Dialogs.PopupError("Nenhum Grupo Aprovador foi configurado para este usúario.\nNão será possível abrir a tela de contratos.");
 
-                    _modalidade.Popular(form);
-                    _unidadeComercial.Popular(form);
-                    _tipoDeOperacao.Popular(form);
-                    _metodoFinanceiro.Popular(form);
-                    _utilizacao.Popular(form);
-                    _embalagem.Popular(form);
-                    _safra.Popular(form);
-
-                    if (!UsuarioPermitido())
+                    form.Close();
+                    BubbleEvent = false;
+                }
+                else
+                {
+                    try
                     {
-                        FormEmModoVisualizacao(form);
+                        form.Freeze(true);
+
+                        _modalidade.Popular(form);
+                        _unidadeComercial.Popular(form);
+                        _tipoDeOperacao.Popular(form);
+                        _metodoFinanceiro.Popular(form);
+                        _utilizacao.Popular(form);
+                        _embalagem.Popular(form);
+                        _safra.Popular(form);
+
+                        if (!UsuarioPermitido())
+                        {
+                            FormEmModoVisualizacao(form);
+                        }
+
+                        // clicando para a primeira aba já vir selecionada
+                        form.Items.Item(Abas.DefinicoesGerais.ItemUID).Click();
+
+                        ConditionsParaFornecedores(form);
+                        ConditionsParaDeposito(form);
+                        ConditionsParaItens(form);
                     }
-
-                    // clicando para a primeira aba já vir selecionada
-                    form.Items.Item(Abas.DefinicoesGerais.ItemUID).Click();
-
-                    ConditionsParaFornecedores(form);
-                    ConditionsParaDeposito(form);
-                    ConditionsParaItens(form);
-                }
-                catch (Exception e)
-                {
-                    Dialogs.PopupError("Erro interno. Erro ao iniciar dados do formulário\nErro: " + e.Message);
-                }
-                finally
-                {
-                    form.Freeze(false);
+                    catch (Exception e)
+                    {
+                        Dialogs.PopupError("Erro interno. Erro ao iniciar dados do formulário\nErro: " + e.Message);
+                    }
+                    finally
+                    {
+                        form.Freeze(false);
+                    }
                 }
             }
         }
@@ -1026,15 +1044,27 @@ namespace CafebrasContratos
             }
             else if (pVal.ItemUID == _matrixAnexos._adicionar.ItemUID)
             {
-                var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, AnexoDbDataSource);
-                _matrixAnexos.AdicionarLinha(form, dbdts);
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, AnexoDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+                        _matrixAnexos.AdicionarLinha(form, dbdts);
+                    }
+                }
             }
             else if (pVal.ItemUID == _matrixAnexos._remover.ItemUID)
             {
-                var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, AnexoDbDataSource);
-                _matrixAnexos.RemoverLinhaSelecionada(form, dbdts);
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, AnexoDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+                        _matrixAnexos.RemoverLinhaSelecionada(form, dbdts);
+                    }
+                }
             }
         }
 
@@ -1043,14 +1073,17 @@ namespace CafebrasContratos
             BubbleEvent = true;
             if (pVal.ItemUID == _matrixAnexos.ItemUID)
             {
-                var form = GetForm(FormUID);
-                var matrix = GetMatrix(form, _matrixAnexos.ItemUID);
-
-                var data = matrix.GetCellSpecific(_matrixAnexos._data.ItemUID, pVal.Row).Value.ToString();
-                var arquivo = matrix.GetCellSpecific(_matrixAnexos._arquivoAnexado.ItemUID, pVal.Row).Value.ToString();
-                if (String.IsNullOrEmpty(data) && !String.IsNullOrEmpty(arquivo))
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    matrix.SetCellWithoutValidation(pVal.Row, _matrixAnexos._data.ItemUID, DateTime.Now.ToString("yyyyMMdd"));
+                    var form = formCOM.Form;
+                    var matrix = GetMatrix(form, _matrixAnexos.ItemUID);
+
+                    var data = matrix.GetCellSpecific(_matrixAnexos._data.ItemUID, pVal.Row).Value.ToString();
+                    var arquivo = matrix.GetCellSpecific(_matrixAnexos._arquivoAnexado.ItemUID, pVal.Row).Value.ToString();
+                    if (String.IsNullOrEmpty(data) && !String.IsNullOrEmpty(arquivo))
+                    {
+                        matrix.SetCellWithoutValidation(pVal.Row, _matrixAnexos._data.ItemUID, DateTime.Now.ToString("yyyyMMdd"));
+                    }
                 }
             }
         }
@@ -1061,21 +1094,39 @@ namespace CafebrasContratos
 
             if (EventoEmCampoDeValor(pVal.ItemUID))
             {
-                var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, MainDbDataSource);
-                CalcularTotais(form, dbdts);
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+                        CalcularTotais(form, dbdts);
+                    }
+                }
             }
             else if (EventoEmCampoDePeneira(pVal.ItemUID))
             {
-                var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, MainDbDataSource);
-                AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    {
+                        var dbdts = GetDBDatasource(form, MainDbDataSource);
+                        AtualizarSomaDosPercentuaisDePeneira(form, dbdts);
+                    }
+                }
             }
             else if (EventoEmCampoDeDiferencial(pVal.ItemUID))
             {
-                var form = GetForm(FormUID);
-                var dbdts = GetDBDatasource(form, MainDbDataSource);
-                AtualizarSomaDosDiferenciais(form, dbdts);
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    {
+                        var dbdts = GetDBDatasource(form, MainDbDataSource);
+                        AtualizarSomaDosDiferenciais(form, dbdts);
+                    }
+                }
             }
         }
 
@@ -1229,52 +1280,45 @@ namespace CafebrasContratos
             ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
             Conditions oConds = oCFL.GetConditions();
 
-            using (var recordset = new RecordSet())
+            if (Program._gruposDeItensPermitidos.Count > 0)
             {
-                var rs = recordset.DoQuery(SQLGrupoDeItensPermitidos);
-                if (rs.RecordCount > 0)
+                for (int i = 0; i < Program._gruposDeItensPermitidos.Count; i++)
                 {
-                    int i = 0;
-                    while (!rs.EoF)
+                    string grupoDeItem = Program._gruposDeItensPermitidos[i];
+
+                    Condition oCond = oConds.Add();
+
+                    if (i == 0)
                     {
-                        i++;
-                        string grupoDeItem = rs.Fields.Item("U_ItmsGrpCod").Value;
-
-                        Condition oCond = oConds.Add();
-
-                        if (i == 1)
-                        {
-                            oCond.BracketOpenNum = 1;
-                        }
-
-                        oCond.Alias = "ItmsGrpCod";
-                        oCond.Operation = BoConditionOperation.co_EQUAL;
-                        oCond.CondVal = grupoDeItem;
-
-                        if (i == rs.RecordCount)
-                        {
-                            oCond.BracketCloseNum = 1;
-                            oCond.Relationship = BoConditionRelationship.cr_AND;
-                        }
-                        else
-                        {
-                            oCond.Relationship = BoConditionRelationship.cr_OR;
-                        }
-
-                        rs.MoveNext();
+                        oCond.BracketOpenNum = 1;
                     }
 
-                    // só trazer itens ativos
-                    Condition oCondAtivo = oConds.Add();
-                    oCondAtivo.BracketOpenNum = 2;
-                    oCondAtivo.Alias = "frozenFor";
-                    oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
-                    oCondAtivo.CondVal = "N";
-                    oCondAtivo.BracketCloseNum = 2;
+                    oCond.Alias = "ItmsGrpCod";
+                    oCond.Operation = BoConditionOperation.co_EQUAL;
+                    oCond.CondVal = grupoDeItem;
 
-                    oCFL.SetConditions(oConds);
+                    if (i == (Program._gruposDeItensPermitidos.Count - 1))
+                    {
+                        oCond.BracketCloseNum = 1;
+                        oCond.Relationship = BoConditionRelationship.cr_AND;
+                    }
+                    else
+                    {
+                        oCond.Relationship = BoConditionRelationship.cr_OR;
+                    }
                 }
+
+                // só trazer itens ativos
+                Condition oCondAtivo = oConds.Add();
+                oCondAtivo.BracketOpenNum = 2;
+                oCondAtivo.Alias = "frozenFor";
+                oCondAtivo.Operation = BoConditionOperation.co_EQUAL;
+                oCondAtivo.CondVal = "N";
+                oCondAtivo.BracketCloseNum = 2;
+
+                oCFL.SetConditions(oConds);
             }
+
         }
 
         #endregion
@@ -1715,18 +1759,14 @@ namespace CafebrasContratos
 
         public static bool TemGrupoDeItemConfiguradoParaChoose()
         {
-            using (var recordset = new RecordSet())
+            if (Program._gruposDeItensPermitidos.Count == 0)
             {
-                var rs = recordset.DoQuery(SQLGrupoDeItensPermitidos);
-                if (rs.RecordCount == 0)
-                {
-                    Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                Dialogs.PopupInfo("Nenhum grupo de item foi configurado para filtrar esta apresentação de itens.");
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
 
@@ -1855,7 +1895,7 @@ namespace CafebrasContratos
         public abstract void QuandoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
         public abstract void QuandoNaoPuderAdicionarObjetoFilho(SAPbouiCOM.Form form);
         public abstract bool ContratoPodeSerAlterado(string status);
-        public abstract void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus);
+        public abstract void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus, string numeroContrato);
 
         #endregion
 

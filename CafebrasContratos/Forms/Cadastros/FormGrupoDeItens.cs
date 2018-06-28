@@ -38,31 +38,37 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(FormUID);
-            var mtx = GetMatrix(form, _matriz.ItemUID);
-            _matriz._grupoDeItem.Popular(mtx);
-
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
-            dbdts.Clear();
-
-            using (var recordset = new RecordSet())
+            using (var formCOM = new FormCOM(FormUID))
             {
-                var rs = recordset.DoQuery("SELECT U_ItmsGrpCod FROM [@UPD_OCTC] ORDER BY CONVERT(INT,Code)");
-                if (rs.RecordCount > 0)
-                {
-                    while (!rs.EoF)
-                    {
-                        var grupoDeItem = rs.Fields.Item(_matriz._grupoDeItem.Datasource).Value;
-                        dbdts.InsertRecord(dbdts.Size);
-                        dbdts.SetValue(_matriz._grupoDeItem.Datasource, dbdts.Size - 1, grupoDeItem);
-                        rs.MoveNext();
-                    }
+                var form = formCOM.Form;
+                var mtx = GetMatrix(form, _matriz.ItemUID);
+                _matriz._grupoDeItem.Popular(mtx);
 
-                    mtx.LoadFromDataSourceEx();
-                }
-                else
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
                 {
-                    _matriz.AdicionarLinha(form);
+                    var dbdts = dbdtsCOM.Dbdts;
+                    dbdts.Clear();
+
+                    using (var recordset = new RecordSet())
+                    {
+                        var rs = recordset.DoQuery("SELECT U_ItmsGrpCod FROM [@UPD_OCTC] ORDER BY CONVERT(INT,Code)");
+                        if (rs.RecordCount > 0)
+                        {
+                            while (!rs.EoF)
+                            {
+                                var grupoDeItem = rs.Fields.Item(_matriz._grupoDeItem.Datasource).Value;
+                                dbdts.InsertRecord(dbdts.Size);
+                                dbdts.SetValue(_matriz._grupoDeItem.Datasource, dbdts.Size - 1, grupoDeItem);
+                                rs.MoveNext();
+                            }
+
+                            mtx.LoadFromDataSourceEx();
+                        }
+                        else
+                        {
+                            _matriz.AdicionarLinha(form);
+                        }
+                    }
                 }
             }
         }
@@ -73,14 +79,20 @@ namespace CafebrasContratos
 
             if (pVal.ItemUID == _salvar.ItemUID)
             {
-                var form = GetForm(FormUID);
-                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-                mtx.FlushToDataSource();
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-
-                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    BubbleEvent = false;
+                    var form = formCOM.Form;
+                    var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                    mtx.FlushToDataSource();
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+
+                        if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
+                        {
+                            BubbleEvent = false;
+                        }
+                    }
                 }
             }
         }
@@ -105,76 +117,89 @@ namespace CafebrasContratos
 
         private void OnSalvar(string formUID)
         {
-            var form = GetForm(formUID);
-            try
+            using (var formCOM = new FormCOM(formUID))
             {
-                form.Freeze(true);
-                Global.Company.StartTransaction();
-
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-                bool ok = true;
-
-                using (var recordset = new RecordSet())
+                var form = formCOM.Form;
+                try
                 {
-                    var rs = recordset.DoQuery($"DELETE FROM [{dbdts.TableName}];");
-                    var userTable = Global.Company.UserTables.Item(dbdts.TableName.Remove(0, 1));
+                    form.Freeze(true);
+                    Global.Company.StartTransaction();
+                    bool ok = true;
 
-                    var mtx = GetMatrix(form, _matriz.ItemUID);
-                    mtx.FlushToDataSource();
-                    var grupoDeItemDataSource = _matriz._grupoDeItem.Datasource;
-
-                    for (int i = 0; i < dbdts.Size; i++)
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
                     {
-                        var grupoDeItem = dbdts.GetValue(grupoDeItemDataSource, i);
-                        if (!string.IsNullOrEmpty(grupoDeItem))
-                        {
-                            var codigo = (i + 1).ToString();
-                            userTable.Code = codigo;
-                            userTable.Name = codigo;
-                            userTable.UserFields.Fields.Item(grupoDeItemDataSource).Value = grupoDeItem;
+                        var dbdts = dbdtsCOM.Dbdts;
 
-                            if (userTable.Add() != 0)
+                        using (var recordset = new RecordSet())
+                        {
+                            var rs = recordset.DoQuery($"DELETE FROM [{dbdts.TableName}];");
+                            var userTable = Global.Company.UserTables.Item(dbdts.TableName.Remove(0, 1));
+
+                            var mtx = GetMatrix(form, _matriz.ItemUID);
+                            mtx.FlushToDataSource();
+                            var grupoDeItemDataSource = _matriz._grupoDeItem.Datasource;
+
+                            for (int i = 0; i < dbdts.Size; i++)
                             {
-                                ok = false;
-                                break;
+                                var grupoDeItem = dbdts.GetValue(grupoDeItemDataSource, i);
+                                if (!string.IsNullOrEmpty(grupoDeItem))
+                                {
+                                    var codigo = (i + 1).ToString();
+                                    userTable.Code = codigo;
+                                    userTable.Name = codigo;
+                                    userTable.UserFields.Fields.Item(grupoDeItemDataSource).Value = grupoDeItem;
+
+                                    if (userTable.Add() != 0)
+                                    {
+                                        ok = false;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
-                }
 
-                if (!ok)
-                {
-                    Dialogs.PopupError("Erro ao salvar dados.\nErro: " + Global.Company.GetLastErrorDescription());
+                    if (!ok)
+                    {
+                        Dialogs.PopupError("Erro ao salvar dados.\nErro: " + Global.Company.GetLastErrorDescription());
+                    }
+                    else
+                    {
+                        Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
+
+                        Program.CarregarGruposDeItensPermitidos();
+
+                        Dialogs.PopupSuccess("Dados salvos com sucesso.");
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_Commit);
-                    Dialogs.PopupSuccess("Dados salvos com sucesso.");
+                    Dialogs.PopupError("Erro interno. Erro ao salvar dados.\nErro: " + e.Message);
+                    Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
                 }
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao salvar dados.\nErro: " + e.Message);
-                Global.Company.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack);
-            }
-            finally
-            {
-                form.Freeze(false);
+                finally
+                {
+                    form.Freeze(false);
+                }
             }
         }
 
         private void OnRemoverLinha(string FormUID)
         {
-            var form = GetForm(FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
-            _matriz.RemoverLinha(form);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                _matriz.RemoverLinha(form);
+            }
         }
 
         private void OnAdicionarLinha(string FormUID)
         {
-            var form = GetForm(FormUID);
-
-            _matriz.AdicionarLinha(form);
+            using (var formCOM = new FormCOM(FormUID))
+            {
+                var form = formCOM.Form;
+                _matriz.AdicionarLinha(form);
+            }
         }
 
         #endregion

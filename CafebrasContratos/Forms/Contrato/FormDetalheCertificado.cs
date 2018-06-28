@@ -34,25 +34,31 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(FormUID);
-            try
+            using (var formCOM = new FormCOM(FormUID))
             {
-                form.Freeze(true);
+                var form = formCOM.Form;
+                try
+                {
+                    form.Freeze(true);
 
-                _matriz._certificado.Popular(form, _matriz.ItemUID);
+                    _matriz._certificado.Popular(form, _matriz.ItemUID);
 
-                CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
+                    CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
-                var statusContratoPai = formPai.GetStatusPersistent(GetForm(_fatherFormUID));
-                form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
-            }
-            finally
-            {
-                form.Freeze(false);
+                    using (var fatherFormCOM = new FormCOM(_fatherFormUID))
+                    {
+                        var statusContratoPai = formPai.GetStatusPersistent(fatherFormCOM.Form);
+                        form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
             }
         }
 
@@ -62,14 +68,20 @@ namespace CafebrasContratos
 
             if (pVal.ItemUID == "1")
             {
-                var form = GetForm(FormUID);
-                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-                mtx.FlushToDataSource();
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-
-                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    BubbleEvent = false;
+                    var form = formCOM.Form;
+                    var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                    mtx.FlushToDataSource();
+
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+                        if (!CamposMatrizEstaoValidos(form, dbdts, _matriz))
+                        {
+                            BubbleEvent = false;
+                        }
+                    }
                 }
             }
         }
@@ -100,18 +112,30 @@ namespace CafebrasContratos
 
         private void OnBotaoAdicionarClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _matriz.AdicionarLinha(form, dbdts);
+                    _matriz.AdicionarLinha(form, dbdts);
+                }
+            }
         }
 
         private void OnBotaoRemoverClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _matriz.RemoverLinhaSelecionada(form, dbdts);
+                    _matriz.RemoverLinhaSelecionada(form, dbdts);
+                }
+            }
         }
 
         #endregion

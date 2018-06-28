@@ -37,33 +37,42 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(FormUID);
-            try
+            using (var formCOM = new FormCOM(FormUID))
             {
-                form.Freeze(true);
+                var form = formCOM.Form;
+                try
+                {
+                    form.Freeze(true);
 
-                _matriz.CriarColunaSumAuto(form, _matriz._percentual.ItemUID);
-                _matriz.CriarColunaSumAuto(form, _matriz._diferencial.ItemUID);
+                    _matriz.CriarColunaSumAuto(form, _matriz._percentual.ItemUID);
+                    _matriz.CriarColunaSumAuto(form, _matriz._diferencial.ItemUID);
 
-                CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
+                    CarregarDadosMatriz(form, _fatherFormUID, _matriz.ItemUID, mainDbDataSource);
 
-                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-                ClicarParaCalcularOsTotalizadores(mtx);
+                    var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                    ClicarParaCalcularOsTotalizadores(mtx);
 
-                form.Items.Item("1").Enabled = UsuarioPermitido();
+                    form.Items.Item("1").Enabled = UsuarioPermitido();
 
-                var fatherForm = GetForm(_fatherFormUID);
-                var fatherDbdts = GetDBDatasource(fatherForm, fatherFormMainDbDataSource);
-                var itemcodeBase = fatherDbdts.GetValue("U_ItemCode", 0).Trim();
-                ConditionsParaItens(form, itemcodeBase);
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
-            }
-            finally
-            {
-                form.Freeze(false);
+                    using (var fatherFormCOM = new FormCOM(_fatherFormUID))
+                    {
+                        var fatherForm = fatherFormCOM.Form;
+                        using (var dbdtsCOM = new DBDatasourceCOM(fatherForm, fatherFormMainDbDataSource))
+                        {
+                            var fatherDbdts = dbdtsCOM.Dbdts;
+                            var itemcodeBase = fatherDbdts.GetValue("U_ItemCode", 0).Trim();
+                            ConditionsParaItens(form, itemcodeBase);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
             }
         }
 
@@ -75,14 +84,20 @@ namespace CafebrasContratos
 
             if (pVal.ItemUID == "1")
             {
-                var form = GetForm(FormUID);
-                var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
-                mtx.FlushToDataSource();
-                var dbdts = GetDBDatasource(form, mainDbDataSource);
-
-                if (!CamposMatrizEstaoValidos(form, dbdts, _matriz) || !SomaDosPercentuaisEstaCorreta(mtx))
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    BubbleEvent = false;
+                    var form = formCOM.Form;
+                    var mtx = ((Matrix)form.Items.Item(_matriz.ItemUID).Specific);
+                    mtx.FlushToDataSource();
+                    using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                    {
+                        var dbdts = dbdtsCOM.Dbdts;
+
+                        if (!CamposMatrizEstaoValidos(form, dbdts, _matriz) || !SomaDosPercentuaisEstaCorreta(mtx))
+                        {
+                            BubbleEvent = false;
+                        }
+                    }
                 }
             }
         }
@@ -140,18 +155,30 @@ namespace CafebrasContratos
 
         private void OnBotaoAdicionarClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _matriz.AdicionarLinha(form, dbdts);
+                    _matriz.AdicionarLinha(form, dbdts);
+                }
+            }
         }
 
         private void OnBotaoRemoverClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, mainDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, mainDbDataSource))
+                {
+                    var dbdts = GetDBDatasource(form, mainDbDataSource);
 
-            _matriz.RemoverLinhaSelecionada(form, dbdts);
+                    _matriz.RemoverLinhaSelecionada(form, dbdts);
+                }
+            }
         }
 
         #endregion
@@ -212,6 +239,8 @@ namespace CafebrasContratos
 
         public void ConditionsParaItens(SAPbouiCOM.Form form, string itemcodeBase)
         {
+            /* - COMENTANDO PORQUE ESSE FORM NÃO É UTILIZADO MAIS.
+             * AS PENEIRAS AGORA SÃO CAMPOS NO CONTRATO.
             ChooseFromList oCFL = form.ChooseFromLists.Item(chooseItemUID);
             Conditions oConds = oCFL.GetConditions();
 
@@ -299,6 +328,7 @@ namespace CafebrasContratos
                     oCFL.SetConditions(oConds);
                 }
             }
+            */
         }
 
         #endregion

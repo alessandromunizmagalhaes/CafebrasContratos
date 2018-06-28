@@ -79,14 +79,14 @@ namespace CafebrasContratos
             return status == StatusPreContrato.Esboço || String.IsNullOrEmpty(status);
         }
 
-        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus)
+        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus, string numeroContrato)
         {
             var tabelaContratoFinal = "[@UPD_OCFC]";
             if (gestaoStatus.StatusPersistente == StatusPreContrato.Autorizado && gestaoStatus.StatusVolatil == StatusPreContrato.Esboço)
             {
                 using (var recordset = new RecordSet())
                 {
-                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND {_numeroDoContrato.Datasource} = '{numeroContrato}'");
                     if (rs.Fields.Item("cont").Value > 0)
                     {
                         throw new BusinessRuleException(
@@ -102,7 +102,7 @@ namespace CafebrasContratos
                     var rs = recordset.DoQuery(
                         $@"SELECT 
                             COUNT(*) as cont FROM {tabelaContratoFinal} 
-                        WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND {_status.Datasource} <> '{StatusContratoFinal.Encerrado}'  ");
+                        WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND {_status.Datasource} <> '{StatusContratoFinal.Encerrado}'  AND {_numeroDoContrato.Datasource} = '{numeroContrato}' ");
                     if (rs.Fields.Item("cont").Value > 0)
                     {
                         throw new BusinessRuleException(
@@ -115,7 +115,7 @@ namespace CafebrasContratos
             {
                 using (var recordset = new RecordSet())
                 {
-                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'");
+                    var rs = recordset.DoQuery($"SELECT COUNT(*) as cont FROM {tabelaContratoFinal} WHERE {_status.Datasource} <> '{StatusContratoFinal.Cancelado}'  AND {_numeroDoContrato.Datasource} = '{numeroContrato}'");
                     if (rs.Fields.Item("cont").Value > 0)
                     {
                         throw new BusinessRuleException(
@@ -155,10 +155,11 @@ namespace CafebrasContratos
 
             base.OnAfterFormDataLoad(ref BusinessObjectInfo, out BubbleEvent);
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            AtualizarMatriz(form);
-
-            var dbdts = GetDBDatasource(form, MainDbDataSource);
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
+            {
+                var form = formCOM.Form;
+                AtualizarMatriz(form);
+            }
         }
 
         #endregion
@@ -192,14 +193,17 @@ namespace CafebrasContratos
             BubbleEvent = true;
             if (pVal.ItemUID == _botaoAdicionar.ItemUID)
             {
-                var form = GetForm(FormUID);
-                if (form.Mode == BoFormMode.fm_OK_MODE)
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    FormContratoFinal.AbrirCriandoNovoRegistro(FormUID);
-                }
-                else
-                {
-                    Dialogs.PopupError("Salve o Contrato antes de criar um novo Contrato Final.");
+                    var form = formCOM.Form;
+                    if (form.Mode == BoFormMode.fm_OK_MODE)
+                    {
+                        FormContratoFinal.AbrirCriandoNovoRegistro(FormUID);
+                    }
+                    else
+                    {
+                        Dialogs.PopupError("Salve o Contrato antes de criar um novo Contrato Final.");
+                    }
                 }
             }
             else

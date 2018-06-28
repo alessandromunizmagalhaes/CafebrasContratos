@@ -51,36 +51,42 @@ namespace CafebrasContratos
         {
             BubbleEvent = true;
 
-            var form = GetForm(FormUID);
-            try
+            using (var formCOM = new FormCOM(FormUID))
             {
-                form.Freeze(true);
+                var form = formCOM.Form;
+                try
+                {
+                    form.Freeze(true);
 
-                _corretores.CriarColunaSumAuto(form, _corretores._comissao.ItemUID);
-                _responsaveis.CriarColunaSumAuto(form, _responsaveis._comissao.ItemUID);
+                    _corretores.CriarColunaSumAuto(form, _corretores._comissao.ItemUID);
+                    _responsaveis.CriarColunaSumAuto(form, _responsaveis._comissao.ItemUID);
 
-                CarregarDadosMatriz(form, _fatherFormUID, _corretores.ItemUID, corretorDbDataSource);
-                CarregarDadosMatriz(form, _fatherFormUID, _responsaveis.ItemUID, responsavelDbDataSource);
+                    CarregarDadosMatriz(form, _fatherFormUID, _corretores.ItemUID, corretorDbDataSource);
+                    CarregarDadosMatriz(form, _fatherFormUID, _responsaveis.ItemUID, responsavelDbDataSource);
 
-                var mtxCorretores = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
-                var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
+                    var mtxCorretores = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
+                    var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
 
-                ClicarParaCalcularOsTotalizadores(mtxCorretores, _corretores._comissao.ItemUID);
-                ClicarParaCalcularOsTotalizadores(mtxResponsaveis, _responsaveis._comissao.ItemUID);
+                    ClicarParaCalcularOsTotalizadores(mtxCorretores, _corretores._comissao.ItemUID);
+                    ClicarParaCalcularOsTotalizadores(mtxResponsaveis, _responsaveis._comissao.ItemUID);
 
-                _corretores._participante.Popular(mtxCorretores);
-                _responsaveis._participante.Popular(mtxResponsaveis);
+                    _corretores._participante.Popular(mtxCorretores);
+                    _responsaveis._participante.Popular(mtxResponsaveis);
 
-                var statusContratoPai = formPai.GetStatusPersistent(GetForm(_fatherFormUID));
-                form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
-            }
-            finally
-            {
-                form.Freeze(false);
+                    using (var fatherFormCOM = new FormCOM(_fatherFormUID))
+                    {
+                        var statusContratoPai = formPai.GetStatusPersistent(fatherFormCOM.Form);
+                        form.Items.Item("1").Enabled = UsuarioPermitido() && formPai.ContratoPodeSerAlterado(statusContratoPai);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Dialogs.PopupError("Erro interno. Erro ao desenhar o form.\nErro: " + e.Message);
+                }
+                finally
+                {
+                    form.Freeze(false);
+                }
             }
         }
 
@@ -90,19 +96,26 @@ namespace CafebrasContratos
 
             if (pVal.ItemUID == "1")
             {
-                var form = GetForm(FormUID);
-                var mtxCorretor = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
-                var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
-
-                mtxCorretor.FlushToDataSource();
-                mtxResponsaveis.FlushToDataSource();
-
-                var dbdtsCorretor = GetDBDatasource(form, corretorDbDataSource);
-                var dbdtsResponsavel = GetDBDatasource(form, responsavelDbDataSource);
-
-                if (!CamposMatrizEstaoValidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoValidos(form, dbdtsResponsavel, _responsaveis))
+                using (var formCOM = new FormCOM(FormUID))
                 {
-                    BubbleEvent = false;
+                    var form = formCOM.Form;
+                    var mtxCorretor = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
+                    var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
+
+                    mtxCorretor.FlushToDataSource();
+                    mtxResponsaveis.FlushToDataSource();
+
+                    using (var dbdtsCorretorCOM = new DBDatasourceCOM(form, corretorDbDataSource))
+                    using (var dbdtsResponsavelCOM = new DBDatasourceCOM(form, responsavelDbDataSource))
+                    {
+                        var dbdtsCorretor = dbdtsCorretorCOM.Dbdts;
+                        var dbdtsResponsavel = dbdtsResponsavelCOM.Dbdts;
+
+                        if (!CamposMatrizEstaoValidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoValidos(form, dbdtsResponsavel, _responsaveis))
+                        {
+                            BubbleEvent = false;
+                        }
+                    }
                 }
             }
         }
@@ -143,66 +156,96 @@ namespace CafebrasContratos
         public override void OnAfterComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
-            var form = GetForm(FormUID);
-            var matrix = GetMatrix(form, pVal.ItemUID);
-            matrix.FlushToDataSource();
-
-            var dbdtsName = string.Empty;
-            Matriz matriz = null;
-
-            if (pVal.ItemUID == _corretores.ItemUID)
+            using (var formCOM = new FormCOM(FormUID))
             {
-                dbdtsName = corretorDbDataSource;
-                matriz = _corretores;
-            }
-            else if (pVal.ItemUID == _responsaveis.ItemUID)
-            {
-                dbdtsName = responsavelDbDataSource;
-                matriz = _responsaveis;
-            }
+                var form = formCOM.Form;
+                var matrix = GetMatrix(form, pVal.ItemUID);
+                matrix.FlushToDataSource();
 
-            var row = pVal.Row - 1;
-            var dbdts = GetDBDatasource(form, dbdtsName);
-            var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, row);
-            if (!String.IsNullOrEmpty(participante))
-            {
-                matriz._comissao.GetValorDBDatasource<int>(dbdts);
-                var comissao = GetComissaoPadrao(participante);
-                matriz._comissao.SetValorDBDatasource(dbdts, comissao, row);
-                matrix.LoadFromDataSourceEx();
+                var dbdtsName = string.Empty;
+                Matriz matriz = null;
+
+                if (pVal.ItemUID == _corretores.ItemUID)
+                {
+                    dbdtsName = corretorDbDataSource;
+                    matriz = _corretores;
+                }
+                else if (pVal.ItemUID == _responsaveis.ItemUID)
+                {
+                    dbdtsName = responsavelDbDataSource;
+                    matriz = _responsaveis;
+                }
+
+                var row = pVal.Row - 1;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, dbdtsName))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
+                    var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, row);
+                    if (!String.IsNullOrEmpty(participante))
+                    {
+                        matriz._comissao.GetValorDBDatasource<int>(dbdts);
+                        var comissao = GetComissaoPadrao(participante);
+                        matriz._comissao.SetValorDBDatasource(dbdts, comissao, row);
+                        matrix.LoadFromDataSourceEx();
+                    }
+                }
             }
         }
 
         private void OnAdicionarCorretorClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, corretorDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, corretorDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _corretores.AdicionarLinha(form, dbdts);
+                    _corretores.AdicionarLinha(form, dbdts);
+                }
+            }
         }
 
         private void OnRemoverCorretorClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, corretorDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, corretorDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _corretores.RemoverLinhaSelecionada(form, dbdts);
+                    _corretores.RemoverLinhaSelecionada(form, dbdts);
+                }
+            }
         }
 
         private void OnAdicionarResponsavelClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, responsavelDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, responsavelDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _responsaveis.AdicionarLinha(form, dbdts);
+                    _responsaveis.AdicionarLinha(form, dbdts);
+                }
+            }
         }
 
         private void OnRemoverResponsavelClick(ItemEvent pVal)
         {
-            var form = GetForm(pVal.FormUID);
-            var dbdts = GetDBDatasource(form, responsavelDbDataSource);
+            using (var formCOM = new FormCOM(pVal.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, responsavelDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
 
-            _responsaveis.RemoverLinhaSelecionada(form, dbdts);
+                    _responsaveis.RemoverLinhaSelecionada(form, dbdts);
+                }
+            }
         }
 
         #endregion

@@ -104,7 +104,7 @@ namespace CafebrasContratos
             ;
         }
 
-        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus)
+        public override void ValidaAlteracaoDeStatus(GestaoStatusContrato gestaoStatus, string numeroContrato)
         {
 
         }
@@ -172,17 +172,36 @@ namespace CafebrasContratos
         {
             base.OnAfterFormDataAdd(ref BusinessObjectInfo, out BubbleEvent);
 
-            var form = GetForm(BusinessObjectInfo.FormUID);
-            var dbdts = GetDBDatasource(form, MainDbDataSource);
-            AtualizarSaldoPreContrato(dbdts);
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
+            {
+                var form = formCOM.Form;
+                using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                {
+                    var dbdts = dbdtsCOM.Dbdts;
+
+                    AtualizarSaldoPreContrato(dbdts);
+                }
+            }
         }
 
         public override void OnAfterFormDataUpdate(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
         {
             base.OnAfterFormDataUpdate(ref BusinessObjectInfo, out BubbleEvent);
 
-            var dbdts = GetDBDatasource(BusinessObjectInfo.FormUID, MainDbDataSource);
-            AtualizarSaldoPreContrato(dbdts);
+            using (var dbdtsCOM = new DBDatasourceCOM(BusinessObjectInfo.FormUID, MainDbDataSource))
+            {
+                var dbdts = dbdtsCOM.Dbdts;
+
+                var status = _status.GetValorDBDatasource<string>(dbdts);
+                if (status == StatusContratoFinal.Cancelado)
+                {
+                    CancelarSaldoContratoFinal(dbdts);
+                }
+                else
+                {
+                    AtualizarSaldoPreContrato(dbdts);
+                }
+            }
         }
 
         #endregion
@@ -194,67 +213,85 @@ namespace CafebrasContratos
         {
             base.OnAfterFormVisible(FormUID, ref pVal, out BubbleEvent);
 
-            var form = GetForm(FormUID);
-            form.EnableMenu(((int)EventosInternos.AdicionarNovo).ToString(), false);
-
-            var botaoComboCopiar = (ButtonCombo)form.Items.Item(_botaoComboCopiar.ItemUID).Specific;
-            _botaoComboCopiar.Popular(botaoComboCopiar.ValidValues);
-
-            if (form.Mode == BoFormMode.fm_ADD_MODE)
+            using (var formCOM = new FormCOM(FormUID))
             {
-                Dialogs.Success("Carregando informações do Contrato de Compra Geral... Aguarde...");
+                var form = formCOM.Form;
+                form.EnableMenu(((int)EventosInternos.AdicionarNovo).ToString(), false);
 
-                var fatherForm = GetForm(_fatherFormUID);
+                var botaoComboCopiar = (ButtonCombo)form.Items.Item(_botaoComboCopiar.ItemUID).Specific;
+                _botaoComboCopiar.Popular(botaoComboCopiar.ValidValues);
 
-                var dbdtsCF = GetDBDatasource(form, MainDbDataSource);
-                var dbdtsPC = GetDBDatasource(_fatherFormUID, new TabelaPreContrato().NomeComArroba);
-
-                var dbdtsCFCertificado = GetDBDatasource(form, new TabelaCertificadosDoContratoFinal().NomeComArroba);
-                var dbdtsPCCertificado = GetDBDatasource(_fatherFormUID, new TabelaCertificadosDoPreContrato().NomeComArroba);
-
-                var dbdtsCFResponsavel = GetDBDatasource(form, new TabelaResponsaveisDoContratoFinal().NomeComArroba);
-                var dbdtsPCResponsavel = GetDBDatasource(_fatherFormUID, new TabelaResponsaveisDoPreContrato().NomeComArroba);
-
-                var dbdtsCFCorretor = GetDBDatasource(form, new TabelaCorretoresDoContratoFinal().NomeComArroba);
-                var dbdtsPCCorretor = GetDBDatasource(_fatherFormUID, new TabelaCorretoresDoPreContrato().NomeComArroba);
-
-                try
+                if (form.Mode == BoFormMode.fm_ADD_MODE)
                 {
-                    form.Freeze(true);
+                    Dialogs.Success("Carregando informações do Contrato de Compra Geral... Aguarde...", BoMessageTime.bmt_Long);
 
-                    var labelsIn = string.Empty;
-                    for (int i = 0; i < _peneiras.Count; i++)
+                    using (var fatherFormCOM = new FormCOM(_fatherFormUID))
+
+                    using (var dbdtsCFCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                    using (var dbdtsPCCOM = new DBDatasourceCOM(_fatherFormUID, new TabelaPreContrato().NomeComArroba))
+
+                    using (var dbdtsCFCertificadoCOM = new DBDatasourceCOM(form, new TabelaCertificadosDoContratoFinal().NomeComArroba))
+                    using (var dbdtsPCCertificadoCOM = new DBDatasourceCOM(_fatherFormUID, new TabelaCertificadosDoPreContrato().NomeComArroba))
+
+                    using (var dbdtsCFResponsavelCOM = new DBDatasourceCOM(form, new TabelaResponsaveisDoContratoFinal().NomeComArroba))
+                    using (var dbdtsPCResponsavelCOM = new DBDatasourceCOM(_fatherFormUID, new TabelaResponsaveisDoPreContrato().NomeComArroba))
+
+                    using (var dbdtsCFCorretorCOM = new DBDatasourceCOM(form, new TabelaCorretoresDoContratoFinal().NomeComArroba))
+                    using (var dbdtsPCCorretorCOM = new DBDatasourceCOM(_fatherFormUID, new TabelaCorretoresDoPreContrato().NomeComArroba))
                     {
-                        labelsIn += ",'" + _peneiras[i].Datasource.Replace("P", "L") + "'";
+                        var fatherForm = fatherFormCOM.Form;
+
+                        var dbdtsCF = dbdtsCFCOM.Dbdts;
+                        var dbdtsPC = dbdtsPCCOM.Dbdts;
+
+                        var dbdtsCFCertificado = dbdtsCFCertificadoCOM.Dbdts;
+                        var dbdtsPCCertificado = dbdtsPCCertificadoCOM.Dbdts;
+
+                        var dbdtsCFResponsavel = dbdtsCFResponsavelCOM.Dbdts;
+                        var dbdtsPCResponsavel = dbdtsPCResponsavelCOM.Dbdts;
+
+                        var dbdtsCFCorretor = dbdtsCFCorretorCOM.Dbdts;
+                        var dbdtsPCCorretor = dbdtsPCCorretorCOM.Dbdts;
+
+                        try
+                        {
+                            form.Freeze(true);
+
+                            var labelsIn = string.Empty;
+                            for (int i = 0; i < _peneiras.Count; i++)
+                            {
+                                labelsIn += ",'" + _peneiras[i].Datasource.Replace("P", "L") + "'";
+                            }
+
+                            CopyIfFieldsMatch(dbdtsPC, ref dbdtsCF, labelsIn);
+                            CopyIfFieldsMatch(dbdtsPCCertificado, ref dbdtsCFCertificado);
+                            CopyIfFieldsMatch(dbdtsPCResponsavel, ref dbdtsCFResponsavel);
+                            CopyIfFieldsMatch(dbdtsPCCorretor, ref dbdtsCFCorretor);
+
+                            var saldoSacas = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDeSacas.Datasource, 0));
+                            var saldoPeso = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDePeso.Datasource, 0));
+
+                            saldoSacas = saldoSacas < 0 ? 0 : saldoSacas;
+                            saldoPeso = saldoPeso < 0 ? 0 : saldoPeso;
+
+                            _quantidadeDeSacas.SetValorDBDatasource(dbdtsCF, saldoSacas);
+                            _quantidadeDePeso.SetValorDBDatasource(dbdtsCF, saldoPeso);
+
+                            CalcularTotais(form, dbdtsCF);
+
+                            _OnAdicionarNovo(form);
+
+                            PopularPessoasDeContato(form, dbdtsPC.GetValue(_codigoPN.Datasource, 0), dbdtsPC.GetValue(_pessoasDeContato.Datasource, 0));
+                            HabilitarCamposDePeneira(form, dbdtsCF, dbdtsCF.GetValue(_codigoItem.Datasource, 0));
+                        }
+                        finally
+                        {
+                            form.Freeze(false);
+                        }
+
+                        Dialogs.Success("Ok.");
                     }
-
-                    CopyIfFieldsMatch(dbdtsPC, ref dbdtsCF, labelsIn);
-                    CopyIfFieldsMatch(dbdtsPCCertificado, ref dbdtsCFCertificado);
-                    CopyIfFieldsMatch(dbdtsPCResponsavel, ref dbdtsCFResponsavel);
-                    CopyIfFieldsMatch(dbdtsPCCorretor, ref dbdtsCFCorretor);
-
-                    var saldoSacas = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDeSacas.Datasource, 0));
-                    var saldoPeso = Helpers.ToDouble(dbdtsPC.GetValue(_saldoDePeso.Datasource, 0));
-
-                    saldoSacas = saldoSacas < 0 ? 0 : saldoSacas;
-                    saldoPeso = saldoPeso < 0 ? 0 : saldoPeso;
-
-                    _quantidadeDeSacas.SetValorDBDatasource(dbdtsCF, saldoSacas);
-                    _quantidadeDePeso.SetValorDBDatasource(dbdtsCF, saldoPeso);
-
-                    CalcularTotais(form, dbdtsCF);
-
-                    _OnAdicionarNovo(form);
-
-                    PopularPessoasDeContato(form, dbdtsPC.GetValue(_codigoPN.Datasource, 0), dbdtsPC.GetValue(_pessoasDeContato.Datasource, 0));
-                    HabilitarCamposDePeneira(form, dbdtsCF, dbdtsCF.GetValue(_codigoItem.Datasource, 0));
                 }
-                finally
-                {
-                    form.Freeze(false);
-                }
-
-                Dialogs.Success("Ok.");
             }
         }
 
@@ -293,38 +330,65 @@ namespace CafebrasContratos
         private void AtualizarSaldoPreContrato(DBDataSource dbdts)
         {
             var tabelaPreContrato = Global.Company.UserTables.Item(new TabelaPreContrato().NomeSemArroba);
-            var numPreContrato = dbdts.GetValue(_numeroDoPreContrato.Datasource, 0).Trim();
-            var numContratoFinal = dbdts.GetValue(_numeroDoContrato.Datasource, 0).Trim();
+            var numPreContrato = _numeroDoPreContrato.GetValorDBDatasource<string>(dbdts);
+            var numContratoFinal = _numeroDoContrato.GetValorDBDatasource<string>(dbdts);
             var codePreContrato = FormPreContrato.GetCode(numPreContrato);
             if (tabelaPreContrato.GetByKey(codePreContrato))
             {
+                // tem que ser feito o cálculo levando em consideração a soma dos contratos filhos tirando eu mesmo,
+                // porque senão, toda vez que eu atualizar o contrato final vai subtrair do pre contrato.
                 using (var recordset = new RecordSet())
                 {
                     var rs = recordset.DoQuery(
                         $@"SELECT 
-	                        SUM(U_QtdSaca) as SaldoSaca, SUM(U_QtdPeso) as SaldoPeso
+	                        SUM(U_QtdSaca) as SaldoSaca, SUM(U_QtdPeso) as SaldoPeso, SUM(U_TLivre) as SaldoLivre
 	                        FROM [@UPD_OCFC] 
 	                        WHERE 1 = 1
-		                        AND U_DocNumCC = {numPreContrato} AND U_DocNumCF <> {numContratoFinal}"
+		                        AND {_status.Datasource} <> '{StatusContratoFinal.Cancelado}' AND U_DocNumCC = {numPreContrato} AND U_DocNumCF <> {numContratoFinal}"
                     );
 
                     double sacasPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDeSacas.Datasource).Value;
                     double pesoPreContrato = tabelaPreContrato.UserFields.Fields.Item(_quantidadeDePeso.Datasource).Value;
+                    double livrePreContrato = tabelaPreContrato.UserFields.Fields.Item(_totalLivre.Datasource).Value;
 
                     double saldoSacas = rs.Fields.Item("SaldoSaca").Value;
                     double saldoPeso = rs.Fields.Item("SaldoPeso").Value;
+                    double saldoLivre = rs.Fields.Item("SaldoLivre").Value;
 
-                    string strSacasContratoFinal = dbdts.GetValue(_saldoDeSacas.Datasource, 0);
-                    double sacasContratoFinal = Helpers.ToDouble(strSacasContratoFinal);
-
-                    string strPesoContratoFinal = dbdts.GetValue(_saldoDePeso.Datasource, 0);
-                    double pesoContratoFinal = Helpers.ToDouble(strPesoContratoFinal);
+                    double sacasContratoFinal = _saldoDeSacas.GetValorDBDatasource<double>(dbdts);
+                    double pesoContratoFinal = _saldoDePeso.GetValorDBDatasource<double>(dbdts);
+                    double livreContratoFinal = _saldoFinanceiro.GetValorDBDatasource<double>(dbdts);
 
                     tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value = sacasPreContrato - saldoSacas - sacasContratoFinal;
                     tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value = pesoPreContrato - saldoPeso - pesoContratoFinal;
+                    tabelaPreContrato.UserFields.Fields.Item(_saldoFinanceiro.Datasource).Value = livrePreContrato - saldoLivre - livreContratoFinal;
 
                     tabelaPreContrato.Update();
                 }
+            }
+        }
+
+        private void CancelarSaldoContratoFinal(DBDataSource dbdts)
+        {
+            var tabelaPreContrato = Global.Company.UserTables.Item(new TabelaPreContrato().NomeSemArroba);
+            var numPreContrato = _numeroDoPreContrato.GetValorDBDatasource<string>(dbdts);
+            var numContratoFinal = _numeroDoContrato.GetValorDBDatasource<string>(dbdts);
+            var codePreContrato = FormPreContrato.GetCode(numPreContrato);
+            if (tabelaPreContrato.GetByKey(codePreContrato))
+            {
+                double sacasPreContrato = tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value;
+                double pesoPreContrato = tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value;
+                double livrePreContrato = tabelaPreContrato.UserFields.Fields.Item(_saldoFinanceiro.Datasource).Value;
+
+                double sacasContratoFinal = _saldoDeSacas.GetValorDBDatasource<double>(dbdts);
+                double pesoContratoFinal = _saldoDePeso.GetValorDBDatasource<double>(dbdts);
+                double livreContratoFinal = _saldoFinanceiro.GetValorDBDatasource<double>(dbdts);
+
+                tabelaPreContrato.UserFields.Fields.Item(_saldoDeSacas.Datasource).Value = sacasPreContrato + sacasContratoFinal;
+                tabelaPreContrato.UserFields.Fields.Item(_saldoDePeso.Datasource).Value = pesoPreContrato + pesoContratoFinal;
+                tabelaPreContrato.UserFields.Fields.Item(_saldoFinanceiro.Datasource).Value = livrePreContrato + livreContratoFinal;
+
+                tabelaPreContrato.Update();
             }
         }
 
