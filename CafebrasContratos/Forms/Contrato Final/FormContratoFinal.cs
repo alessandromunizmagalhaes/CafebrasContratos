@@ -162,6 +162,7 @@ namespace CafebrasContratos
                 {"6","Devolução de Nota Fiscal de Entrada"},
             }
         };
+        private static bool _adicionou = false;
 
         #endregion
 
@@ -178,8 +179,11 @@ namespace CafebrasContratos
                 using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
                 {
                     var dbdts = dbdtsCOM.Dbdts;
-
-                    AtualizarSaldoPreContrato(dbdts);
+                    if (BusinessObjectInfo.ActionSuccess)
+                    {
+                        _adicionou = true;
+                        AtualizarSaldoPreContrato(dbdts);
+                    }
                 }
             }
         }
@@ -216,8 +220,9 @@ namespace CafebrasContratos
             using (var formCOM = new FormCOM(FormUID))
             {
                 var form = formCOM.Form;
-                form.EnableMenu(((int)EventosInternos.AdicionarNovo).ToString(), false);
+                DesabilitarMenuAdicionarNovo(form);
 
+                form.Items.Item(_botaoComboCopiar.ItemUID).AffectsFormMode = false;
                 var botaoComboCopiar = (ButtonCombo)form.Items.Item(_botaoComboCopiar.ItemUID).Specific;
                 _botaoComboCopiar.Popular(botaoComboCopiar.ValidValues);
 
@@ -292,6 +297,69 @@ namespace CafebrasContratos
                         Dialogs.Success("Ok.");
                     }
                 }
+            }
+        }
+
+        public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            if (pVal.ItemUID == _botaoComboCopiar.ItemUID)
+            {
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    if (form.Mode == BoFormMode.fm_OK_MODE)
+                    {
+                        using (var dbdtsCOM = new DBDatasourceCOM(form, MainDbDataSource))
+                        {
+                            var dbdts = dbdtsCOM.Dbdts;
+                            var fornecedor = _codigoPN.GetValorDBDatasource<string>(dbdts);
+                            var numContratoFinal = _numeroDoContrato.GetValorDBDatasource<string>(dbdts);
+                            var transportadora = _transportadora.GetValorDBDatasource<string>(dbdts);
+
+                            var codigoItem = _codigoItem.GetValorDBDatasource<string>(dbdts);
+                            var deposito = _deposito.GetValorDBDatasource<string>(dbdts);
+                            var utilizacao = _utilizacao.GetValorDBDatasource<string>(dbdts);
+                            var safra = _safra.GetValorDBDatasource<string>(dbdts);
+                            var embalagem = _embalagem.GetValorDBDatasource<string>(dbdts);
+                            var quantidade = _quantidadeDePeso.GetValorDBDatasource<double>(dbdts);
+
+                            var objPedidoCompra = new FormPedidoCompra();
+                            var formPedidoCompra = objPedidoCompra.Abrir();
+                            objPedidoCompra.PreencherPedido(formPedidoCompra, new PedidoCompraParams()
+                            {
+                                NumContratoFinal = numContratoFinal,
+                                Fornecedor = fornecedor,
+                                Item = codigoItem,
+                                Utilizacao = utilizacao,
+                                Transportadora = transportadora,
+                                Embalagem = embalagem,
+                                Deposito = deposito,
+                                Quantidade = quantidade
+                            });
+                        }
+                    }
+                    else
+                    {
+                        Dialogs.PopupError("Salve o Contrato antes de criar um novo Documento.");
+                    }
+                }
+            }
+            else if (pVal.ItemUID == "1")
+            {
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    if (form.Mode == BoFormMode.fm_ADD_MODE && _adicionou)
+                    {
+                        _adicionou = false;
+                        form.Close();
+                    }
+                }
+            }
+            else
+            {
+                base.OnAfterItemPressed(FormUID, ref pVal, out BubbleEvent);
             }
         }
 

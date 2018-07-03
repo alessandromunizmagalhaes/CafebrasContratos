@@ -168,8 +168,14 @@ namespace CafebrasContratos
 
 
                 #region :: Form SAP
-
                 var formUsuarios = new FormUsuarios();
+                var formPedidoCompra = new FormPedidoCompra();
+
+                var formsPadraoSAP = new List<SAPHelper.Form>()
+                {
+                    formUsuarios,
+                    formPedidoCompra
+                };
 
                 #endregion
 
@@ -185,7 +191,7 @@ namespace CafebrasContratos
 
                 FormEvents.DeclararEventos(eventFilters, new List<MapEventsToForms>() {
                     new MapEventsToForms(BoEventTypes.et_FORM_VISIBLE, formsVisible),
-                    new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formUsuarios),
+                    new MapEventsToForms(BoEventTypes.et_FORM_LOAD, formsPadraoSAP),
                     new MapEventsToForms(BoEventTypes.et_COMBO_SELECT, new List<SAPHelper.Form>(){
                         formPreContrato,
                         formContratoFinal,
@@ -245,7 +251,8 @@ namespace CafebrasContratos
                         formContratoFinalDetalheCertificado,
                         formContratoFinalComissoes,
                         formGrupoDeItens,
-                        formConfiguracaoPeneira
+                        formConfiguracaoPeneira,
+                        formPedidoCompra
                     }),
                     new MapEventsToForms(BoEventTypes.et_MATRIX_LINK_PRESSED, new List<SAPHelper.Form>(){
                         formPreContrato

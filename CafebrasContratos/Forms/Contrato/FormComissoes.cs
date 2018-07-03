@@ -58,6 +58,9 @@ namespace CafebrasContratos
                 {
                     form.Freeze(true);
 
+                    DesabilitarMenuAdicionarNovo(form);
+                    DesabilitarMenuPesquisar(form);
+
                     _corretores.CriarColunaSumAuto(form, _corretores._comissao.ItemUID);
                     _responsaveis.CriarColunaSumAuto(form, _responsaveis._comissao.ItemUID);
 
@@ -98,6 +101,7 @@ namespace CafebrasContratos
             {
                 using (var formCOM = new FormCOM(FormUID))
                 {
+
                     var form = formCOM.Form;
                     var mtxCorretor = ((Matrix)form.Items.Item(_corretores.ItemUID).Specific);
                     var mtxResponsaveis = ((Matrix)form.Items.Item(_responsaveis.ItemUID).Specific);
@@ -111,11 +115,50 @@ namespace CafebrasContratos
                         var dbdtsCorretor = dbdtsCorretorCOM.Dbdts;
                         var dbdtsResponsavel = dbdtsResponsavelCOM.Dbdts;
 
-                        if (!CamposMatrizEstaoValidos(form, dbdtsCorretor, _corretores) || !CamposMatrizEstaoValidos(form, dbdtsResponsavel, _responsaveis))
+                        if (!MatrizEstaValida(form, dbdtsCorretor, _corretores) || !MatrizEstaValida(form, dbdtsResponsavel, _responsaveis))
                         {
                             BubbleEvent = false;
                         }
                     }
+                }
+            }
+        }
+
+        private bool MatrizEstaValida(SAPbouiCOM.Form form, DBDataSource dbdts, Matriz matriz)
+        {
+            try
+            {
+                ValidarMatriz(dbdts, matriz);
+            }
+            catch (FormValidationException e)
+            {
+                Dialogs.MessageBox(e.Message);
+                var mtx = GetMatrix(form, matriz.ItemUID);
+                if (mtx.RowCount > 0)
+                {
+                    mtx.Columns.Item(e.Campo).Cells.Item(e.DatasourceRow + 1).Click();
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao tentar atribuir valores da matriz ao formulário.\nErro: " + e.Message);
+                return false;
+            }
+            return true;
+        }
+
+        private void ValidarMatriz(DBDataSource dbdts, Matriz matriz)
+        {
+            for (int i = 0; i < dbdts.Size; i++)
+            {
+                var participante = matriz._participante.GetValorDBDatasource<string>(dbdts, i);
+                var comissao = matriz._comissao.GetValorDBDatasource<double>(dbdts, i);
+
+                if (!String.IsNullOrEmpty(participante) && comissao == 0)
+                {
+                    throw new FormValidationException(matriz._comissao.Mensagem, matriz._comissao.ItemUID, "", i);
                 }
             }
         }

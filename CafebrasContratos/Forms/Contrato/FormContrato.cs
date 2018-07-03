@@ -1195,6 +1195,9 @@ namespace CafebrasContratos
             QuandoNaoPuderAdicionarObjetoFilho(form);
 
             form.Items.Item(_status.ItemUID).Enabled = false;
+
+            var mtx = GetMatrix(form, _matrixAnexos.ItemUID);
+            mtx.AddRow();
         }
 
         public override void _OnPesquisar(SAPbouiCOM.Form form)

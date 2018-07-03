@@ -31,6 +31,7 @@ namespace CafebrasContratos
             }
 
             db.CriarCampo("OUSR", CamposTabelaSAP.grupoAprovador);
+            db.CriarCampo("OPOR", CamposTabelaSAP.numeroContratoFilho);
         }
     }
 }

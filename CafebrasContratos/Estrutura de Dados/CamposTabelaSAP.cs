@@ -12,5 +12,7 @@ namespace CafebrasContratos
                             new ValorValido(GrupoAprovador.Gestor, "Gestor"),
                             new ValorValido(GrupoAprovador.Visualizador, "Visualizador")
                         });
+
+        public static Coluna numeroContratoFilho = new ColunaVarchar("DocNumCF", "Numero Contrato Final", 50);
     }
 }
