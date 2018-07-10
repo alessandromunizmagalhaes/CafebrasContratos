@@ -19,6 +19,7 @@ namespace CafebrasContratos
                 new TabelaParticipante(),
                 new TabelaGrupoCafe(),
                 new TabelaConfiguracaoPeneira(),
+                new TabelaObjectTypes(),
                 new TabelaPreContrato(),
                 new TabelaContratoFinal()
             };
@@ -30,8 +31,21 @@ namespace CafebrasContratos
                 db.CriarTabela(tabelas[i]);
             }
 
-            db.CriarCampo("OUSR", CamposTabelaSAP.grupoAprovador);
-            db.CriarCampo("OPOR", CamposTabelaSAP.numeroContratoFilho);
+            Dialogs.Info($"Criando campos de usuário...");
+
+            var camposSAP = new CamposTabelaSAP();
+
+            db.CriarCampo("OUSR", camposSAP.grupoAprovador);
+            db.CriarCampo("OPOR", camposSAP.numeroContratoFilho);
+            db.CriarCampo("OPOR", camposSAP.filhoDeContrato);
+
+            Dialogs.Info($"Atualizando procedimentos armazenados...");
+
+            var transactionNotification = new TransactionNotification();
+            transactionNotification.CriarFuncoes();
+            var postTransaction = new PostTransactionNotice();
+            new SBO_SP_TransactionNotification().Atualizar(transactionNotification);
+            new SBO_SP_PostTransactionNotice().Atualizar(postTransaction);
         }
     }
 }

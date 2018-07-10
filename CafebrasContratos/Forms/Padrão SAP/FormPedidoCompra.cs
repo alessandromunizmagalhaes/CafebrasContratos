@@ -10,11 +10,26 @@ namespace CafebrasContratos
         private const string mainDbDataSource = "OPOR";
         private const string menuUID = "2305";
 
-        public SAPbouiCOM.Form Abrir()
+        public FormPedidoCompra()
         {
-            return Global.SBOApplication.OpenForm(BoFormObjectEnum.fo_PurchaseOrder, "", "");
+            var camposSAP = new CamposTabelaSAP();
+            _numeroContratoFinal.ItemUID = camposSAP.numeroContratoFilho.NomeComU_NaFrente;
+            _numeroContratoFinal.Datasource = _numeroContratoFinal.ItemUID;
+            _filhoDeContrato.Datasource = camposSAP.filhoDeContrato.NomeComU_NaFrente;
         }
 
+        #region :: Campos
+
+        public ItemForm _numeroContratoFinal = new ItemForm();
+        public ItemForm _filhoDeContrato = new ItemForm()
+        {
+            ItemUID = "SOContract"
+        };
+
+        #endregion
+
+
+        #region :: Eventos de Item
 
         public override void OnBeforeFormLoad(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
@@ -30,11 +45,13 @@ namespace CafebrasContratos
                 var itemLabelRefUID = "86";
                 var itemLabelRef = form.Items.Item(itemLabelRefUID);
 
-                var editNumeroContratoFinal = form.Items.Add("U_DocNumCF", BoFormItemTypes.it_EDIT);
+                var editNumeroContratoFinal = form.Items.Add(_numeroContratoFinal.ItemUID, BoFormItemTypes.it_EDIT);
 
                 editNumeroContratoFinal.Enabled = false;
                 editNumeroContratoFinal.FromPane = 0;
                 editNumeroContratoFinal.ToPane = 0;
+
+                editNumeroContratoFinal.SetAutoManagedAttribute(BoAutoManagedAttr.ama_Editable, (int)BoAutoFormMode.afm_All, BoModeVisualBehavior.mvb_False);
 
                 int comboTop = itemRef.Top + 23;
                 editNumeroContratoFinal.Top = comboTop;
@@ -42,7 +59,7 @@ namespace CafebrasContratos
                 editNumeroContratoFinal.Width = itemRef.Width;
                 editNumeroContratoFinal.DisplayDesc = true;
 
-                ((EditText)editNumeroContratoFinal.Specific).DataBind.SetBound(true, mainDbDataSource, "U_DocNumCF");
+                ((EditText)editNumeroContratoFinal.Specific).DataBind.SetBound(true, mainDbDataSource, _numeroContratoFinal.Datasource);
 
                 var labelGrupoAprovador = form.Items.Add("L_DocNumCF", BoFormItemTypes.it_STATIC);
 
@@ -62,44 +79,18 @@ namespace CafebrasContratos
                 linkedButton.LinkTo = editNumeroContratoFinal.UniqueID;
 
                 ((LinkedButton)linkedButton.Specific).LinkedObject = BoLinkedObject.lf_BusinessPartner;
-            }
-        }
 
-        public void PreencherPedido(SAPbouiCOM.Form form, PedidoCompraParams param)
-        {
-            try
-            {
-                form.Freeze(true);
-                form.Mode = BoFormMode.fm_ADD_MODE;
-                form.Items.Item("U_DocNumCF").Specific.Value = param.NumContratoFinal;
-                form.Items.Item("4").Specific.Value = param.Fornecedor;
-                form.Items.Item("U_DocNumCF").Enabled = false;
+                var editVeioContrato = form.Items.Add(_filhoDeContrato.ItemUID, BoFormItemTypes.it_EDIT);
 
-                // clicando na aba imposto
-                form.Items.Item("2013").Click();
-                form.Items.Item("2022").Specific.Value = param.Transportadora;
+                editVeioContrato.Visible = false;
+                editVeioContrato.FromPane = 0;
+                editVeioContrato.ToPane = 0;
 
-                form.Items.Item("112").Click();
+                editVeioContrato.Top = editNumeroContratoFinal.Top;
+                editVeioContrato.Left = editNumeroContratoFinal.Left - 120;
+                editVeioContrato.Width = 15;
 
-                var matrix = GetMatrix(form, "38");
-                //matrix.Columns.Item("1").Cells.Item(1).Specific.Value = param.Item;
-                if (param.Quantidade > 0)
-                {
-                    matrix.Columns.Item("11").Cells.Item(1).Specific.Value = Helpers.ToString(param.Quantidade);
-                }
-                ((ComboBox)matrix.Columns.Item("2011").Cells.Item(1).Specific).Select(param.Utilizacao, BoSearchKey.psk_ByValue);
-                matrix.Columns.Item("U_ATL_Tipo_embalagem").Cells.Item(1).Specific.Value = param.Embalagem;
-                matrix.Columns.Item("24").Cells.Item(1).Specific.Value = param.Deposito;
-
-                form.Items.Item("14").Click();
-            }
-            catch (Exception e)
-            {
-                Dialogs.PopupError("Erro interno. Erro ao preencher dados do pedido de compra.\nErro: " + e.Message);
-            }
-            finally
-            {
-                form.Freeze(false);
+                ((EditText)editVeioContrato.Specific).DataBind.SetBound(true, mainDbDataSource, _filhoDeContrato.Datasource);
             }
         }
 
@@ -123,6 +114,68 @@ namespace CafebrasContratos
             }
         }
 
+        #endregion
 
+
+        #region :: Regras de Negócio
+
+        public void PreencherPedido(SAPbouiCOM.Form form, PedidoCompraParams param)
+        {
+            try
+            {
+                form.Freeze(true);
+                form.Mode = BoFormMode.fm_ADD_MODE;
+                form.Items.Item(_numeroContratoFinal.ItemUID).Specific.Value = param.NumContratoFinal;
+                form.Items.Item(_filhoDeContrato.ItemUID).Specific.Value = "S";
+                form.Items.Item("4").Specific.Value = param.Fornecedor;
+                form.Items.Item(_numeroContratoFinal.ItemUID).Enabled = false;
+
+                // aba imposto
+                form.Items.Item("2013").Click();
+
+                form.Items.Item("2022").Specific.Value = param.Transportadora;
+
+                // aba geral
+                form.Items.Item("112").Click();
+
+                var matrix = GetMatrix(form, "38");
+                matrix.Columns.Item("1").Cells.Item(1).Specific.Value = param.Item;
+                if (param.Quantidade > 0)
+                {
+                    matrix.Columns.Item("11").Cells.Item(1).Specific.Value = Helpers.ToString(param.Quantidade);
+                }
+                ((ComboBox)matrix.Columns.Item("2011").Cells.Item(1).Specific).Select(param.Utilizacao, BoSearchKey.psk_ByValue);
+                matrix.Columns.Item("U_ATL_Tipo_embalagem").Cells.Item(1).Specific.Value = param.Embalagem;
+                matrix.Columns.Item("24").Cells.Item(1).Specific.Value = param.Deposito;
+
+                matrix.Columns.Item("1").Cells.Item(1).Click();
+                form.Items.Item("14").Click();
+            }
+            catch (Exception e)
+            {
+                Dialogs.PopupError("Erro interno. Erro ao preencher dados do pedido de compra.\nErro: " + e.Message);
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
+        public SAPbouiCOM.Form Abrir()
+        {
+            return Global.SBOApplication.OpenForm(BoFormObjectEnum.fo_PurchaseOrder, "", "");
+        }
+
+        #endregion
+
+
+        #region :: Eventos Internos
+
+        public override void _OnDuplicar(SAPbouiCOM.Form form)
+        {
+            form.Items.Item(_numeroContratoFinal.ItemUID).Specific.Value = "";
+        }
+
+        #endregion
     }
 }

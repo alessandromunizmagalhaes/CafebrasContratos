@@ -303,8 +303,46 @@ namespace CafebrasContratos
         public override void OnAfterItemPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
         {
             BubbleEvent = true;
+
+            if (pVal.ItemUID == "1")
+            {
+                using (var formCOM = new FormCOM(FormUID))
+                {
+                    var form = formCOM.Form;
+                    if (form.Mode == BoFormMode.fm_ADD_MODE && _adicionou)
+                    {
+                        _adicionou = false;
+                        form.Close();
+                    }
+                }
+            }
+            else
+            {
+                base.OnAfterItemPressed(FormUID, ref pVal, out BubbleEvent);
+            }
+        }
+
+        public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            base.OnAfterFormClose(FormUID, ref pVal, out BubbleEvent);
+
+            var formTypePreContrato = new FormPreContrato().FormType;
+            for (int i = 0; i < Global.SBOApplication.Forms.Count; i++)
+            {
+                var currentForm = Global.SBOApplication.Forms.Item(i);
+                if (currentForm.TypeEx == formTypePreContrato)
+                {
+                    new FormPreContrato().AtualizarMatriz(currentForm);
+                }
+            }
+        }
+
+        public override void OnBeforeComboSelect(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
             if (pVal.ItemUID == _botaoComboCopiar.ItemUID)
             {
+                BubbleEvent = false;
+
                 using (var formCOM = new FormCOM(FormUID))
                 {
                     var form = formCOM.Form;
@@ -345,36 +383,9 @@ namespace CafebrasContratos
                     }
                 }
             }
-            else if (pVal.ItemUID == "1")
-            {
-                using (var formCOM = new FormCOM(FormUID))
-                {
-                    var form = formCOM.Form;
-                    if (form.Mode == BoFormMode.fm_ADD_MODE && _adicionou)
-                    {
-                        _adicionou = false;
-                        form.Close();
-                    }
-                }
-            }
             else
             {
-                base.OnAfterItemPressed(FormUID, ref pVal, out BubbleEvent);
-            }
-        }
-
-        public override void OnAfterFormClose(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
-        {
-            base.OnAfterFormClose(FormUID, ref pVal, out BubbleEvent);
-
-            var formTypePreContrato = new FormPreContrato().FormType;
-            for (int i = 0; i < Global.SBOApplication.Forms.Count; i++)
-            {
-                var currentForm = Global.SBOApplication.Forms.Item(i);
-                if (currentForm.TypeEx == formTypePreContrato)
-                {
-                    new FormPreContrato().AtualizarMatriz(currentForm);
-                }
+                base.OnAfterComboSelect(FormUID, ref pVal, out BubbleEvent);
             }
         }
 
