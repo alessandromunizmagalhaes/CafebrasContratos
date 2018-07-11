@@ -85,12 +85,8 @@
     <Compile Include="Forms\Pré Contrato\FormPreContratoDetalheCertificado.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Stored Procedures\SBO_SP_PostTransactionNotice.cs" />
-    <Compile Include="Stored Procedures\SBO_SP_TransactionNotification.cs" />
     <Compile Include="Stored Procedures\PostTransactionNotice.cs" />
     <Compile Include="Stored Procedures\TransactionNotification.cs" />
-    <Compile Include="Stored Procedures\StoredProcedure.cs" />
-    <Compile Include="Stored Procedures\IStoredProcedureImplementation.cs" />
     <Compile Include="Versoes\Versoes.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

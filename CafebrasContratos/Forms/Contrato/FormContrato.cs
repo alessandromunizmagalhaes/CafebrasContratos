@@ -574,6 +574,20 @@ namespace CafebrasContratos
                 QuandoEmCancelado = false,
             }
         };
+        public ItemFormContrato _CidadeEntrega = new ItemFormContrato()
+        {
+            ItemUID = "CidadeEn",
+            Datasource = "U_CidadeEn",
+            gestaoCamposEmStatus = new GestaoCamposContrato()
+            {
+                QuandoEmEsboco = true,
+                QuandoEmLiberado = true,
+                QuandoEmRenegociacao = true,
+                QuandoEmAutorizado = false,
+                QuandoEmEncerrado = false,
+                QuandoEmCancelado = false,
+            }
+        };
         public ItemForm _saldoFinanceiro = new ItemForm()
         {
             ItemUID = "SFin",

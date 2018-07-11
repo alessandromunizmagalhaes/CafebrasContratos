@@ -359,55 +359,6 @@ namespace CafebrasContratos
 
         #endregion
 
-        /*
-        CREATE PROCEDURE dbo.AtualizaCampoFalandoQueVeioDoContrato @DocEntry NVARCHAR(30), @Tabela NVARCHAR(30)
-        AS
-        BEGIN
-	        DECLARE @UPDATE NVARCHAR(100)
-	        DECLARE @ParmDefinition nvarchar(100);
-	        SET @ParmDefinition = N'@DocEntry NVARCHAR(30)';  
-	        SET @UPDATE = 'UPDATE ' + @Tabela + ' SET U_SonOfContract = ''N'' WHERE DocEntry = @DocEntry';
-	        EXECUTE sp_executesql @UPDATE, @ParmDefinition, @DocEntry = @DocEntry
-        END
-
-
-        EXEC AtualizaCampoFalandoQueVeioDoContrato @DocEntry = N'3056', @Tabela = N'OPOR'
-         */
-
-        /*
-         - campo de usuário: Veio de Contrato (S), (N).
-         ++ toda vez que eu copiar um pedido vindo de contrato, atualiza esse campo com o valor (S)
-         + toda vez que eu adicionar um pedido, se esse flag vier como (N), seta o Numero do Contrato para (NULL)
-         + toda vez que já passou a adição de umpedido, volta o campo para (N).
-         */
-
-        /*
-         --S1407 Trava criada automaticamente pelo Addon de Contratos
-IF @object_type = '22' AND @transaction_type = 'A'
-    BEGIN
-		DECLARE @VeioDeContrato VARCHAR(3);
-		DECLARE @Tabela VARCHAR(50) = N'OPOR'
-		BEGIN
-			(SELECT @VeioDeContrato = U_SonOfContract FROM OPOR WHERE DocEntry = @list_of_cols_val_tab_del)
-		END
-		IF @VeioDeContrato = 'N'
-		BEGIN
-			EXEC AtualizaCodigoContrato @DocEntry = @list_of_cols_val_tab_del, @Tabela = @Tabela
-		END
-
-	    DECLARE @TemItemDeCafe BIT = (SELECT DBO.DOCUMENTOTEMITEMDECAFEOPOR(@list_of_cols_val_tab_del));
-	    IF @TemItemDeCafe > 0 AND @VeioDeContrato = 'N'
-			BEGIN
-				select @error = '1407'
-				select @error_message = 'O Item escolhido só pode ser gerado apartir de um Contrato de Compra de Café.'
-			END
-		ELSE
-			BEGIN
-				EXEC AtualizaCodigoContrato @DocEntry = @list_of_cols_val_tab_del, @Tabela = @Tabela
-			END
-    END
---E1407
-         */
     }
 }
 

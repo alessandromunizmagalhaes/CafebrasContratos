@@ -1,4 +1,5 @@
-﻿namespace CafebrasContratos
+﻿using SAPHelper;
+namespace CafebrasContratos
 {
     class PostTransactionNotice : IStoredProcedureImplementation
     {
