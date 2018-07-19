@@ -10,6 +10,11 @@ namespace CafebrasContratos
         #region :: Propriedades
 
         private const string SRF = "FormContratoFinal.srf";
+        public MatrizDTDocumentos _matrizDocumentos = new MatrizDTDocumentos()
+        {
+            ItemUID = "mtxDocs",
+            Datasource = "Documentos"
+        };
 
         #endregion
 
@@ -208,6 +213,20 @@ namespace CafebrasContratos
             }
         }
 
+        public override void OnAfterFormDataLoad(ref BusinessObjectInfo BusinessObjectInfo, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+
+
+            base.OnAfterFormDataLoad(ref BusinessObjectInfo, out BubbleEvent);
+
+            using (var formCOM = new FormCOM(BusinessObjectInfo.FormUID))
+            {
+                var form = formCOM.Form;
+                AtualizarMatriz(form);
+            }
+        }
+
         #endregion
 
 
@@ -225,6 +244,9 @@ namespace CafebrasContratos
                 form.Items.Item(_botaoComboCopiar.ItemUID).AffectsFormMode = false;
                 var botaoComboCopiar = (ButtonCombo)form.Items.Item(_botaoComboCopiar.ItemUID).Specific;
                 _botaoComboCopiar.Popular(botaoComboCopiar.ValidValues);
+
+                var mtx = GetMatrix(form, _matrizDocumentos.ItemUID);
+                _matrizDocumentos.Bind(mtx);
 
                 if (form.Mode == BoFormMode.fm_ADD_MODE)
                 {
@@ -360,7 +382,9 @@ namespace CafebrasContratos
                             var utilizacao = _utilizacao.GetValorDBDatasource<string>(dbdts);
                             var safra = _safra.GetValorDBDatasource<string>(dbdts);
                             var embalagem = _embalagem.GetValorDBDatasource<string>(dbdts);
-                            var quantidade = _quantidadeDePeso.GetValorDBDatasource<double>(dbdts);
+                            var quantidade = _saldoDePeso.GetValorDBDatasource<double>(dbdts);
+                            var filial = GetFilial(_deposito.GetValorDBDatasource<string>(dbdts));
+                            var precoUnitario = _valorFaturado.GetValorDBDatasource<double>(dbdts);
 
                             var objPedidoCompra = new FormPedidoCompra();
                             var formPedidoCompra = objPedidoCompra.Abrir();
@@ -373,7 +397,9 @@ namespace CafebrasContratos
                                 Transportadora = transportadora,
                                 Embalagem = embalagem,
                                 Deposito = deposito,
-                                Quantidade = quantidade
+                                Quantidade = quantidade,
+                                PrecoUnitario = precoUnitario,
+                                Filial = filial
                             });
                         }
                     }
@@ -386,6 +412,28 @@ namespace CafebrasContratos
             else
             {
                 base.OnAfterComboSelect(FormUID, ref pVal, out BubbleEvent);
+            }
+        }
+
+        private string GetFilial(string deposito)
+        {
+            using (var rsCOM = new RecordSet())
+            {
+                var rs = rsCOM.DoQuery($"SELECT BPLID FROM OWHS WHERE WhsCode = '{deposito}'");
+                return rs.Fields.Item("BPLID").Value.ToString();
+            }
+        }
+
+        public override void OnBeforeMatrixLinkPressed(string FormUID, ref ItemEvent pVal, out bool BubbleEvent)
+        {
+            base.OnBeforeMatrixLinkPressed(FormUID, ref pVal, out BubbleEvent);
+
+            if (pVal.ColUID == _matrizDocumentos.Codigo.ItemUID)
+            {
+                var mtx = GetMatrix(FormUID, _matrizDocumentos.ItemUID);
+                var codigo = mtx.Columns.Item(pVal.ColUID).Cells.Item(pVal.Row).Specific.Value;
+
+                new FormPedidoCompra().Abrir(codigo);
             }
         }
 
@@ -476,6 +524,47 @@ namespace CafebrasContratos
             form.Items.Item(_botaoComboCopiar.ItemUID).Enabled = habilitado;
         }
 
+        public void AtualizarMatriz(SAPbouiCOM.Form form)
+        {
+            var dbdts = GetDBDatasource(form, MainDbDataSource);
+            var dt = GetDatatable(form, _matrizDocumentos.Datasource);
+
+            var numeroContrato = _numeroDoContrato.GetValorDBDatasource<string>(dbdts);
+
+            try
+            {
+                form.Freeze(true);
+                dt.ExecuteQuery(
+                    $@"SELECT 
+	                    ObjType as Tipo
+	                    , tb0.DocEntry
+	                    , tb0.DocStatus
+	                    , tb0.DocDate
+	                    , tb1.ItemCode
+	                    , tb1.Dscription
+	                    , tb1.Quantity
+	                    , tb0.DocTotal 
+                    FROM OPOR tb0
+                    INNER JOIN (
+	                    SELECT 
+		                    DocEntry, ItemCode, Dscription, Quantity, ROW_NUMBER() OVER ( PARTITION BY DocEntry ORDER BY DocEntry ) as count
+	                    FROM POR1
+                    )  tb1 ON (tb1.DocEntry = tb0.DocEntry AND tb1.count = 1)
+                    WHERE 1 = 1 
+	                    AND tb0.U_DocNumCF = '{numeroContrato}'"
+                    );
+
+                var mtx = GetMatrix(form, _matrizDocumentos.ItemUID);
+                mtx.LoadFromDataSource();
+
+                mtx.AutoResizeColumns();
+            }
+            finally
+            {
+                form.Freeze(false);
+            }
+        }
+
         #endregion
 
 
@@ -497,12 +586,51 @@ namespace CafebrasContratos
         #endregion
 
 
+        public class MatrizDTDocumentos : MatrizDatatable
+        {
+            public ItemForm TipoDocumento = new ItemForm()
+            {
+                ItemUID = "tipo",
+                Datasource = "Tipo"
+            };
+            public ItemForm Codigo = new ItemForm()
+            {
+                ItemUID = "docentry",
+                Datasource = "DocEntry"
+            };
+            public ItemForm Status = new ItemForm()
+            {
+                ItemUID = "docstatus",
+                Datasource = "DocStatus"
+            };
+            public ItemForm Data = new ItemForm()
+            {
+                ItemUID = "docdate",
+                Datasource = "DocDate"
+            };
+            public ItemForm CodigoItem = new ItemForm()
+            {
+                ItemUID = "itemcode",
+                Datasource = "ItemCode"
+            };
+            public ItemForm NomeItem = new ItemForm()
+            {
+                ItemUID = "itemname",
+                Datasource = "ItemName"
+            };
+            public ItemForm ValorTotal = new ItemForm()
+            {
+                ItemUID = "doctotal",
+                Datasource = "DocTotal"
+            };
+        }
+
         public class AbasContratoFinal : AbasContrato
         {
             public TabForm Documentos = new TabForm()
             {
                 ItemUID = "AbaCFinal",
-                PaneLevel = 4
+                PaneLevel = 3
             };
         }
     }

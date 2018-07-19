@@ -255,7 +255,8 @@ namespace CafebrasContratos
                         formPedidoCompra
                     }),
                     new MapEventsToForms(BoEventTypes.et_MATRIX_LINK_PRESSED, new List<SAPHelper.Form>(){
-                        formPreContrato
+                        formPreContrato,
+                        formContratoFinal
                     }),
                     new MapEventsToForms(BoEventTypes.et_DOUBLE_CLICK, new List<SAPHelper.Form>(){
                         formPreContrato,

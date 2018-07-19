@@ -252,7 +252,7 @@ namespace CafebrasContratos
             var dbdts = GetDBDatasource(form, MainDbDataSource);
             var dt = GetDatatable(form, _matrizContratosFinais.Datasource);
 
-            var docnumcc = dbdts.GetValue(_numeroDoContrato.Datasource, 0);
+            var numeroContrato = _numeroDoContrato.GetValorDBDatasource<string>(dbdts);
 
             try
             {
@@ -261,7 +261,7 @@ namespace CafebrasContratos
                     $@"SELECT 
                         U_DocNumCF,U_StatusCtr, U_CardCode, U_CardName, U_Descricao 
                     FROM [@UPD_OCFC] 
-                    WHERE U_DocNumCC = {docnumcc} 
+                    WHERE U_DocNumCC = '{numeroContrato}'
                     ORDER BY U_DocNumCF"
                     );
 
@@ -269,8 +269,6 @@ namespace CafebrasContratos
                 mtx.LoadFromDataSource();
 
                 mtx.AutoResizeColumns();
-
-                var status = dt.GetValue("U_StatusCtr", 0);
             }
             finally
             {

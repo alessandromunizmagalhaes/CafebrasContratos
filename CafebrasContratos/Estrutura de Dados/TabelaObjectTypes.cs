@@ -13,6 +13,8 @@ namespace CafebrasContratos
             {((int)BoObjectTypes.oPurchaseInvoices).ToString(), "OPCH"},
             {((int)BoObjectTypes.oPurchaseDeliveryNotes).ToString(), "OPDN"},
             {((int)BoObjectTypes.oPurchaseDownPayments).ToString(), "ODPO"},
+            {((int)BoObjectTypes.oPurchaseReturns).ToString(), "ORPD"},
+            {((int)BoObjectTypes.oPurchaseCreditNotes).ToString(), "ORPC"},
         };
 
         public TabelaObjectTypes() : base("UPD_OBJ_TYPES", "Tipos de Objetos", BoUTBTableType.bott_NoObject)
